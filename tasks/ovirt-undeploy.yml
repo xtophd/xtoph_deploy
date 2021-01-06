@@ -1,0 +1,91 @@
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+- name: "ovirt-undeploy : deploy node"
+  delegate_to: localhost
+  block:
+
+
+
+    ##
+    ##    NOTE: All tasks here are delegated to excute
+    ##          on the deployhost/localhost
+    ##
+
+    ##
+    ##    Log in to the oVIRT API service
+    ##
+    ##    * NOTE * username and password should be in
+    ##             the encrypted credentials.yml file
+    ##
+
+
+
+    - name: "ovirt-deploy : Login to oVirt"
+      throttle: 1
+      ovirt_auth:
+        hostname: "{{ xtoph_deploy.ovirt.api.fqdn }}"
+        ca_file:  "{{ xtoph_deploy.ovirt.engine_cafile | default(omit) }}"
+        insecure: "{{ xtoph_deploy.ovirt.insecure |  default(true) }}"
+        username: "{{ ovirt_username }}"
+        password: "{{ ovirt_password }}"
+
+
+
+    ##
+    ##    Stop and Delete Virtual Machine 
+    ##
+
+
+
+    - name: "ovirt-undeploy : issue vm stop"
+      ignore_errors: true
+      ovirt_vm:
+        auth:      "{{ ovirt_auth }}"
+        name:      "{{ xtoph_deploy.ovirt.vm.name }}"
+        cluster:   "{{ xtoph_deploy.ovirt.cluster_name }}"
+        state:     "stopped"
+        wait:      no
+      register: vmstop_result
+
+    - name: "ovirt-undeploy : wait for vm to be down"
+      ovirt_vm_info:
+        pattern: name="{{ xtoph_deploy.ovirt.vm.name }}" cluster="{{ xtoph_deploy.ovirt.cluster_name }}"
+        auth: "{{ ovirt_auth }}"
+      register: vminfo_result
+      until: vminfo_result.ovirt_vms[0].status == "down" or vminfo_result.ovirt_vms[0].status == "absent"
+      retries: 24
+      delay: 5
+
+    - name: "ovirt-undeploy : undeploy vm" 
+      ovirt_vm:
+        auth:      "{{ ovirt_auth }}"
+        name:      "{{ xtoph_deploy.ovirt.vm.name }}"
+        cluster:   "{{ xtoph_deploy.ovirt.cluster_name }}"
+        state:     absent
+        wait:      yes
+
+    - name: "ovirt-undeploy : undeploy iso in oVIRT storage domain"
+      ovirt_disk:
+        auth: '{{ ovirt_auth }}'
+        name: '{{ xtoph_deploy.ovirt.vm.name }}.iso'
+        storage_domain: '{{ xtoph_deploy.ovirt.storage.domain }}'
+        state: absent
+        wait: yes
+
+
+
+    ##
+    ##    Log out of the oVIRT API service
+    ##
+
+
+
+
+    - name: "ovirt-undeploy : Logout from oVirt"
+      throttle: 1
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"

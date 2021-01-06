@@ -1,0 +1,54 @@
+xtoph_deploy: 
+
+  ovirt:
+
+    cluster_name:  "Default"
+    engine_cafile: "/etc/pki/ovirt-engine/ca.pem"
+
+    api:
+
+      ip:   ""
+      fqdn: ""
+
+      username: ""
+      password: ""
+
+    network:
+
+      name: ""
+
+      profiles:
+
+        default:
+          description:   "Default network using ovirtmgmt"
+          ovirt_network: "ovirtmgmt"
+          ovirt_model:   "virtio"
+          managed:       "no"
+
+        private:
+          description:   "Private network created/managed"
+          ovirt_network: "TBD"
+          ovirt_model:   "virtio"
+          managed:       "yes"
+
+    storage:
+
+      domain: ""
+
+      profiles:
+
+        default:
+          description: "Default storage using virtio-scsi (sda)"
+          bus:         "virtio_scsi"
+          sparse:      "true"
+      
+        virtio-scsi:
+          description: "Default storage using virtio-scsi (sda)"
+          bus:         "virtio_scsi"
+          sparse:      "false"
+  
+        virtio:
+          description: "Default storage using virtio (vda)"
+          bus:         "virtio"
+          sparse:      "false"
+

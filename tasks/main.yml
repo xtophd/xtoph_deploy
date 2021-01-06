@@ -1,0 +1,107 @@
+---
+
+##
+##    Load variables
+##
+
+
+
+- name: "main.yml : loading config variables"
+  include_vars:
+    file: "../../../config/{{ item }}"
+  loop:
+    - xtoph-deploy-config.yml
+    - credentials.yml
+
+- name: "main.yml : loading xtoph_deploy/vars variables"
+  include_vars:
+    file: "../vars/{{ item }}"
+  loop:
+    - defaults.yml
+    - resource_profiles.yml
+    - hardware_profiles.yml
+    - kickstart_profiles.yml
+
+
+
+##
+##    Combine variables under a single dictionary (xtoph_deploy)
+##
+##    For the various profiles, we only merge the chunk 
+##    relevant to this host (inventory_hostname) which is
+##    determined by  xtoph_deploy.selected_profile.XXX variable
+## 
+
+
+
+- name: "main.yml : merging xtoph_deploy_config into single dictionary called 'xtoph_deploy'"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_deploy | combine(xtoph_deploy_config, recursive=True) }}"
+
+- name: "main.yml : merge hardware_profile into xtoph_deploy"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_hardware_profiles[xtoph_deploy.selected_profile.hardware] | combine(xtoph_deploy) }}"
+  when: xtoph_deploy.selected_profile.hardware != ''
+
+- name: "main.yml : merge kickstart_profile into xtoph_deploy"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_kickstart_profiles[xtoph_deploy.selected_profile.kickstart] | combine(xtoph_deploy) }}"
+  when: xtoph_deploy.selected_profile.kickstart != ''
+
+- name: "main.yml : merge resource_profile into xtoph_deploy"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_resource_profiles[xtoph_deploy.selected_profile.resource] | combine(xtoph_deploy) }}"
+  when: xtoph_deploy.selected_profile.resource != ''
+
+
+
+##
+##    If xtoph_deploy.debug is 'true', 
+##    dump the xtoph_deploy dictionary to stdout
+## 
+
+
+
+- name: "main.yml : DEBUG dump xtoph_deploy dictionary"
+  debug: var=xtoph_deploy
+  when: xtoph_deploy.debug == true
+
+
+
+##
+##    Set up the deployhost for ovirt
+##
+
+
+
+- import_tasks: ovirt-setup.yml
+  when: xtoph_deploy_action == "setup"
+
+
+
+##
+##    Deploy a node
+##
+
+
+
+- import_tasks: ovirt-deploy.yml
+  when: xtoph_deploy_action == "deploy"
+
+- import_tasks: ovirt-deploy-monitor.yml
+  when: xtoph_deploy_action == "deploy_monitor"
+
+- import_tasks: ovirt-deploy-finish.yml
+  when: xtoph_deploy_action == "deploy_finish"
+
+
+
+##
+##    Undeploy a node
+##
+
+
+
+- import_tasks: ovirt-undeploy.yml
+  when: xtoph_deploy_action == "undeploy"
+

@@ -1,0 +1,168 @@
+##
+## KICKSTART PROFILES
+##
+
+xtoph_kickstart_profiles:
+
+  ##
+  ##
+  ##
+
+  rhel83:
+    kickstart_profile:
+      name:           "rhel83"
+      description:    "Red Hat Enterprise Linux 8.3 DVD" 
+      method:         "cdrom"
+      template:       "ks-rhel8.j2"
+      boot_iso:       "rhel-8.3-x86_64-dvd.iso"
+      boot_iso_label: "RHEL-8-3-0-BaseOS-x86_64"
+      repo_iso:       "rhel-8.3-x86_64-dvd.iso"
+      mnt:            "rhel-8.3"
+      kvm_os_type:    "rhel_8x64"
+      repos:
+        baseos :
+          name:       "my-rhel-8-baseos-rpms"
+          subpath:    "/BaseOS"
+        appstream :
+          name:       "my-rhel-8-appstream-rpms"
+          subpath:    "/AppStream"
+  
+  rhel83-bootiso:
+    kickstart_profile:
+      name:           "rhel83-bootiso"
+      description:    "Red Hat Enterprise Linux 8.3 Boot ISO" 
+      method:         "network"
+      template:       "ks-rhel8-bootiso.j2"
+      boot_iso:       "rhel-8.3-x86_64-boot.iso"
+      boot_iso_label: "RHEL-8-3-0-BaseOS-x86_64"
+      repo_iso:       "rhel-8.3-x86_64-dvd.iso"
+      mnt:            "rhel-8.3"
+      kvm_os_type:    "rhel_8x64"
+      repos:
+        baseos :
+          name:       "my-rhel8-baseos-rpms"
+          subpath:    "/BaseOS"
+        appstream :
+          name:       "my-rhel8-appstream-rpms"
+          subpath:    "/AppStream"
+  
+  ##
+  ##
+  ##
+
+  rhel82:
+    kickstart_profile:
+      name:           "rhel82"
+      description:    "Red Hat Enterprise Linux 8.2 DVD" 
+      method:         "cdrom"
+      template:       "ks-rhel8.j2"
+      boot_iso:       "rhel-8.2-x86_64-dvd.iso"
+      boot_iso_label: "RHEL-8-2-0-BaseOS-x86_64"
+      repo_iso:       "rhel-8.2-x86_64-dvd.iso"
+      mnt:            "rhel-8.2"
+      kvm_os_type:    "rhel_8x64"
+      repos:
+        baseos :
+          name:       "my-rhel-8-baseos-rpms"
+          subpath:    "/BaseOS"
+        appstream :
+          name:       "my-rhel-8-appstream-rpms"
+          subpath:    "/AppStream"
+   
+  rhel82-bootiso:
+    kickstart_profile:
+      name:           "rhel82-bootiso"
+      description:    "Red Hat Enterprise Linux 8.2 Boot ISO" 
+      method:         "network"
+      template:       "ks-rhel8-bootiso.j2"
+      boot_iso:       "rhel-8.2-x86_64-boot.iso"
+      boot_iso_label: "RHEL-8-2-0-BaseOS-x86_64"
+      repo_iso:       "rhel-8.2-x86_64-dvd.iso"
+      mnt:            "rhel-8.2"
+      kvm_os_type:    "rhel_8x64"
+      repos:
+        baseos :
+          name:       "my-rhel-8-baseos-rpms"
+          subpath:    "/BaseOS"
+        appstream :
+          name:       "my-rhel-8-appstream-rpms"
+          subpath:    "/AppStream"
+   
+  ##
+  ##
+  ##
+
+  rhel81:
+    kickstart_profile:
+      name:           "rhel81"
+      description:    "Red Hat Enterprise Linux 8.1 DVD" 
+      method:         "cdrom"
+      template:       "ks-rhel8.j2"
+      boot_iso:       "rhel-8.1-x86_64-dvd.iso"
+      boot_iso_label: "RHEL-8-1-0-BaseOS-x86_64"
+      repo_iso:       "rhel-8.1-x86_64-dvd.iso"
+      mnt:            "rhel-8.1"
+      kvm_os_type:    "rhel_8x64"
+      repos:
+        baseos :
+          name:       "my-rhel-8-baseos-rpms"
+          subpath:    "/BaseOS"
+        appstream :
+          name:       "my-rhel-8-appstream-rpms"
+          subpath:    "/AppStream"
+ 
+  ##
+  ##
+  ##
+
+  rhel79:
+    kickstart_profile:
+      name:           "rhel79"
+      description:    "Red Hat Enterprise Linux 7.9 DVD" 
+      method:         "cdrom"
+      template:       "ks-rhel7.j2"
+      boot_iso:       "rhel-server-7.9-x86_64-dvd.iso"
+      boot_iso_label: "RHEL-7.9 Server.x86_64"
+      repo_iso:       "rhel-server-7.9-x86_64-dvd.iso"
+      mnt:            "rhel-7.9"
+      kvm_os_type:    "rhel_7x64"
+      repos:
+        baseos :
+          name:       "my-rhel-7-server-rpms"
+          subpath:    ""
+
+  rhel79-bootiso:
+    kickstart_profile:
+      name:           "rhel79-bootiso"
+      description:    "Red Hat Enterprise Linux 7.9 Boot ISO" 
+      method:         "network"
+      template:       "ks-rhel7-bootiso.j2"
+      boot_iso:       "rhel-server-7.9-x86_64-boot.iso"
+      boot_iso_label: "RHEL-7.9 Server.x86_64"
+      repo_iso:       "rhel-server-7.9-x86_64-dvd.iso"
+      mnt:            "rhel-7.9"
+      kvm_os_type:    "rhel_7x64"
+      repos:
+        baseos :
+          name:       "my-rhel-7-server-rpms"
+          subpath:    ""
+
+  ##
+  ##
+  ##
+
+  rhel78:
+    kickstart_profile:
+      name:           "rhel78"
+      description:    "Red Hat Enterprise Linux 7.8 DVD" 
+      method:         "cdrom"
+      template:       "ks-rhel7.j2"
+      boot_iso:       "rhel-server-7.8-x86_64-dvd.iso"
+      boot_iso_label: "RHEL-7.8 Server.x86_64"
+      repo_iso:       "rhel-server-7.8-x86_64-dvd.iso"
+      mnt:            "rhel-7.8"
+      kvm_os_type:    "rhel_7x64"
+      repos:
+        baseos :
+          name:       "my-rhel-7-server-rpms"
+          subpath:    ""

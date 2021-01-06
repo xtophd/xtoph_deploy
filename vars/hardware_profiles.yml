@@ -1,0 +1,104 @@
+##
+## HARDWARE PROFILES
+##
+
+xtoph_hardware_profiles:
+
+  default:
+    hardware_profile:
+      description: "Default system hardware profile"
+      disk:
+        dev:    "sda"
+    
+  kvm_vda:
+    hardware_profile:
+      description: "KVM based virtual machine using disk.bus = virtio"
+      platform: "libvirt"
+      disk:
+        bus:    "virtio"
+        sparse: "true"
+        dev:    "vda"
+      network:
+        model:  "virtio"
+    
+  kvm_nest_vda:
+    hardware_profile:
+      description: "KVM based virtual machine with nested-virt and disk.bus = virtio"
+      platform: "libvirt"
+      cpu:
+        type:   "host-passthrough"
+      disk:
+        bus:    "virtio"
+        sparse: "true"
+        dev:    "vda"
+      network:
+        model:  "virtio"
+    
+  kvm_sda:
+    hardware_profile:
+      description: "KVM based virtual machine using disk.bus = virtio-scsi"
+      platform: "libvirt"
+      disk:
+        bus:    "virtio-scsi"
+        sparse: "true"
+        dev:    "sda"
+      network:
+        model:  "virtio"
+    
+  kvm_nest_sda:
+    hardware_profile:
+      description: "KVM based virtual machine with nested-virt and disk.bus = virtio-scsi"
+      platform: "libvirt"
+      cpu:
+        type:   "host-passthrough"
+      disk:
+        bus:    "virtio-scsi"
+        sparse: "true"
+        dev:    "sda"
+      network:
+        model:  "virtio"
+    
+  ovirt_sda:
+    hardware_profile:
+      description: "oVirt based virtual machine using disk.bus = virtio-scsi (sda)"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      disk:
+        bus:    "virtio_scsi"
+        sparse: "true"
+        dev:    "sda"
+      network:
+        model:  "virtio"
+        profile: "ovirtmgmt"
+    
+  ovirt_vda:
+    hardware_profile:
+      description: "oVirt based virtual machine using disk.bus = virtio (vda)"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      disk:
+        bus:    "virtio"
+        sparse: "true"
+        dev:    "vda"
+      network:
+        model:  "virtio"
+        profile: "ovirtmgmt"
+    
+  vmware_sda:
+    hardware_profile:
+      description: "VMWare based virtual machine using disk.bus = TBD"
+      disk:
+        dev:    "sda"
+    
+  dell_r720:
+    hardware_profile:
+      description: "DELL r710 example"
+      disk:
+        dev:    "sda"
+    
+  hp_dl380:
+    hardware_profile:
+      description: "HP DL380"
+      usb_delay: "10"
+      disk:
+        dev:    "sda"

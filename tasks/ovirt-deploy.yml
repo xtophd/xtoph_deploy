@@ -1,0 +1,604 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+- delegate_to: localhost
+  block:
+
+    ##
+    ##    NOTE: All tasks here are blocked and delegated to excute
+    ##          on the deployhost/localhost 
+    ##
+
+
+    ##
+    ##    Log in to the oVIRT API service
+    ##
+    ##    NOTE: username and password should be in
+    ##          the encrypted credentials.yml file
+    ##
+    ##    NOTE: to avoid concurrency problems with
+    ##          hitting the api at scale, we
+    ##          set 'throttle = 1'
+    ##
+    
+    
+    
+    - name: "ovirt-deploy : Login to oVirt"
+      throttle: 1
+      ovirt_auth:
+        hostname: "{{ xtoph_deploy.ovirt.api.fqdn }}"
+        ca_file:  "{{ xtoph_deploy.ovirt.engine_cafile | default(omit) }}"
+        insecure: "{{ xtoph_deploy.ovirt.insecure |  default(true) }}"
+        username: "{{ ovirt_username }}"
+        password: "{{ ovirt_password }}"
+        state:    present
+
+
+
+    ##
+    ##    Determine state of the vm
+    ##
+    
+    
+    
+    - name: "ovirt-deploy : determine state of vm"
+      ovirt_vm_info:
+        pattern: name="{{ xtoph_deploy.ovirt.vm.name }}" cluster="{{ xtoph_deploy.ovirt.cluster_name }}"
+        auth: "{{ ovirt_auth }}"
+      register: vminfo_result
+      ignore_errors: true
+    
+    
+
+    - name: "ovirt-deploy : DEBUG vm status/info results"
+      debug: var=vminfo_result
+      when: xtoph_deploy.debug == true
+    
+    
+    
+    ##
+    ##    If the node is absent OR node NOT up, 
+    ##    then set_fact to deploy the node
+    ##
+    
+    
+    
+    - set_fact:
+        deploy_node: false
+    
+    - set_fact:
+        deploy_node: true
+      when: vminfo_result.ovirt_vms|length == 0
+    
+    - set_fact:
+        deploy_node: true
+      when:
+        - vminfo_result.ovirt_vms[0].status is defined
+        - vminfo_result.ovirt_vms[0].status != "up"
+    
+    - name:  "ovirt-deploy : DEBUG vm status/info results"
+      debug:
+        msg: "deploy_node = {{ deploy_node }}"
+      when: xtoph_deploy.debug == true
+
+
+
+##
+##
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+    ##
+    ##    NOTE: All tasks here are blocked and delegated to excute
+    ##          on the deployhost/localhost when deploy_node = true
+    ##
+
+    
+    ##
+    ##    Update /etc/hosts with hostnames and IPs of new cluster
+    ##
+    ##    NOTE: to avoid cuncurrency problems editing a single
+    ##          file, we set 'throttle = 1'
+    ##
+
+
+
+    - name: "ovirt-deploy : cleanup conflicting IP in /etc/hosts"
+      throttle: 1
+      lineinfile:
+        dest:   "/etc/hosts"
+        regexp: "{{ h_pubIP }} .*$"
+        state:  absent
+    
+    - name: "ovirt-deploy : cleanup conflicting name in /etc/hosts"
+      throttle: 1
+      lineinfile:
+        dest:   "/etc/hosts"
+        regexp: ".*{{ inventory_hostname }}.{{ g_network0_fqdn }}.*"
+        state:  absent
+    
+    - name: "ovirt-deploy : add entry in /etc/hosts"
+      throttle: 1
+      lineinfile:
+        dest:   "/etc/hosts"
+        line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{ g_network0_fqdn }}"
+        state:  present
+
+
+
+    ##
+    ##    Create MAC addresses if not already configured
+    ##    and store it in the ../config/host_vars directory
+    ##
+ 
+
+
+    - name: "ovirt-deploy : create host_vars dir"
+      file: path="{{ lookup('env','PWD') }}/config/host_vars" state=directory
+ 
+    - name: "ovirt-deploy : create host_vars file"
+      file: path="{{ lookup('env','PWD') }}/config/host_vars/{{ inventory_hostname }}" state=touch
+  
+    - name: "ovirt-deploy : generate random MAC "
+      script: macgen.py
+      register: macgen_output
+      when: h_pubMAC is undefined
+  
+    - name: "ovirt-deploy : store random MAC in host_vars"
+      lineinfile:
+        dest:   "{{ lookup('env', 'PWD') }}/config/host_vars/{{ inventory_hostname }}"
+        line:   "h_pubMAC: '{{ macgen_output.stdout }}'"
+        state:  present
+      when: h_pubMAC is undefined
+      register: makeupmac
+  
+    - name: "ovirt-deploy : set fact to preserve MAC for this run"
+      set_fact:
+        h_pubMAC: '{{ macgen_output.stdout }}'
+      when: makeupmac.changed
+
+
+
+    ##
+    ##    Set up a repo using a loopback mounted ISO
+    ##
+    ##    * NOTE * to avoid concurrency problems when
+    ##             when detecting and mounting the iso 
+    ##             mount, we set 'throttle = 1'
+    ##
+
+
+
+    - name: "ovirt-deploy : DEBUG repo loopback details"
+      debug: 
+        msg:
+         - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+         - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+      when: xtoph_deploy.debug == true
+
+    - name: "ovirt-deploy : stat repo mount point"
+      throttle: 1
+      stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+      register: test_repo_mount
+      when: xtoph_deploy.kickstart_profile.repo_iso != ""
+
+    - name: "ovirt-deploy : create repo mount point"
+      throttle: 1
+      file: 
+        path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}" 
+        mode:  "0755"
+        state: directory
+      when: test_repo_mount.stat.exists == false
+
+    - name: "ovirt-deploy : mount iso"
+      throttle: 1
+      vars:
+      mount:
+        path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+        src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+        opts:   "loop,ro"
+        state:  "mounted"
+        fstype: "iso9660"
+      when: xtoph_deploy.kickstart_profile.repo_iso != ""
+
+
+
+    ##
+    ##    Cleanup and create a fresh temp workspace
+    ##
+
+
+
+    - name: "ovirt-deploy : DEBUG temp workspace details"
+      debug: 
+        msg:
+        - "temp workspace = {{ xtoph_deploy.deployhost.tmp_dir }}"
+      when: xtoph_deploy.debug == true
+
+    - name: "ovirt-deploy : delete old temp workspace"
+      shell:
+        cmd: |
+          if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.tmp_dir }} ; fi
+
+    - name: "ovirt-deploy : create new temp workspace"
+      file:
+        path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
+        mode="0755"
+        state=directory
+      loop:
+        - iso
+        - artifacts 
+
+
+
+    ##
+    ##
+    ##    Create ks.cfg in http directory.  For ovirt
+    ##    deployments we currently cook the ks.cfg
+    ##    directly into the ISO.
+    ##
+    ##    NOTE: using run-once and specifying kernel,
+    ##          initrd and kernel args only works with
+    ##          local and iso storage domains (BUG?).
+    ##
+    ##          ovirt api does not support uploads to
+    ##          the iso-domain
+    ##
+    ##          I am not interested in managing file
+    ##          distribution to all rhv-h local domains
+    ##
+    ##          THIS IS WHY THE CUSTOM ISO METHOD IS
+    ##          THE CURRENT SOLUTION
+    ##
+    ##          I have enabled a smaller solution using
+    ##          the rhel "boot" ISO (700Mb vs. 8G) with
+    ##          a simple kickstart_profile definition which
+    ##          then performs the install from the
+    ##          http hosted repo.
+    ##
+
+
+
+    ##
+    ##    Create the custom ISO for the OS installation
+    ##
+    ##    * NOTE * to avoid concurrency problems with
+    ##             disk space and i/o bandwidth, we
+    ##             use serial at the import_task level
+    ##             DO NOT use "throttle" here as a stop gap
+    ##
+
+
+
+    - name: "ovirt-deploy : clone ISO source to temp workspace"
+      vars:
+        t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+        t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+      shell:
+        cmd: |
+          xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
+
+
+
+    ##
+    ##    Create the kickstart config
+    ##
+    ##    NOTE: put 1 copy in http directory
+    ##          and 1 on the ISO
+    ##
+
+
+
+    - name: "ovirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
+      file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
+
+
+    - name: "ovirt-deploy : deploy kickstart config iso temp workspace and http dir"
+      vars:
+        p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
+        p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+      template:
+        src:   "{{ xtoph_deploy.kickstart_profile.template }}"
+        dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
+        owner: root
+        group: root
+        mode: 0444
+      loop:
+        - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
+        - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+
+
+
+    ##
+    ##    Adjust the isolinux.cfg
+    ##
+
+
+
+    - name: "ovirt-deploy : isolinux.cfg: change default timeout to 3 seconds"
+      replace:
+        path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+        regexp: '^timeout(\s+.*)?$'
+        replace: 'timeout 30'
+
+    - name: "ovirt-deploy : remove default menu option from isolinux.cfg"
+      lineinfile:
+        dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+        regexp: "^.*menu default.*$"
+        state:  absent
+
+    - name: "ovirt-deploy : set new default menu option in isolinux.cfg"
+      lineinfile:
+        dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+        insertafter: "^.*label linux.*$"
+        line: "  menu default"
+        state: present
+
+
+
+    ##
+    ##    Kernel arguments for method = cdrom
+    ##
+
+
+
+    - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
+      replace:
+        path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+        regexp: '(\s+)append(\s+.*)?$'
+        replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.ovirt.network.net0.ip }} netmask={{ xtoph_deploy.ovirt.network.net0.netmask }} nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }} gateway={{ xtoph_deploy.ovirt.network.net0.gateway }}'
+      when: xtoph_deploy.kickstart_profile.method == "cdrom"
+
+
+
+    ##
+    ##    Kernel arguments for method = network
+    ##
+
+
+
+    - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
+      replace:
+        path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+        regexp: '(\s+)append(\s+.*)?$'
+        replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.ovirt.network.net0.ip }} netmask={{ xtoph_deploy.ovirt.network.net0.netmask }} nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }} gateway={{ xtoph_deploy.ovirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+      when: xtoph_deploy.kickstart_profile.method == "network"
+
+
+
+    ##
+    ##    Preserve some files in the temp workspace
+    ##    artifacts directory for easy debugging
+    ##
+
+
+    
+    - name: "ovirt-deploy : copy files to temp workspace artifacts directory for preservation"
+      copy:
+        dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
+        src:  "{{ item }}"
+      loop:
+        - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg" 
+        - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
+     
+    - name: "ovirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+      copy:
+        dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+        content:  "{{ xtoph_deploy | to_nice_yaml }}"
+     
+
+
+    ##
+    ##    Generate the custom ISO image
+    ##
+
+
+
+    - name: "ovirt-deploy : generate custom iso image"
+      shell:
+        cmd: |
+          cd {{ xtoph_deploy.deployhost.tmp_dir }}/iso
+          genisoimage -U -r -v -T -J -joliet-long        \
+                      -V      "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"        \
+                      -volset "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"        \
+                      -A      "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"        \
+                      -b      isolinux/isolinux.bin      \
+                      -c      isolinux/boot.cat          \
+                      -no-emul-boot                      \
+                      -boot-load-size 4                  \
+                      -boot-info-table                   \
+                      -eltorito-alt-boot                 \
+                      -e images/efiboot.img              \
+                      -no-emul-boot                      \
+                      -o      "../{{ xtoph_deploy.ovirt.vm.name }}.iso" .
+
+
+    ##  
+    ##    NOTE: I have not made use of a hybrid
+    ##          ISO for xtoph_deploy, but why not
+    ##          allow hybrid booting as a CD-ROM or as a
+    ##          hard disk with our generated image
+
+
+
+    - name: "ovirt-deploy : enable hybrid uefi iso"
+      shell:
+        cmd: |
+          isohybrid --uefi "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
+
+
+
+    ##
+    ##    Transfer the ISO image to ovirt storage domain
+    ##
+    ##    NOTE: to avoid concurrency problems with
+    ##          disk space and i/o bandwidth, we
+    ##          set 'throttle = 1'
+    ##
+
+
+    - name: "ovirt-deploy : upload iso image"
+      ovirt_disk:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ xtoph_deploy.ovirt.vm.name }}.iso"
+        description: "{{ xtoph_deploy.ovirt.vm.name }}.iso"
+        upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
+        bootable: true
+        content_type: iso
+        format: raw
+        storage_domain: "{{ xtoph_deploy.ovirt.storage.domain }}"
+
+
+    - name: "ovirt-deploy : clean-up temporary work-space"
+      shell:
+        cmd: |
+          if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ; fi
+          if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso" ]] ; then rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso" ; fi
+      when: xtoph_deploy.cleanup == true
+
+
+    
+    ##
+    ##    Create virtual machine
+    ##
+    ##    NOTE:  the kickstart_profile can override the
+    ##           hardware_profile default os_type.  This
+    ##           provides easy customization of kvm
+    ##           optimizations per OS
+    ##
+
+
+
+    - name: "ovirt-deploy : create vm with cpu, mem and nics"
+      ovirt_vm:
+        auth:      "{{ ovirt_auth }}"
+        name:      "{{ xtoph_deploy.ovirt.vm.name }}"
+        cluster:   "{{ xtoph_deploy.ovirt.cluster_name }}"
+        memory:    "{{ xtoph_deploy.resource_profile.memsize }} MiB"
+        cpu_cores: "{{ xtoph_deploy.resource_profile.vcpus }}"
+        nics:
+          - name: "nic1"
+            interface: "{{ xtoph_deploy.hardware_profile.network.model }}"
+            profile_name: "{{ xtoph_deploy.ovirt.network.net0.ovirt_network }}"
+            mac_address: "{{ h_pubMAC }}"
+        graphical_console:
+           protocol:
+             - spice
+        operating_system: "{{ xtoph_deploy.kickstart_profile.kvm_os_type | default(xtoph_deploy.hardware_profile.default_os_type) }}"
+        high_availability: false
+        type: server
+        state: stopped
+        wait: yes
+
+
+
+    ##
+    ##    Add boot disk to virtual machine
+    ##
+
+
+
+    - name: "ovirt-deploy : modify vm with boot-disk"
+      ovirt_disk:
+        auth:              "{{ ovirt_auth }}"
+        name:              "{{ xtoph_deploy.ovirt.vm.name }}_root"
+        vm_name:           "{{ xtoph_deploy.ovirt.vm.name }}"
+        storage_domain:    "{{ xtoph_deploy.ovirt.storage.domain }}"
+        interface:         "{{ xtoph_deploy.hardware_profile.disk.bus }}"
+        sparse:            "{{ xtoph_deploy.hardware_profile.disk.sparse }}"
+        size:              "{{ xtoph_deploy.resource_profile.storage.root.size }} GiB"
+        bootable:          yes
+        format:            cow
+        wipe_after_delete: yes
+        wait:              yes
+
+    - name: "ovirt-deploy : modify vm with extra disks"
+      ovirt_disk:
+        auth:              "{{ ovirt_auth }}"
+        name:              "{{ xtoph_deploy.ovirt.vm.name }}_{{ t_diskname }}"
+        vm_name:           "{{ xtoph_deploy.ovirt.vm.name }}"
+        storage_domain:    "{{ xtoph_deploy.ovirt.storage.domain }}"
+        interface:         "{{ xtoph_deploy.hardware_profile.disk.bus }}"
+        sparse:            "{{ xtoph_deploy.hardware_profile.disk.sparse }}"
+        size:              "{{ xtoph_deploy['resource_profile']['storage']['extra'][t_diskname].size }} GiB"
+        bootable:          no
+        format:            cow
+        wipe_after_delete: yes
+        wait:              yes
+      loop: "{{ xtoph_deploy.resource_profile.storage.extra | flatten(1) }}"
+      loop_control:
+        loop_var: t_diskname
+      when: xtoph_deploy.resource_profile.storage.extra is defined
+
+
+
+    ##
+    ##
+    ##    Configure boot device based on ISO availability
+    ##
+    ##
+
+
+
+    - name: "ovirt-deploy : vm attach ISO and change boot device to cdrom"
+      ovirt_vm:
+        auth:         "{{ ovirt_auth }}"
+        name:         "{{ xtoph_deploy.ovirt.vm.name }}"
+        cluster:      "{{ xtoph_deploy.ovirt.cluster_name }}"
+        cd_iso:       "{{ xtoph_deploy.ovirt.vm.name }}.iso"
+        boot_devices:
+          - cdrom
+          - hd
+      when:
+        - xtoph_deploy.kickstart_profile is defined
+
+    - name: "ovirt-deploy : vm change boot device to network"
+      ovirt_vm:
+        auth:         "{{ ovirt_auth }}"
+        name:         "{{ xtoph_deploy.ovirt.vm.name }}"
+        cluster:      "{{ xtoph_deploy.ovirt.cluster_name }}"
+        boot_devices:
+          - hd
+          - network
+      when:
+        - xtoph_deploy.kickstart_profile is not defined
+
+    - name: "ovirt-deploy : vm change state to RUNNING (START INSTALL)"
+      ovirt_vm:
+        auth: "{{ ovirt_auth }}"
+        name: "{{ xtoph_deploy.ovirt.vm.name }}"
+        cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
+        state: running
+        wait: no
+
+  when: deploy_node == true
+
+
+
+##
+##
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+    ##
+    ##    Log out of the oVIRT API service
+    ##
+    
+    - name: Logout from oVirt
+      throttle: 1
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
+

@@ -1,0 +1,87 @@
+##
+## RESOURCE PROFILES
+##
+
+xtoph_resource_profiles:
+
+  tiny:
+    resource_profile:
+      name: "tiny"
+      description: "Tiny Node [2cpu,4GB,30GB disk]"
+      vcpus: 2
+      memsize: 4000
+      storage:
+        root:
+          size: 30
+  
+  tiny-extra:
+    resource_profile:
+      name: "tiny-extra"
+      description: "Tiny Node with Extra Disks [2cpu,4GB,30GB disk + 4x5GB disks]"
+      vcpus: 2
+      memsize: 4000
+      storage:
+        root:
+          size: 30
+        extra:
+          disk1:
+            size: 5
+          disk2: 
+            size: 5
+          disk3: 
+            size: 5 
+          disk4: 
+            size: 5 
+          
+  sml:
+    resource_profile:
+      name: "sml"
+      description: "Small Node [ex: OCP Worker]"
+      vcpus: 2
+      memsize: 8000
+      storage:
+        root:
+          size: 120 
+  
+  med:
+    resource_profile:
+      name: "med"
+      description: "Medium Node [ex: OCP Master/Bootstrap]"
+      vcpus:    4
+      memsize:  16000
+      storage:
+        root:
+          size: 120 
+  
+  lrg:
+    resource_profile:
+      name: "lrg"
+      description: "Large Node"
+      vcpus:    8
+      memsize:  32000
+      storage:
+        root:
+          size: 200 
+  
+  bastion:
+    resource_profile:
+      name: "bastion"
+      description: "Bastion Utility Server"
+      vcpus:    4
+      memsize:  8000
+      storage:
+        root:
+          size: 30 
+  
+  sat6:
+    resource_profile:
+      name: "sat6"
+      description: "Satellite 6 [4cpu,24GB,30GB + 200GB disk]"
+      vcpus: 4
+      memsize: 24000
+      storage:
+        root:
+          size: 30
+        extra:
+          disk1:
+            size: 200
