@@ -1,5 +1,42 @@
 xtoph_deploy: 
 
+
+
+  deployhost:
+
+    ##     platform type [ ovirt | libvirt ]
+
+    platform: ""
+
+    ##     deployer hostname OR ip
+
+    ip: ""
+
+    ##     httpd,kickstart,repo service port
+
+    http_port:    "8008"
+
+    ##
+    ##     temporary directory for various tasks
+    ##
+    ##     NOTE: needs to be unique for every host
+    ##
+
+    tmp_dir: "/home/tmp/{{ g_clusterName }}/{{ inventory_hostname }}"
+
+    kickstart:
+      dir: "/var/www/html/ks"
+      url: "http://192.168.1.170:8008/ks"
+
+    iso:
+      dir: "/home/iso"
+
+    repos:
+      dir: "/var/www/html/repos"
+      url: "http://192.168.1.170:8008/repos"
+
+
+    
   ovirt:
 
     cluster_name:  "Default"
