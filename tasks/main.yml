@@ -75,10 +75,16 @@
 
 
 - import_tasks: ovirt-setup.yml
-  when: ( xtoph_deploy_action == "setup" and xtoph_deploy.deployhost.platform == "ovirt" )
+  when: 
+    - xtoph_deploy_action == "setup"
+    - xtoph_deploy.deployhost.platform == "ovirt" 
 
-- import_tasks: ovirt-setup.yml
-  when: ( xtoph_deploy_action == "setup" and xtoph_deploy.deployhost.platform == "libvirt" )
+- import_tasks: libvirt-setup.yml
+  when: 
+    - xtoph_deploy_action == "setup" 
+    - xtoph_deploy.deployhost.platform == "libvirt" 
+
+
 
 ##
 ##    OVIRT undeploy/deploy/monitor/finish
@@ -103,7 +109,7 @@
     - import_tasks: ovirt-deploy-finish.yml
       when: xtoph_deploy_action == "deploy_finish"
 
-  when: xtoph_deploy.hardware_profile.platform == "ovirt"
+  when: xtoph_deploy.deployhost.platform == "ovirt"
 
 
 
@@ -113,13 +119,13 @@
 
 
 
-# - block:
+- block:
 
 #    - import_tasks: libvirt-undeploy.yml
 #      when: xtoph_deploy_action == "undeploy"
 
-#    - import_tasks: libvirt-deploy.yml
-#      when: xtoph_deploy_action == "deploy"
+    - import_tasks: libvirt-deploy.yml
+      when: xtoph_deploy_action == "deploy"
     
 #    - import_tasks: libvirt-deploy-monitor.yml
 #      when: xtoph_deploy_action == "deploy_monitor"
@@ -127,4 +133,4 @@
 #    - import_tasks: libvirt-deploy-finish.yml
 #      when: xtoph_deploy_action == "deploy_finish"
 
-#  when: xtoph_deploy.hardware_profile.platform == "libvirt"
+  when: xtoph_deploy.deployhost.platform == "libvirt"
