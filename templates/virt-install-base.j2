@@ -1,0 +1,13 @@
+#!/bin/bash
+
+virt-install --name="{{ xtoph_deploy.libvirt.vm.name }}" \
+    --ram="{{ xtoph_deploy.resource_profile.memsize }}" \
+    --check disk_size=off \
+    --network "network={{ xtoph_deploy.libvirt.network.net0.network_name }},mac={{ h_pubMAC }},model={{ xtoph_deploy.hardware_profile.network.model }}" \
+    --graphics vnc \
+    --vcpus {{ xtoph_deploy.resource_profile.vcpus }} \
+    --cpu {{ xtoph_deploy.hardware_profile.cpu.type | default ('host-model') }} \
+    --boot hd,network,menu=yes \
+    --disk "{{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.qcow2,bus={{ xtoph_deploy.hardware_profile.disk.bus }},sparse={{ xtoph_deploy.hardware_profile.disk.sparse }},size={{ xtoph_deploy.resource_profile.storage.root.size }}" \
+    --location={{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso" \
+    --noreboot \
