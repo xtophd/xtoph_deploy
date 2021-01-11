@@ -121,16 +121,16 @@
 
 - block:
 
-#    - import_tasks: libvirt-undeploy.yml
-#      when: xtoph_deploy_action == "undeploy"
+    - import_tasks: libvirt-undeploy.yml
+      when: xtoph_deploy_action == "undeploy"
 
     - import_tasks: libvirt-deploy.yml
       when: xtoph_deploy_action == "deploy"
     
-#    - import_tasks: libvirt-deploy-monitor.yml
-#      when: xtoph_deploy_action == "deploy_monitor"
+    - import_tasks: libvirt-deploy-monitor.yml
+      when: xtoph_deploy_action == "deploy_monitor"
 
-#    - import_tasks: libvirt-deploy-finish.yml
-#      when: xtoph_deploy_action == "deploy_finish"
+    - import_tasks: libvirt-deploy-finish.yml
+      when: xtoph_deploy_action == "deploy_finish"
 
   when: xtoph_deploy.deployhost.platform == "libvirt"

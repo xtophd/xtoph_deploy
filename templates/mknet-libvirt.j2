@@ -12,31 +12,24 @@
 ##    need to be provided in one atomic command.
 ##
 
-
-
-NETWORK_NAME="$1"
-NETWORK_XML="$2"
-
-
-
 ##
 ##    Test for libvirt network
 ##
 
 
 
-if ! virsh net-info "${NETWORK_NAME}"; then
+if ! virsh net-info "{{ xtoph_deploy.libvirt.network.net0.network_name }}"; then
  
     ##
     ##    Create & Start the libvirt network
     ##
     
-    virsh net-define "${NETWORK_XML}"
+    virsh net-define "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
  
     
-    virsh net-start "${NETWORK_NAME}"
+    virsh net-start "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
 
 
-    virsh net-autostart "${NETWORK_NAME}"
+    virsh net-autostart "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
     
 fi

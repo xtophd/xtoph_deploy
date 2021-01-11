@@ -3,7 +3,7 @@
 ## Summary:
 ##
 
-- name: "ovirt-undeploy : deploy node"
+- name: "ovirt-undeploy : BEGIN"
   delegate_to: localhost
   block:
 

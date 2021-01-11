@@ -1,0 +1,67 @@
+#!/bin/bash
+
+##
+##    This script is intended to be used with
+##    the xtoph_deploy ansible role.  It combines
+##    all steps to create a network bridge suitable 
+##    for use with 'mknet-libvirt.sh' which comes
+##    next.
+##
+##    The intent is to provide one command for
+##    an ansible shell-task which can be throttled.
+##    Thus all the steps from detection to creation,
+##    need to be provided in one atomic command.
+##
+
+##
+##    Test for bridge
+##
+
+
+
+if ! nmcli dev show "{{ xtoph_deploy.libvirt.network.net0.network_name }}" ; then
+   
+
+ 
+    ##
+    ##    Create the bridge
+    ##
+    
+    
+    
+    nmcli con add type bridge \
+          con-name "{{ xtoph_deploy.libvirt.network.net0.network_name }}" \
+          ifname   "{{ xtoph_deploy.libvirt.network.net0.network_name }}" \
+          ip4      "{{ xtoph_deploy.libvirt.network.net0.ip }}/{{ xtoph_deploy.libvirt.network.net0.prefix }}" \
+          gw4      "{{ xtoph_deploy.libvirt.network.net0.gateway }}" \
+          ipv4.dns "{{ xtoph_deploy.libvirt.network.net0.nameserver }}" \
+          autoconnect yes bridge.stp no ipv6.method ignore
+    
+    
+    
+    ##
+    ##    Add device to bridge 
+    ##
+    
+    
+    
+    nmcli con add type ethernet \
+          con-name {{ xtoph_deploy.libvirt.network.net0.network_name }} \
+          ifname   {{ xtoph_deploy.libvirt.network.net0.dev }} \
+          master   {{ xtoph_deploy.libvirt.network.net0.network_name }}
+    
+    nmcli con modify {{ xtoph_deploy.libvirt.network.net0.network_name }} connection.autoconnect-slaves yes
+    
+    
+    
+    ##
+    ##    Bring up the bridge
+    ##
+    
+    
+    
+    ifdown "{{ xtoph_deploy.libvirt.network.net0.dev }}"
+    ifdown "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+    ifup   "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+
+fi

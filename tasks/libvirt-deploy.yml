@@ -22,7 +22,7 @@
     
       - name: "libvirt-deploy : determine state of vm"
         shell:
-          cmd: "virsh domstate '{{ xtoph_deploy.libvirt.vm.name }}' | head -n 1"
+          cmd: "virsh domstate '{{ xtoph_deploy.libvirt.vm.name }}'"
         register: vminfo_result
         ignore_errors: true
 
@@ -50,6 +50,15 @@
           deploy_node: true
         when: ( vminfo_result.rc == 0 and vminfo_result.stdout == "shut off" )
     
+
+
+
+
+      - name:  "libvirt-deploy : DEBUG vm status result"
+        debug:
+          var: vminfo_result
+        when: xtoph_deploy.debug == true
+
       - name:  "libvirt-deploy : DEBUG vm status/info results"
         debug:
           msg: "deploy_node = {{ deploy_node }}"
@@ -206,7 +215,6 @@
         loop:
           - iso
           - artifacts 
-          - network
           - virt-install-fragments
 
 
@@ -356,12 +364,18 @@
       ##
 
 
-  
-      - name: "libvirt-deploy : generate custom iso image"
-        script: |
-          mkiso.sh "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}" \
-                   "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" \
-                   "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
+      - name: "libvirt-deploy : create script to generate iso"
+        template:
+          src: "mkiso.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
+          owner: root
+          group: root
+          mode: 0755
+ 
+      - name: "libvirt-deploy : execute mkiso.sh script"
+        shell: 
+          cmd: |
+            {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh
 
 
 
@@ -419,29 +433,19 @@
 
 
 
-      - name: "libvirt-deploy : network xml template for 'nat'"
-        vars:
-          - p_name:    "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
-          - p_type:    "{{ xtoph_deploy.libvirt.network.net0.fwd_type }}"
-          - p_address: "{{ xtoph_deploy.libvirt.network.net0.gateway }}"
-          - p_netmask: "{{ xtoph_deploy.libvirt.network.net0.netmask }}"
+      - name: "libvirt-deploy : xml to define livbirt-network as 'nat'"
         template:
-          src: "libvirt-net-nat.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/network/libvirt-network.xml"
+          src: "libvirt-nat-xml.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
           owner: root
           group: root
           mode: 0644
         when: xtoph_deploy.libvirt.network.net0.fwd_type == "nat"
 
-      - name: "libvirt-deploy : network xml template for 'bridge'"
-        vars:
-          - p_name:    "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
-          - p_type:    "{{ xtoph_deploy.libvirt.network.net0.fwd_type }}"
-          - p_address: "{{ xtoph_deploy.libvirt.network.net0.gateway }}"
-          - p_netmask: "{{ xtoph_deploy.libvirt.network.net0.netmask }}"
+      - name: "libvirt-deploy : xml to define livbirt-network as 'bridge'"
         template:
-          src: "libvirt-net-bridge.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/network/libvirt-network.xml"
+          src: "libvirt-bridge-xml.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
           owner: root
           group: root
           mode: 0644
@@ -461,28 +465,24 @@
 
      
 
-      - name: "libvirt-deploy : network bridge create"
-        throttle: 1
-        script: |
-            mknet-bridge.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}" \
-                            "{{ xtoph_deploy.libvirt.network.net0.dev          }}" \
-                            "{{ xtoph_deploy.libvirt.network.net0.ip           }}" \
-                            "{{ xtoph_deploy.libvirt.network.net0.gateway      }}" \
-                            "{{ xtoph_deploy.libvirt.network.net0.prefix       }}" \
-                            "{{ xtoph_deploy.libvirt.network.net0.nameserver   }}" 
-        register: mknet_bridge_output
-        when: 
-          - xtoph_deploy.libvirt.network.net0.fwd_type != "bridge"
-          - testnet_libvirt.stdout == "no" 
-   
+      - name: "libvirt-deploy : script to create bridge network"
+        vars:
+        template:
+          src: "mknet-bridge.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+          owner: root
+          group: root
+          mode: 0755
+        when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
 
- 
-      - name: "libvirt-deploy : libvirt network create"
-        throttle: 1
-        script: |
-            mknet-libvirt.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}" \
-                             "{{ xtoph_deploy.deployhost.tmp_dir }}/network/libvirt-network.xml"
-        when: testnet_libvirt.stdout == "no" 
+      - name: "libvirt-deploy : script to create libvirt network"
+        vars:
+        template:
+          src: "mknet-libvirt.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+          owner: root
+          group: root
+          mode: 0755
    
 
  
@@ -519,17 +519,30 @@
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"
           owner: root
           group: root
-          mode: 644
+          mode: 0744
    
 
  
       ##
-      ##    Execute virt-install script
+      ##    Execute virtual machine installation scripts
       ##
 
 
 
-      - name: "TASKS-DEPLOY-INSTALL-01 ({{ tdp_node_name }}): execute virt-install script"
+      - name: "livbirt-deploy : create bridge network"
+        throttle: 1
+        shell:
+          cmd: |
+            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+        when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
+
+      - name: "livbirt-deploy : create libvirt network"
+        throttle: 1
+        shell:
+          cmd: |
+            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+
+      - name: "livbirt-deploy : create virtual machine"
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"
