@@ -30,13 +30,16 @@
 
 
     - name: "libvirt-undeploy : delete virtual machine"
+      throttle: 1
       shell:
         cmd: |
           virsh undefine "{{ xtoph_deploy.libvirt.vm.name }}" --remove-all-storage --nvram
+      ignore_errors: yes
 
 
 
     - name: "libvirt-undeploy : undeploy iso in storage directory"
+      throttle: 1
       file:
         path: "{{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
         state: absent

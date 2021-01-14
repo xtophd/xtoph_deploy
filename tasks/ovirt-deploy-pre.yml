@@ -1,0 +1,88 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+
+##
+##
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    NOTE: All tasks here are blocked and delegated to excute
+      ##          on the deployhost/localhost when deploy_node = true
+      ##
+
+
+    
+      ##
+      ##    Update /etc/hosts with hostnames and IPs of new cluster
+      ##
+      ##    NOTE: to avoid cuncurrency problems editing a single
+      ##          file, we set 'throttle = 1'
+      ##
+
+
+
+      - name: "libvirt-deploy : cleanup conflicting IP in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          regexp: "{{ h_pubIP }} .*$"
+          state:  absent
+      
+      - name: "libvirt-deploy : cleanup conflicting name in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}.*"
+          state:  absent
+      
+      - name: "libvirt-deploy : add entry in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{  xtoph_deploy.libvirt.network.net0.fqdn }}"
+          state:  present
+
+
+
+      ##
+      ##    Create MAC addresses if not already configured
+      ##    and store it in the ../config/host_vars directory
+      ##
+ 
+
+
+      - name: "libvirt-deploy : create host_vars dir"
+        file: path="{{ lookup('env','PWD') }}/config/host_vars" state=directory
+   
+      - name: "libvirt-deploy : create host_vars file"
+        file: path="{{ lookup('env','PWD') }}/config/host_vars/{{ inventory_hostname }}" state=touch
+    
+      - name: "libvirt-deploy : generate random MAC "
+        script: macgen.py
+        register: macgen_output
+        when: h_pubMAC is undefined
+    
+      - name: "libvirt-deploy : store random MAC in host_vars"
+        lineinfile:
+          dest:   "{{ lookup('env', 'PWD') }}/config/host_vars/{{ inventory_hostname }}"
+          line:   "h_pubMAC: '{{ macgen_output.stdout }}'"
+          state:  present
+        when: h_pubMAC is undefined
+        register: makeupmac
+    
+      - name: "libvirt-deploy : set fact to preserve MAC for this run"
+        set_fact:
+          h_pubMAC: '{{ macgen_output.stdout }}'
+        when: makeupmac.changed
+
+

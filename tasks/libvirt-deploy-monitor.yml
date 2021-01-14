@@ -70,8 +70,3 @@
     #    state: absent
     #    wait: yes
 
-  when: 
-    - xtoph_deploy.kickstart_profile is defined
-
-
-

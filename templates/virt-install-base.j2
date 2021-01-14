@@ -9,5 +9,4 @@ virt-install --name "{{ xtoph_deploy.libvirt.vm.name }}" \
     --cpu {{ xtoph_deploy.hardware_profile.cpu.type | default ('host-model') }} \
     --boot hd,network,menu=yes \
     --disk "{{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.qcow2,bus={{ xtoph_deploy.hardware_profile.disk.bus }},sparse={{ xtoph_deploy.hardware_profile.disk.sparse }},size={{ xtoph_deploy.resource_profile.storage.root.size }}" \
-    --cdrom "{{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso" \
     --noreboot \

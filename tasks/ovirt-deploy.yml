@@ -122,14 +122,14 @@
       throttle: 1
       lineinfile:
         dest:   "/etc/hosts"
-        regexp: ".*{{ inventory_hostname }}.{{ g_network0_fqdn }}.*"
+        regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}.*"
         state:  absent
     
     - name: "ovirt-deploy : add entry in /etc/hosts"
       throttle: 1
       lineinfile:
         dest:   "/etc/hosts"
-        line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{ g_network0_fqdn }}"
+        line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
         state:  present
 
 
