@@ -31,21 +31,21 @@
 
 
 
-      - name: "libvirt-pre-config : cleanup conflicting IP in /etc/hosts"
+      - name: "libvirt-deploy-preprocess : cleanup conflicting IP in /etc/hosts"
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
           regexp: "{{ h_pubIP }} .*$"
           state:  absent
       
-      - name: "libvirt-pre-config : cleanup conflicting name in /etc/hosts"
+      - name: "libvirt-deploy-preprocess: cleanup conflicting name in /etc/hosts"
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
           regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}.*"
           state:  absent
       
-      - name: "libvirt-pre-config : add entry in /etc/hosts"
+      - name: "libvirt-deploy-preprocess: add entry in /etc/hosts"
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
@@ -61,18 +61,18 @@
  
 
 
-      - name: "libvirt-pre-config : create host_vars dir"
+      - name: "libvirt-deploy-preprocess: create host_vars dir"
         file: path="{{ lookup('env','PWD') }}/config/host_vars" state=directory
    
-      - name: "libvirt-pre-config : create host_vars file"
+      - name: "libvirt-deploy-preprocess: create host_vars file"
         file: path="{{ lookup('env','PWD') }}/config/host_vars/{{ inventory_hostname }}" state=touch
     
-      - name: "libvirt-pre-config : generate random MAC "
+      - name: "libvirt-deploy-preprocess: generate random MAC "
         script: macgen.py
         register: macgen_output
         when: h_pubMAC is undefined
     
-      - name: "libvirt-pre-config : store random MAC in host_vars"
+      - name: "libvirt-deploy-preprocess: store random MAC in host_vars"
         lineinfile:
           dest:   "{{ lookup('env', 'PWD') }}/config/host_vars/{{ inventory_hostname }}"
           line:   "h_pubMAC: '{{ macgen_output.stdout }}'"
@@ -80,7 +80,7 @@
         when: h_pubMAC is undefined
         register: makeupmac
     
-      - name: "libvirt-pre-config : set fact to preserve MAC for this run"
+      - name: "libvirt-deploy-preprocess: set fact to preserve MAC for this run"
         set_fact:
           h_pubMAC: '{{ macgen_output.stdout }}'
         when: makeupmac.changed

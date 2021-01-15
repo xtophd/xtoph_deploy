@@ -28,6 +28,7 @@
     ##
 
 
+
     - name: "libvirt-deploy-monitor : wait for shutdown"
       shell:
         cmd: |
@@ -36,37 +37,15 @@
       until:  result.rc == 0
       retries: 600
       delay: 5
-      when: deploy_node == true
-    
-    #- name: "libvirt-deploy-monitor : eject iso"
-    #  ovirt_vm:
-    #    auth: "{{ ovirt_auth }}"
-    #    name: "{{ xtoph_deploy.ovirt.vm.name }}"
-    #    cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
-    #    cd_iso: ""
-   
 
+
+    
     - name: "libvirt-deploy-monitor : start node back up"
       shell:
         cmd: |
           virsh start "{{ xtoph_deploy.libvirt.vm.name }}"
-      when: deploy_node == true
 
 
-    #- name: "libvirt-deploy-monitor : vm change boot device to hd"
-    #  ovirt_vm:
-    #    auth: "{{ ovirt_auth }}"
-    #    name: "{{ xtoph_deploy.ovirt.vm.name }}"
-    #    cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
-    #    boot_menu: "no"
-    #    boot_devices:
-    #      - hd
- 
-    #- name: "libvirt-deploy-monitor : undeploy iso"
-    #  ovirt_disk:
-    #    auth: '{{ ovirt_auth }}'
-    #    name: '{{ xtoph_deploy.ovirt.vm.name }}.iso'
-    #    storage_domain: '{{ xtoph_deploy.ovirt.storage.domain }}'
-    #    state: absent
-    #    wait: yes
 
+  when: deploy_node == true and
+        xtoph_deploy.kickstart_profile.wait_for_shutdown == true

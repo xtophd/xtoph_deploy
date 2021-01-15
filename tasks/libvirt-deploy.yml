@@ -346,7 +346,8 @@
                 fi
             when: xtoph_deploy.cleanup == true
 
-        when: xtoph_deploy.kickstart_profile is defined
+        when: xtoph_deploy.kickstart_profile is defined and
+              xtoph_deploy.kickstart_profile.method != "pxe"
 
 
 
@@ -375,7 +376,7 @@
 
 
 
-      - name: "libvirt-deploy : xml to define livbirt-network as 'nat'"
+      - name: "libvirt-deploy : xml to define libvirt-network as 'nat'"
         template:
           src: "libvirt-nat-xml.j2"
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
@@ -384,7 +385,7 @@
           mode: 0644
         when: xtoph_deploy.libvirt.network.net0.fwd_type == "nat"
 
-      - name: "libvirt-deploy : xml to define livbirt-network as 'bridge'"
+      - name: "libvirt-deploy : xml to define libvirt-network as 'bridge'"
         template:
           src: "libvirt-bridge-xml.j2"
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
@@ -450,11 +451,18 @@
           loop_var: t_diskname
         when: xtoph_deploy.resource_profile.storage.extra is defined
 
+      - name: "libvirt-deploy: virt-install pxe fragment"
+        template:
+          src:  virt-install-pxe.j2
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/35-pxe"
+        when: xtoph_deploy.kickstart_profile.method == "pxe"
+
       - name: "libvirt-deploy: virt-install cdrom fragment"
         template:
           src:  virt-install-cdrom.j2
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/40-cdrom"
-        when: xtoph_deploy.kickstart_profile is defined and xtoph_deploy.kickstart_profile.boot_iso != ""
+        when: xtoph_deploy.kickstart_profile.method == "cdrom" or
+              xtoph_deploy.kickstart_profile.method == "network"
 
       - name: "libvirt-deploy: virt-install finish fragment"
         template:
@@ -477,24 +485,32 @@
 
 
 
-      - name: "livbirt-deploy : create bridge network"
+      - name: "libvirt-deploy : create bridge network"
         throttle: 1
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
         when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
 
-      - name: "livbirt-deploy : create libvirt network"
+      - name: "libvirt-deploy : create libvirt network"
         throttle: 1
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
 
-      - name: "livbirt-deploy : create virtual machine"
+      - name: "libvirt-deploy : create virtual machine"
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"
 
+      - name: "libvirt-deploy-monitor : wait for virtual machine running"
+        shell:
+          cmd: |
+            virsh domstate "{{ xtoph_deploy.libvirt.vm.name }}" | grep -q "running"
+        register: result
+        until:  result.rc == 0
+        retries: 600
+        delay: 5
 
 
   ##

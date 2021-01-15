@@ -13,32 +13,28 @@
 
 
 
-- name: "libvirt-deploy-finish : BEGIN"
-  delegate_to: localhost
+- delegate_to: localhost
   block:
 
 
 
       ##
-      ##
       ##    Wait for host to respond to ssh port
       ##
-      ##
       
       
       
-      - name: "libvirt-deploy-finish : wait for boot"
+      - name: "libvirt-deploy-post : wait for ssh alive"
         wait_for:
           host: "{{ xtoph_deploy.libvirt.network.net0.ip }}"
           connect_timeout: 5
           port: 22
           sleep: 15
           state: started
-          timeout: 300
+          timeout: 900
 
 
 
-      ##
       ##
       ##    Cleanup ssh known hosts
       ##
@@ -50,13 +46,13 @@
 
 
   
-      - name: "libvirt-deploy-finish : DEBUG hostname details"
+      - name: "libvirt-deploy-post : DEBUG hostname details"
         debug:
           msg:
            - "host fqdn  = {{ inventory_hostname_short }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}"
         when: xtoph_deploy.debug == true
   
-      - name: "libvirt-deploy-finish : clean up old ssh keys for node"
+      - name: "libvirt-deploy-post : clean up old ssh keys for node"
         throttle: 1
         shell:
           cmd: |
@@ -66,7 +62,7 @@
             ssh-keygen -R "{{ xtoph_deploy.libvirt.network.net0.ip }}"
         ignore_errors: yes
   
-      - name: "libvirt-deploy-finish : add new ssh keys for node"
+      - name: "libvirt-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
           p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}"
@@ -75,6 +71,8 @@
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
         ignore_errors: yes
 
+  when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
+        xtoph_deploy.kickstart_profile.wait_for_ssh == true
 
 
 ##
@@ -85,7 +83,7 @@
 
 
 
-- name: "libvirt-deploy-finish : DEBUG repo details"
+- name: "libvirt-deploy-post : DEBUG repo details"
   debug:
     msg:
      - "repo name     = {{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
@@ -93,11 +91,11 @@
      - "repo subpath  = {{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
      - "repo url      = {{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-  when: xtoph_deploy.debug == true
+  when: xtoph_deploy.debug == true and xtoph_deploy.kickstart_profile.repos is defined
 
 
 
-- name: "libvirt-deploy-finish : configure yum repositories"
+- name: "libvirt-deploy-post : configure yum repositories"
   yum_repository:
     name:        "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
     description: "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
@@ -105,5 +103,5 @@
     enabled:     "yes"
     gpgcheck:    "no"
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-
+  when: xtoph_deploy.kickstart_profile.repos is defined
 

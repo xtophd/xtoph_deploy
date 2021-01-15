@@ -87,7 +87,7 @@
 
 
 ##
-##    OVIRT undeploy/deploy/monitor/finish
+##    OVIRT setup/undeploy/deploy
 ##
 
 
@@ -100,45 +100,48 @@
     - import_tasks: ovirt-undeploy.yml
       when: xtoph_deploy_action == "undeploy"
 
-    - import_tasks: libvirt-deploy-pre.yml
-      when: xtoph_deploy_action == "deploy_pre"
+    - import_tasks: libvirt-deploy-preprocess.yml
+      when: xtoph_deploy_action == "preprocess"
 
-    - import_tasks: ovirt-deploy.yml
-      when: xtoph_deploy_action == "deploy"
+    - block:
+
+        - import_tasks: ovirt-deploy.yml
     
-    - import_tasks: ovirt-deploy-monitor.yml
-      when: xtoph_deploy_action == "deploy_monitor"
+        - import_tasks: ovirt-deploy-monitor.yml
 
-    - import_tasks: ovirt-deploy-post.yml
-      when: xtoph_deploy_action == "deploy_post"
+        - import_tasks: ovirt-deploy-post.yml
+
+      when: xtoph_deploy_action == "deploy"
 
   when: xtoph_deploy.deployhost.platform == "ovirt"
 
 
 
 ##
-##    LIBVIRT  undeploy/deploy/monitor/finish
+##    LIBVIRT  setup/preprocess/undeploy/deploy
 ##
 
 
 
 - block:
+
     - import_tasks: libvirt-undeploy.yml
       when: xtoph_deploy_action == "setup"
 
     - import_tasks: libvirt-undeploy.yml
       when: xtoph_deploy_action == "undeploy"
 
-    - import_tasks: libvirt-deploy-pre.yml
-      when: xtoph_deploy_action == "deploy_pre"
-    
-    - import_tasks: libvirt-deploy.yml
-      when: xtoph_deploy_action == "deploy"
-    
-    - import_tasks: libvirt-deploy-monitor.yml
-      when: xtoph_deploy_action == "deploy_monitor"
+    - import_tasks: libvirt-deploy-preprocess.yml
+      when: xtoph_deploy_action == "preprocess"
 
-    - import_tasks: libvirt-deploy-post.yml
-      when: xtoph_deploy_action == "deploy_post"
+    - block:
+    
+        - import_tasks: libvirt-deploy.yml
+    
+        - import_tasks: libvirt-deploy-monitor.yml
+
+        - import_tasks: libvirt-deploy-post.yml
+
+      when: xtoph_deploy_action == "deploy"
 
   when: xtoph_deploy.deployhost.platform == "libvirt"
