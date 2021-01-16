@@ -353,9 +353,9 @@
   
           - name: "ovirt-deploy : create script to generate iso"
             vars:
-              t_iso_label="{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"
-              t_iso_source="{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-              t_iso_output="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
+              t_iso_label:  "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"
+              t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+              t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
             template:
               src: "mkiso.j2"
               dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
