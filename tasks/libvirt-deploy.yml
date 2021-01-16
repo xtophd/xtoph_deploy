@@ -340,6 +340,7 @@
     
     
           - name: "libvirt-deploy : upload iso image"
+            throttle: 1
             copy:
               src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
               dest: "{{ xtoph_deploy.libvirt.storage.qcow_dir }}"

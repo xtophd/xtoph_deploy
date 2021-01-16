@@ -59,7 +59,7 @@
             until: vminfo_result.ovirt_vms[0].status == "down"
             retries: 600
             delay: 5
-            when: deploy_node == true
+            when: xtoph_deploy.kickstart_profile.wait_for_shutdown == true
       
           - name: "ovirt-deploy-monitor : eject iso"
             ovirt_vm:
@@ -67,6 +67,7 @@
               name: "{{ xtoph_deploy.ovirt.vm.name }}"
               cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
               cd_iso: ""
+            when: xtoph_deploy.kickstart_profile.method != "pxe"
       
           - name: "ovirt-deploy-monitor : vm change boot device to hd"
             ovirt_vm:
@@ -76,6 +77,7 @@
               boot_menu: "no"
               boot_devices:
                 - hd
+            when: xtoph_deploy.kickstart_profile.method != "pxe"
       
           - name: "ovirt-deploy-monitor : vm change state to RUNNING (BOOT)"
             ovirt_vm:
@@ -85,17 +87,18 @@
               state: "running"
               wait: yes
             retries: 3
+            when: xtoph_deploy.kickstart_profile.wait_for_shutdown == true
       
-          - name: "ovirt-deploy-monitor : undeploy iso"
+          - name: "ovirt-deploy-monitor : undeploy iso in storage domain"
             ovirt_disk:
               auth: '{{ ovirt_auth }}'
               name: '{{ xtoph_deploy.ovirt.vm.name }}.iso'
               storage_domain: '{{ xtoph_deploy.ovirt.storage.domain }}'
               state: absent
               wait: yes
+            when: xtoph_deploy.kickstart_profile.method != "pxe"
 
-      when: 
-        - xtoph_deploy.kickstart_profile is defined
+      when: deploy_node == true
 
 
 

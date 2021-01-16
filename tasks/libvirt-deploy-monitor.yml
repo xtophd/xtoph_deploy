@@ -37,15 +37,24 @@
       until:  result.rc == 0
       retries: 600
       delay: 5
+      when: xtoph_deploy.kickstart_profile.wait_for_shutdown == true
 
 
     
-    - name: "libvirt-deploy-monitor : start node back up"
+    - name: "libvirt-deploy-monitor : virtual machine change state to RUNNING (BOOT)"
       shell:
         cmd: |
           virsh start "{{ xtoph_deploy.libvirt.vm.name }}"
+      when: xtoph_deploy.kickstart_profile.wait_for_shutdown == true
 
 
 
-  when: deploy_node == true and
-        xtoph_deploy.kickstart_profile.wait_for_shutdown == true
+    - name: "libvirt-deploy-monitor : undeploy iso in storage directory"
+      throttle: 1
+      file:
+        path: "{{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
+        state: absent
+
+
+
+  when: deploy_node == true

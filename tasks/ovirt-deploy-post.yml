@@ -13,8 +13,7 @@
 
 
 
-- name: "ovirt-deploy-finish : BEGIN"
-  delegate_to: localhost
+- delegate_to: localhost
   block:
 
       ##
@@ -25,7 +24,7 @@
       
       
       
-      - name: "ovirt-deploy-finish : wait for boot (check port 22)"
+      - name: "ovirt-deploy-post : wait for boot (check port 22)"
         wait_for:
           host: "{{ xtoph_deploy.ovirt.network.net0.ip }}"
           connect_timeout: 5
@@ -46,13 +45,13 @@
       ##             problems, set 'throttle: 1'
       ##
   
-      - name: "ovirt-deploy-finish : DEBUG hostname details"
+      - name: "ovirt-deploy-post : DEBUG hostname details"
         debug:
           msg:
            - "host fqdn  = {{ inventory_hostname_short }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
         when: xtoph_deploy.debug == true
   
-      - name: "ovirt-deploy-finish : clean up old ssh keys for node"
+      - name: "ovirt-deploy-post : clean up old ssh keys for node"
         throttle: 1
         shell:
           cmd: |
@@ -62,7 +61,7 @@
             ssh-keygen -R "{{ xtoph_deploy.ovirt.network.net0.ip }}"
         ignore_errors: yes
   
-      - name: "ovirt-deploy-finish : add new ssh keys for node"
+      - name: "ovirt-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
           p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
@@ -81,7 +80,7 @@
 
 
 
-- name: "ovirt-deploy-finish : DEBUG repo details"
+- name: "ovirt-deploy-post : DEBUG repo details"
   debug:
     msg:
      - "repo name     = {{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
@@ -89,11 +88,12 @@
      - "repo subpath  = {{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
      - "repo url      = {{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-  when: xtoph_deploy.debug == true and xtoph_deploy.kickstart_profile is defined
+  when: xtoph_deploy.debug == true and 
+        xtoph_deploy.kickstart_profile.repos is defined
 
 
 
-- name: "ovirt-deploy-finish : configure yum repositories"
+- name: "ovirt-deploy-post : configure yum repositories"
   yum_repository:
     name:        "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
     description: "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
@@ -101,7 +101,7 @@
     enabled:     "yes"
     gpgcheck:    "no"
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-  when: xtoph_deploy.kickstart_profile is defined
+  when: xtoph_deploy.kickstart_profile.repos is defined
 
 
 

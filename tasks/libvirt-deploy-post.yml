@@ -91,7 +91,8 @@
      - "repo subpath  = {{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
      - "repo url      = {{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-  when: xtoph_deploy.debug == true and xtoph_deploy.kickstart_profile.repos is defined
+  when: xtoph_deploy.debug == true and 
+        xtoph_deploy.kickstart_profile.repos is defined
 
 
 
