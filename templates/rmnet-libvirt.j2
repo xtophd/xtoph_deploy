@@ -1,0 +1,30 @@
+#!/bin/bash
+
+##
+##    This script is intended to be used with
+##    the xtoph_deploy ansible role.  It combines
+##    all steps to REMOVE a libvirt network for
+##    for use with VMs running in kvm.
+##
+##    The intent is to provide one command for
+##    an ansible shell-task which can be throttled.
+##
+
+##
+##    Test for libvirt network
+##
+
+
+
+if virsh net-info "{{ xtoph_deploy.libvirt.network.net0.network_name }}"; then
+ 
+    ##
+    ##    Destroy and Undefine the libvirt network
+    ##
+    
+    virsh net-destroy "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+
+
+    virsh net-undefine "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+    
+fi

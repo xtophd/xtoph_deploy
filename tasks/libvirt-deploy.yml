@@ -326,9 +326,19 @@
           ##          disk space and i/o bandwidth, we
           ##          set 'throttle = 1'
           ##
+
+          ##
+          ##    NOTE: YAML Spec 1.2 http://www.yaml.org/spec/1.2/spec.html#id2760844
+          ##          Scalar content can be written in block notation, 
+          ##          using a literal style (indicated by “|”) where 
+          ##          all line breaks are significant. Alternatively, 
+          ##          they can be written with the folded style 
+          ##          (denoted by “>”) where each line break is folded
+          ##          to a space unless it ends an empty or a more-indented line.
+          ## 
+
     
     
-      
           - name: "libvirt-deploy : upload iso image"
             copy:
               src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
@@ -395,18 +405,17 @@
         when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
 
 
-
-      ##
-      ##    NOTE: YAML Spec 1.2 http://www.yaml.org/spec/1.2/spec.html#id2760844
-      ##          Scalar content can be written in block notation, 
-      ##          using a literal style (indicated by “|”) where 
-      ##          all line breaks are significant. Alternatively, 
-      ##          they can be written with the folded style 
-      ##          (denoted by “>”) where each line break is folded
-      ##          to a space unless it ends an empty or a more-indented line.
-      ## 
-
      
+      ##
+      ##    Scripts to create and remove network
+      ##
+      ##    NOTE: the creation of the REMOVE script rmnet-libvirt.sh
+      ##          is only meant to serve for trouble shooting.  It is
+      ##          NOT used at any point during a "deploy".  During
+      ##          "undeploy", the script will be templated again.
+      ##
+
+
 
       - name: "libvirt-deploy : script to create bridge network"
         vars:
@@ -423,6 +432,15 @@
         template:
           src: "mknet-libvirt.j2"
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+          owner: root
+          group: root
+          mode: 0755
+   
+      - name: "libvirt-deploy : script to remove libvirt network"
+        vars:
+        template:
+          src: "rmnet-libvirt.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/rmnet-libvirt.sh"
           owner: root
           group: root
           mode: 0755
@@ -499,6 +517,7 @@
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
 
       - name: "libvirt-deploy : create virtual machine"
+        throttle: 1
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"

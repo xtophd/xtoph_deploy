@@ -13,6 +13,42 @@
     ##          on the deployhost/localhost
     ##
 
+
+
+    ##
+    ##    Create script to delete the libvirt network
+    ##
+    ##    NOTE:  at this time, an "undeploy" will NOT
+    ##           execute this script and clean up
+    ##           libvirt networking.  Currently, it is
+    ##           left as a manual step.
+    ##
+    ##    NOTE:  we don't touch system routes during
+    ##           "undeploy".  Again, that's left as 
+    ##           manual step.
+    ##
+
+
+
+    - name: "libvirt-deploy : script to remove libvirt network"
+      vars:
+      template:
+        src: "rmnet-libvirt.j2"
+        dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/rmnet-libvirt.sh"
+        owner: root
+        group: root
+        mode: 0755
+
+
+
+    #- name: "libvirt-deploy : create libvirt network"
+    #  throttle: 1
+    #  shell:
+    #    cmd: |
+    #      bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/rmnet-libvirt.sh"
+
+
+
     ##
     ##    Stop and Delete Virtual Machine 
     ##
