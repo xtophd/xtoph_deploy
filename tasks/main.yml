@@ -100,7 +100,7 @@
     - import_tasks: ovirt-undeploy.yml
       when: xtoph_deploy_action == "undeploy"
 
-    - import_tasks: libvirt-deploy-preprocess.yml
+    - import_tasks: ovirt-deploy-preprocess.yml
       when: xtoph_deploy_action == "preprocess"
 
     - block:
