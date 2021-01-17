@@ -32,7 +32,7 @@ if ! nmcli dev show "{{ xtoph_deploy.libvirt.network.net0.network_name }}" ; the
     nmcli con add type bridge \
           con-name "{{ xtoph_deploy.libvirt.network.net0.network_name }}" \
           ifname   "{{ xtoph_deploy.libvirt.network.net0.network_name }}" \
-          ip4      "{{ xtoph_deploy.libvirt.network.net0.ip }}/{{ xtoph_deploy.libvirt.network.net0.prefix }}" \
+          ip4      "{{ xtoph_deploy.deployhost.ip }}/{{ xtoph_deploy.libvirt.network.net0.prefix }}" \
           gw4      "{{ xtoph_deploy.libvirt.network.net0.gateway }}" \
           ipv4.dns "{{ xtoph_deploy.libvirt.network.net0.nameserver }}" \
           autoconnect yes bridge.stp no ipv6.method ignore
