@@ -16,22 +16,16 @@
 
 
 ##
-##    Set up repos and install packages
-##    dependant on the version of RHEL
+##    install packages that vary
+##    between versions of RHEL
 ##
 
 
 
 - block:
 
-  #  - name: "libvirt-setup : subscription manager enable RHEL 7 required repos only"
-  #    rhsm_repository:
-  #      name: "rhel-7-server-rpms,rhel-7-server-optional-rpms,rhel-7-server-extras-rpms"
-  #      purge: True
-  #      state: enabled
-
-    - name: "libvirt-setup : (rhel 7) install python"
-      yum: name=python state=installed
+      - name: "libvirt-setup : (rhel 7) install python"
+        yum: name=python state=installed
 
   when:
     - ansible_distribution == "RedHat"
@@ -41,20 +35,14 @@
 
 - block:
 
-  #  - name: "libvirt-setup : subscription manager enable RHEL 8 required repos only"
-  #    rhsm_repository:
-  #      name: "rhel-8-for-x86_64-baseos-rpms,rhel-8-for-x86_64-appstream-rpms"
-  #      purge: True
-  #      state: enabled
+      - name: "libvirt-setup : (rhel 8) install python3"
+        yum: name=python3 state=installed
 
-    - name: "libvirt-setup : (rhel 8) install python3"
-      yum: name=python3 state=installed
-
-    - name: "libvirt-setup: (rhel 8) configure python3 alternatives"
-      alternatives:
-         name='python'
-         link='/usr/bin/unversioned-python'
-         path='/usr/bin/python3'
+      - name: "libvirt-setup: (rhel 8) configure python3 alternatives"
+        alternatives:
+           name='python'
+           link='/usr/bin/unversioned-python'
+           path='/usr/bin/python3'
 
   when:
     - ansible_distribution == "RedHat"
@@ -83,7 +71,7 @@
 
 
 - name: "libvirt-setup : enable required system services"
-  service: name="{{ item }}" state=restarted enabled=yes masked=no
+  service: name="{{ item }}" state=started enabled=yes masked=no
   with_items:
     - "NetworkManager"
     - "firewalld"
@@ -135,27 +123,6 @@
 
 
 ##
-##    Configure httpd to support kickstarts
-##
-
-
-
-- name: "libvirt-setup: deploy httpd configuration"
-  vars:
-    - p_port: "{{ xtoph_deploy.deployhost.http_port }}"
-  template:
-    src: "deployhost-httpd-conf.j2"
-    dest: "/etc/httpd/conf/httpd.conf"
-    owner: root
-    group: root
-    mode: 0644
-
-- name: "libvirt-setup: selinux restorecon on /var/www/html"
-  shell: restorecon -R /var/www/html
-
-
-
-##
 ##    Install and enable httpd services/ports
 ##
 
@@ -165,15 +132,29 @@
 
     - name: "libvirt-setup : install httpd packages"
       yum: name=httpd state=installed
-    
+
     - name: "libvirt-setup : enable http system services"
-      service: name="{{ item }}" state=restarted enabled=yes masked=no
+      service: name="{{ item }}" state=started enabled=yes masked=no
       with_items:
         - "NetworkManager"
         - "firewalld"
         - "httpd"
     
-    - name: "libvirt-setup : add http firewalld services"
+    - name: "libvirt-setup: deploy httpd configuration"
+      vars:
+        - p_port: "{{ xtoph_deploy.deployhost.http_port }}"
+      template:
+        src: "deployhost-httpd-conf.j2"
+        dest: "/etc/httpd/conf/httpd.conf"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart_httpd
+
+    - name: "libvirt-setup: selinux restorecon on /var/www/html"
+      shell: restorecon -R /var/www/html
+    
+    - name: "libvirt-setup : enable http/https firewalld services"
       firewalld:
         service: "{{ item }}"
         immediate: yes
@@ -189,9 +170,8 @@
         immediate: yes
         permanent: yes
         state: enabled
-      when: 
-        - xtoph_deploy.deployhost.http_port != "80"
-        - xtoph_deploy.deployhost.http_port != "443"
+      when: xtoph_deploy.deployhost.http_port != "80"  and
+            xtoph_deploy.deployhost.http_port != "443"
 
     ##    NOTE: I should probably just develop a selinux 
     ##          test to see if port needs to be added  
@@ -275,58 +255,76 @@
 
 - block:
   
-    - name: "libvirt-setup : install cockpit packages"
-      yum: name=cockpit,cockpit-dashboard,cockpit-machines state=installed
+      - name: "libvirt-setup : install cockpit packages"
+        yum: name=cockpit,cockpit-dashboard,cockpit-machines state=installed
+   
+      - name: "libvirt-setup :  enable cockpit system services"
+        service: name="{{ item }}" state=started enabled=yes masked=no
+        with_items:
+          - "cockpit"
+          - "cockpit.socket"
+    
+      - name: "libvirt-setup : create cockpit systemd drop-in directory"
+        file:
+          path: "/etc/systemd/system/cockpit.socket.d/"
+          mode: "0755"
+          owner: "root"
+          group: "root"
+          state: directory
   
-    - name: "libvirt-setup : create cockpit systemd drop-in directory"
-      file:
-        path: "/etc/systemd/system/cockpit.socket.d/"
-        mode: "0755"
-        owner: "root"
-        group: "root"
-        state: directory
+      - name: "libvirt-setup : deploy cockpit custom configuration"
+        vars:
+          - p_port: "{{ kvm_cfg.cockpit_port }}"
+        template:
+          src:  "cockpit-listen-conf.j2"
+          dest: "/etc/systemd/system/cockpit.socket.d/listen.conf"
+          owner: root
+          group: root
+          mode: 0644
+        register: cockpit_result
+        when: xtoph_deploy.deployhost.cockpit_port != ""
+        notify: restart_cockpit
   
-    - name: "libvirt-setup : deploy cockpit custom configuration"
-      vars:
-        - p_port: "{{ kvm_cfg.cockpit_port }}"
-      template:
-        src:  "cockpit-listen-conf.j2"
-        dest: "/etc/systemd/system/cockpit.socket.d/listen.conf"
-        owner: root
-        group: root
-        mode: 0644
-      when: xtoph_deploy.deployhost.cockpit_port != ""
+      - name: "libvirt-setup :  add cockpit firewalld services"
+        firewalld:
+          service: "{{ item }}"
+          immediate: yes
+          permanent: yes
+          state: enabled
+        with_items:
+          - "cockpit"
+    
+      - name: "libvirt-setup :  add cockpit custom firewalld ports"
+        firewalld:
+          port: "{{ kvm_cfg.cockpit_port }}/tcp"
+          immediate: yes
+          permanent: yes
+          state: enabled
+        when: xtoph_deploy.deployhost.cockpit_port != ""
   
-    - name: "libvirt-setup :  enable cockpit system services"
-      service: name="{{ item }}" state=restarted enabled=yes masked=no
-      with_items:
-        - "cockpit"
-        - "cockpit.socket"
-  
-    - name: "libvirt-setup :  add cockpit firewalld services"
-      firewalld:
-        service: "{{ item }}"
-        immediate: yes
-        permanent: yes
-        state: enabled
-      with_items:
-        - "cockpit"
-  
-    - name: "libvirt-setup :  add cockpit custom firewalld ports"
-      firewalld:
-        port: "{{ kvm_cfg.cockpit_port }}/tcp"
-        immediate: yes
-        permanent: yes
-        state: enabled
-      when: xtoph_deploy.deployhost.cockpit_port != ""
-
-    ##    NOTE: If we use a port not natively included 
-    ##          by default selinux profiles, we need to add it
-    ##   
-    ##     - name: "libvirt-setup:  add http port to selinux http_port_t"
-    ##     - shell:
-    ##         cmd: |
-    ##           semanage port -a -t http_port_t -p tcp {{ xtoph_deploy.deployhost.cockpit_port }}
+      ##    NOTE: If we use a port not natively included 
+      ##          by default selinux profiles, we need to add it
+      ##   
+      ##     - name: "libvirt-setup:  add http port to selinux http_port_t"
+      ##     - shell:
+      ##         cmd: |
+      ##           semanage port -a -t http_port_t -p tcp {{ xtoph_deploy.deployhost.cockpit_port }}
 
   when: xtoph_deploy.deployhost.cockpit_enable == true
+
+
+
+##
+##    NOTE: with the possiblity of firewalld be restarted
+##          during setup, we restart libvirtd to cover
+##          our bases.  this ensures firewall rules 
+##          created by libvirtd are all in place
+##
+
+
+
+- name: "libvirt-setup : restart libvirtd"
+  service:
+    name: libvirtd
+    state: restarted
 

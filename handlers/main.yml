@@ -15,3 +15,11 @@
   with_items:
     - "httpd"
 
+
+
+- name:    "xtoph_deploy (handler) : restart libvirtd"
+  listen:  "restart_libvirtd"
+  service: name="{{ item }}" state=running enabled=yes masked=no
+  with_items:
+    - "libvirtd"
+
