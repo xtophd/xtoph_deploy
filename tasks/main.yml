@@ -109,6 +109,12 @@
 
         - import_tasks: ovirt-deploy-post.yml
 
+      ##
+      ##    NOTE: If xtoph_deploy.hardware_profile.platform != 'ovirt'
+      ##          all tasks are skipped.  This makes it a little easier
+      ##          to mixed platform types (ie: ovirt + baremetal)
+      ##
+
       when: xtoph_deploy_action == "deploy" and
             xtoph_deploy.hardware_profile.platform == "ovirt"
 
@@ -138,6 +144,12 @@
         - import_tasks: libvirt-deploy-monitor.yml
 
         - import_tasks: libvirt-deploy-post.yml
+
+      ##
+      ##    NOTE: If xtoph_deploy.hardware_profile.platform != 'libvirt'
+      ##          all tasks are skipped.  This makes it a little easier
+      ##          to mixed platform types (ie: libvirt + baremetal)
+      ##
 
       when: xtoph_deploy_action == "deploy" and
             xtoph_deploy.hardware_profile.platform == "libvirt"

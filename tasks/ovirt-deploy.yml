@@ -135,284 +135,285 @@
 
       - block:
   
-          ##
-          ##    All tasks in this block are related to
-          ##    kickstart repo and ks.cfg setup
-          ##
-          ##    * NOTE * to avoid concurrency problems when
-          ##             when detecting and mounting the iso
-          ##             mount, we set 'throttle = 1'
-          ##
+            ##
+            ##    All tasks in this block are related to
+            ##    kickstart repo and ks.cfg setup
+            ##
+            ##    * NOTE * to avoid concurrency problems when
+            ##             when detecting and mounting the iso
+            ##             mount, we set 'throttle = 1'
+            ##
   
   
   
-          - name: "ovirt-deploy : DEBUG repo loopback details"
-            debug: 
-              msg:
-               - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-               - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-            when: xtoph_deploy.debug == true
+            - name: "ovirt-deploy : DEBUG repo loopback details"
+              debug: 
+                msg:
+                 - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+                 - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+              when: xtoph_deploy.debug == true
   
-          - name: "ovirt-deploy : stat repo mount point"
-            throttle: 1
-            stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-            register: test_repo_mount
-            when: xtoph_deploy.kickstart_profile is defined and 
-                  xtoph_deploy.kickstart_profile.repo_iso != ""
+            - name: "ovirt-deploy : stat repo mount point"
+              throttle: 1
+              stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+              register: test_repo_mount
+              when: xtoph_deploy.kickstart_profile is defined and 
+                    xtoph_deploy.kickstart_profile.repo_iso != ""
   
-          - name: "ovirt-deploy : create repo mount point"
-            throttle: 1
-            file: 
-              path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}" 
-              mode:  "0755"
-              state: directory
-            when: test_repo_mount.stat.exists == false
+            - name: "ovirt-deploy : create repo mount point"
+              throttle: 1
+              file: 
+                path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}" 
+                mode:  "0755"
+                state: directory
+              when: test_repo_mount.stat.exists == false
   
-          - name: "ovirt-deploy : mount iso"
-            throttle: 1
-            vars:
-            mount:
-              path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-              opts:   "loop,ro"
-              state:  "mounted"
-              fstype: "iso9660"
-            when: xtoph_deploy.kickstart_profile.repo_iso != ""
-  
-  
-  
-          ##
-          ##
-          ##    Create ks.cfg in http directory.  For ovirt
-          ##    deployments we currently cook the ks.cfg
-          ##    directly into the ISO.
-          ##
-          ##    NOTE: using run-once and specifying kernel,
-          ##          initrd and kernel args only works with
-          ##          local and iso storage domains (BUG?).
-          ##
-          ##          ovirt api does not support uploads to
-          ##          the iso-domain
-          ##
-          ##          I am not interested in managing file
-          ##          distribution to all rhv-h local domains
-          ##
-          ##          THIS IS WHY THE CUSTOM ISO METHOD IS
-          ##          THE CURRENT SOLUTION
-          ##
-          ##          I have enabled a smaller solution using
-          ##          the rhel "boot" ISO (700Mb vs. 8G) with
-          ##          a simple kickstart_profile definition which
-          ##          then performs the install from the
-          ##          http hosted repo.
-          ##
+            - name: "ovirt-deploy : mount iso"
+              throttle: 1
+              vars:
+              mount:
+                path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+                src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+                opts:   "loop,ro"
+                state:  "mounted"
+                fstype: "iso9660"
+              when: xtoph_deploy.kickstart_profile.repo_iso != ""
   
   
   
-          ##
-          ##    Create the custom ISO for the OS installation
-          ##
-          ##    * NOTE * to avoid concurrency problems with
-          ##             disk space and i/o bandwidth, we
-          ##             use serial at the import_task level
-          ##             DO NOT use "throttle" here as a stop gap
-          ##
-  
-  
-          - name: "ovirt-deploy : test iso availability"
-            stat:
-              path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            register: iso_result
-
-          - fail:
-              msg: "Specified ISO does not exist: {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            when: not iso_result.stat.exists
-
-  
-          - name: "ovirt-deploy : clone ISO source to temp workspace"
-            vars:
-              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-              t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-            shell:
-              cmd: |
-                xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
-  
-          - name: "ovirt-deploy : preserve the ISO volume id"
-            vars:
-              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            shell:
-              cmd: |
-                isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
-            register: isoinfo_volume_id
-
-  
-  
-          ##
-          ##    Create the kickstart config
-          ##
-          ##    NOTE: put 1 copy in http directory
-          ##          and 1 on the ISO
-          ##
+            ##
+            ##
+            ##    Create ks.cfg in http directory.  For ovirt
+            ##    deployments we currently cook the ks.cfg
+            ##    directly into the ISO.
+            ##
+            ##    NOTE: using run-once and specifying kernel,
+            ##          initrd and kernel args only works with
+            ##          local and iso storage domains (BUG?).
+            ##
+            ##          ovirt api does not support uploads to
+            ##          the iso-domain
+            ##
+            ##          I am not interested in managing file
+            ##          distribution to all rhv-h local domains
+            ##
+            ##          THIS IS WHY THE CUSTOM ISO METHOD IS
+            ##          THE CURRENT SOLUTION
+            ##
+            ##          I have enabled a smaller solution using
+            ##          the rhel "boot" ISO (700Mb vs. 8G) with
+            ##          a simple kickstart_profile definition which
+            ##          then performs the install from the
+            ##          http hosted repo.
+            ##
   
   
   
-          - name: "ovirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
-      
-      
-          - name: "ovirt-deploy : deploy kickstart config iso temp workspace and http dir"
-            vars:
-              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
-            template:
-              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-              owner: root
-              group: root
-              mode: 0444
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+            ##
+            ##    Create the custom ISO for the OS installation
+            ##
+            ##    * NOTE * to avoid concurrency problems with
+            ##             disk space and i/o bandwidth, we
+            ##             use serial at the import_task level
+            ##             DO NOT use "throttle" here as a stop gap
+            ##
+    
+    
+            - name: "ovirt-deploy : test iso availability"
+              stat:
+                path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+              register: iso_result
   
-  
-  
-          ##
-          ##    Adjust the isolinux.cfg
-          ##
-  
-  
-  
-          - name: "ovirt-deploy : isolinux.cfg: change default timeout to 3 seconds"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: '^timeout(\s+.*)?$'
-              replace: 'timeout 30'
-      
-          - name: "ovirt-deploy : remove default menu option from isolinux.cfg"
-            lineinfile:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: "^.*menu default.*$"
-              state:  absent
-      
-          - name: "ovirt-deploy : set new default menu option in isolinux.cfg"
-            lineinfile:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              insertafter: "^.*label linux.*$"
-              line: "  menu default"
-              state: present
-  
-  
-  
-          ##
-          ##    Kernel arguments for method = cdrom
-          ##
-      
-      
-      
-          - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.ovirt.network.net0.ip }} netmask={{ xtoph_deploy.ovirt.network.net0.netmask }} nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }} gateway={{ xtoph_deploy.ovirt.network.net0.gateway }}'
-            when: xtoph_deploy.kickstart_profile.method == "cdrom"
-      
-      
-      
-          ##
-          ##    Kernel arguments for method = network
-          ##
+            - fail:
+                msg: "Specified ISO does not exist: {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+              when: not iso_result.stat.exists
+    
+            - name: "ovirt-deploy : clone ISO source to temp workspace"
+              vars:
+                t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+                t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+              shell:
+                cmd: |
+                  xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
+    
+            - name: "ovirt-deploy : preserve the ISO volume id"
+              vars:
+                t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+              shell:
+                cmd: |
+                  isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
+              register: isoinfo_volume_id
 
   
+  
+            ##
+            ##    Create the kickstart config
+            ##
+            ##    NOTE: put 1 copy in http directory
+            ##          and 1 on the ISO
+            ##
+  
+  
+  
+            - name: "ovirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
+              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
+        
+        
+            - name: "ovirt-deploy : deploy kickstart config iso temp workspace and http dir"
+              vars:
+                p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
+                p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+              template:
+                src:   "{{ xtoph_deploy.kickstart_profile.template }}"
+                dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
+                owner: root
+                group: root
+                mode: 0444
+              loop:
+                - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
+                - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+  
+  
+  
+            ##
+            ##    Adjust the isolinux.cfg
+            ##
+    
+    
+    
+            - name: "ovirt-deploy : isolinux.cfg: change default timeout to 3 seconds"
+              replace:
+                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                regexp: '^timeout(\s+.*)?$'
+                replace: 'timeout 30'
+        
+            - name: "ovirt-deploy : remove default menu option from isolinux.cfg"
+              lineinfile:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                regexp: "^.*menu default.*$"
+                state:  absent
+        
+            - name: "ovirt-deploy : set new default menu option in isolinux.cfg"
+              lineinfile:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                insertafter: "^.*label linux.*$"
+                line: "  menu default"
+                state: present
+  
+  
+  
+            ##
+            ##    Kernel arguments for method = cdrom
+            ##
+        
+        
+        
+            - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
+              replace:
+                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                regexp: '(\s+)append(\s+.*)?$'
+                replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.ovirt.network.net0.ip }} netmask={{ xtoph_deploy.ovirt.network.net0.netmask }} nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }} gateway={{ xtoph_deploy.ovirt.network.net0.gateway }}'
+              when: xtoph_deploy.kickstart_profile.method == "cdrom"
+        
+        
+        
+            ##
+            ##    Kernel arguments for method = network
+            ##
+  
+    
+        
+            - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
+              replace:
+                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                regexp: '(\s+)append(\s+.*)?$'
+                replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.ovirt.network.net0.ip }} netmask={{ xtoph_deploy.ovirt.network.net0.netmask }} nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }} gateway={{ xtoph_deploy.ovirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+              when: xtoph_deploy.kickstart_profile.method == "network"
+    
+    
+    
+            ##
+            ##    Preserve some files in the temp workspace
+            ##    artifacts directory for easy debugging
+            ##
+  
+  
       
-          - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.ovirt.network.net0.ip }} netmask={{ xtoph_deploy.ovirt.network.net0.netmask }} nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }} gateway={{ xtoph_deploy.ovirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
-            when: xtoph_deploy.kickstart_profile.method == "network"
-  
-  
-  
-          ##
-          ##    Preserve some files in the temp workspace
-          ##    artifacts directory for easy debugging
-          ##
-  
-  
-      
-          - name: "ovirt-deploy : copy files to temp workspace artifacts directory for preservation"
-            copy:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
-              src:  "{{ item }}"
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg" 
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
+            - name: "ovirt-deploy : copy files to temp workspace artifacts directory for preservation"
+              copy:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
+                src:  "{{ item }}"
+              loop:
+                - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg" 
+                - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
+             
+            - name: "ovirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+              copy:
+                dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+                content:  "{{ xtoph_deploy | to_nice_yaml }}"
            
-          - name: "ovirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
-            copy:
-              dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
-              content:  "{{ xtoph_deploy | to_nice_yaml }}"
-           
       
       
-          ##
-          ##    Generate the custom ISO image
-          ##
+            ##
+            ##    Generate the custom ISO image
+            ##
+ 
+
+ 
+            - name: "ovirt-deploy : create script to generate iso"
+              vars:
+                t_iso_label:  "{{ isoinfo_volume_id.stdout }}"
+                t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+                t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
+              template:
+                src: "mkiso.j2"
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
+                owner: root
+                group: root
+                mode: 0755
+    
+            - name: "ovirt-deploy : execute mkiso.sh script"
+              shell:
+                cmd: |
+                  {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh
   
-          - name: "ovirt-deploy : create script to generate iso"
-            vars:
-              # t_iso_label:  "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"
-              t_iso_label:  "{{ isoinfo_volume_id.stdout }}"
-              t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-              t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
-            template:
-              src: "mkiso.j2"
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
-              owner: root
-              group: root
-              mode: 0755
-  
-          - name: "ovirt-deploy : execute mkiso.sh script"
-            shell:
-              cmd: |
-                {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh
   
   
-  
-          ##
-          ##    Transfer the ISO image to ovirt storage domain
-          ##
-          ##    NOTE: to avoid concurrency problems with
-          ##          disk space and i/o bandwidth, we
-          ##          set 'throttle = 1'
-          ##
+            ##
+            ##    Transfer the ISO image to ovirt storage domain
+            ##
+            ##    NOTE: to avoid concurrency problems with
+            ##          disk space and i/o bandwidth, we
+            ##          set 'throttle = 1'
+            ##
       
       
   
-          - name: "ovirt-deploy : upload iso image"
-            throttle: 1
-            ovirt_disk:
-              auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.ovirt.vm.name }}.iso"
-              description: "{{ xtoph_deploy.ovirt.vm.name }}.iso"
-              upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
-              bootable: true
-              content_type: iso
-              format: raw
-              storage_domain: "{{ xtoph_deploy.ovirt.storage.domain }}"
+            - name: "ovirt-deploy : upload iso image"
+              throttle: 1
+              ovirt_disk:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.ovirt.vm.name }}.iso"
+                description: "{{ xtoph_deploy.ovirt.vm.name }}.iso"
+                upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
+                bootable: true
+                content_type: iso
+                format: raw
+                storage_domain: "{{ xtoph_deploy.ovirt.storage.domain }}"
       
+
       
-          - name: "ovirt-deploy : clean-up temporary work-space"
-            shell:
-              cmd: |
-                if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
-                  rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-                fi
-  
-                if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso" ]] ; then
-                  rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
-                fi
-            when: xtoph_deploy.cleanup == true
+            - name: "ovirt-deploy : clean-up temporary work-space"
+              shell:
+                cmd: |
+                  if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
+                    rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+                  fi
+    
+                  if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso" ]] ; then
+                    rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.ovirt.vm.name }}.iso"
+                  fi
+              when: xtoph_deploy.cleanup == true
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe"
