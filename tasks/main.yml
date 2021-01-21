@@ -94,11 +94,9 @@
 
 - block:
 
-    - import_tasks: ovirt-setup.yml
-      when: xtoph_deploy_action == "setup"
-
     - import_tasks: ovirt-undeploy.yml
-      when: xtoph_deploy_action == "undeploy"
+      when: xtoph_deploy_action == "undeploy" and
+            xtoph_deploy.hardware_profile.platform == "ovirt"
 
     - import_tasks: ovirt-deploy-preprocess.yml
       when: xtoph_deploy_action == "preprocess"
@@ -111,9 +109,10 @@
 
         - import_tasks: ovirt-deploy-post.yml
 
-      when: xtoph_deploy_action == "deploy"
+      when: xtoph_deploy_action == "deploy" and
+            xtoph_deploy.hardware_profile.platform == "ovirt"
 
-  when: xtoph_deploy.deployhost.platform == "ovirt"
+  when: xtoph_deploy.deployhost.platform == "ovirt" 
 
 
 
@@ -126,10 +125,8 @@
 - block:
 
     - import_tasks: libvirt-undeploy.yml
-      when: xtoph_deploy_action == "setup"
-
-    - import_tasks: libvirt-undeploy.yml
-      when: xtoph_deploy_action == "undeploy"
+      when: xtoph_deploy_action == "undeploy" and
+            xtoph_deploy.hardware_profile.platform == "libvirt"
 
     - import_tasks: libvirt-deploy-preprocess.yml
       when: xtoph_deploy_action == "preprocess"
@@ -142,6 +139,7 @@
 
         - import_tasks: libvirt-deploy-post.yml
 
-      when: xtoph_deploy_action == "deploy"
+      when: xtoph_deploy_action == "deploy" and
+            xtoph_deploy.hardware_profile.platform == "libvirt"
 
   when: xtoph_deploy.deployhost.platform == "libvirt"

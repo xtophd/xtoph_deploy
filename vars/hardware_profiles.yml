@@ -86,19 +86,36 @@ xtoph_hardware_profiles:
     
   vmware_sda:
     hardware_profile:
+      platform: "vmware"
       description: "VMWare based virtual machine using disk.bus = TBD"
       disk:
         dev:    "sda"
     
   dell_r720:
     hardware_profile:
+      platform: "baremetal"
       description: "DELL r710 example"
       disk:
         dev:    "sda"
     
   hp_dl380:
     hardware_profile:
+      platform: "baremetal"
       description: "HP DL380"
       usb_delay: "10"
+      disk:
+        dev:    "sda"
+
+  pc_nvme:
+    hardware_profile:
+      platform: "baremetal"
+      description: "Generic PC with nvme"
+      disk:
+        dev:    "nvme0n1"
+
+  pc_sda:
+    hardware_profile:
+      platform: "baremetal"
+      description: "Generic PC with nvme"
       disk:
         dev:    "sda"
