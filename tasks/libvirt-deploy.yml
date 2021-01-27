@@ -185,6 +185,14 @@
             shell:
               cmd: |
                 xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
+
+          - name: "ovirt-deploy : preserve the ISO volume id"
+            vars:
+              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+            shell:
+              cmd: |
+                isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
+            register: isoinfo_volume_id
     
     
     
@@ -306,7 +314,7 @@
     
           - name: "libvirt-deploy : create script to generate iso"
             vars:
-              t_iso_label:  "{{ xtoph_deploy.kickstart_profile.boot_iso_label }}"
+              t_iso_label:  "{{ isoinfo_volume_id.stdout }}"
               t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
               t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
             template:
