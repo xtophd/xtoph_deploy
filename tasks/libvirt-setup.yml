@@ -315,7 +315,46 @@
 
 
 ##
-##    NOTE: with the possiblity of firewalld be restarted
+##    Install and enable dnsmasq services/ports
+##
+
+
+
+- block:
+
+      - name: "libvirt-setup : install dnsmasq package"
+        yum: name=dnsmasq state=installed
+
+      - name: "libvirt-setup : adjust /etc/dnsmasq.conf with except-interface"
+        lineinfile:
+          dest: "/etc/dnsmasq.conf"
+          insertafter: "^#except-interface=.*$"
+          line: "except-interface=virbr0"
+          state: present
+   
+      - name: "libvirt-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
+        lineinfile:
+          dest: "/etc/dnsmasq.conf"
+          insertafter: "^#bind-interfaces.*$"
+          line: "bind-interfaces"
+          state: present
+   
+      - name: "libvirt-setup :  enable dnsmasq system services"
+        service: name="dnsmasq" state=restarted enabled=yes masked=no
+    
+      - name: "libvirt-setup :  add dns firewalld services"
+        firewalld:
+          service:   "dns"
+          immediate: yes
+          permanent: yes
+          state: enabled
+  
+  when: xtoph_deploy.deployhost.dnsmasq_enable == true
+
+
+
+##
+##    NOTE: with the possiblity of firewalld being restarted
 ##          during setup, we restart libvirtd to cover
 ##          our bases.  this ensures firewall rules 
 ##          created by libvirtd are all in place

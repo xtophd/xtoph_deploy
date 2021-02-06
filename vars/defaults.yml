@@ -12,6 +12,10 @@ xtoph_deploy:
 
     ip: ""
 
+    ##     install, enable and manage dnsmasq 
+
+    dnsmasq_enable:  false
+
     ##     httpd,kickstart,repo service port
 
     http_port:    "8008"
