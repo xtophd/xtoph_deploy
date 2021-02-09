@@ -251,7 +251,19 @@
               insertafter: "^.*label linux.*$"
               line: "  menu default"
               state: present
-    
+
+
+
+          ##
+          ##    Determine the nameserver provided to client
+          ##
+
+
+
+          - name: "ovirt-deploy : determine primary nameserver for host"
+            set_fact:
+              client_primary_ns: "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.ovirt.network.net0.nameserver }}"
+
     
     
           ##
@@ -264,7 +276,7 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }}'
+              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ client_primary_ns }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }}'
             when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
     
@@ -279,7 +291,7 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ client_primary_ns }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
             when: xtoph_deploy.kickstart_profile.method == "network"
     
     
