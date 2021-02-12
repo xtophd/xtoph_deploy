@@ -11,7 +11,7 @@
 
 - name:    "xtoph_deploy (handler) : restart httpd"
   listen:  "restart_httpd"
-  service: name="{{ item }}" state=running enabled=yes masked=no
+  service: name="{{ item }}" state=started enabled=yes masked=no
   with_items:
     - "httpd"
 
@@ -19,7 +19,7 @@
 
 - name:    "xtoph_deploy (handler) : restart libvirtd"
   listen:  "restart_libvirtd"
-  service: name="{{ item }}" state=running enabled=yes masked=no
+  service: name="{{ item }}" state=started enabled=yes masked=no
   with_items:
     - "libvirtd"
 
