@@ -478,7 +478,7 @@
 
       - name: "libvirt-deploy : virt-install extra disk fragments"
         vars:
-          p_disksize: "{{ xtoph_deploy['resource_profile']['storage']['extra'][t_diskname].size }}"
+          t_disksize: "{{ xtoph_deploy['resource_profile']['storage']['extra'][t_diskname].size }}"
         template:
           src: virt-install-disk.j2
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/30-extra-{{ t_diskname }}"
