@@ -3,16 +3,15 @@
 ##
 ##    This script is intended to be used with
 ##    the xtoph_deploy ansible role.  It checks
-##    is a libvirt network exists.
+##    is a firewalld zone exists.
 ##
 ##    Prints string 'yes' or 'no' to STDIO
-##
+##   
 ##    Always returns RC = 0
-##
 
 
 
-NETWORK_NAME="$1"
+ZONE_NAME="$1"
 
 
 
@@ -22,10 +21,10 @@ NETWORK_NAME="$1"
 
 
 
-if virsh net-info "${NETWORK_NAME}" >/dev/null; then
-    echo "yes"
+if firewall-cmd --info-zone="${ZONE_NAME}" >/dev/null ; then
+    echo -n "yes"
 else
-    echo "no"
+    echo -n "no"
 fi
 
 

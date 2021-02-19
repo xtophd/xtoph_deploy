@@ -153,7 +153,8 @@
 
     - name: "libvirt-setup: selinux restorecon on /var/www/html"
       shell: restorecon -R /var/www/html
-    
+
+   
     - name: "libvirt-setup : enable http/https firewalld services"
       firewalld:
         service: "{{ item }}"
@@ -172,6 +173,46 @@
         state: enabled
       when: xtoph_deploy.deployhost.http_port != "80"  and
             xtoph_deploy.deployhost.http_port != "443"
+
+
+
+    ##
+    ##    NOTES: around RHEL 8.3 there were additional
+    ##           firewall zones introduced.  check and
+    ##           appliy same rules
+    ##
+
+    
+
+    - name: "libvirt-setup : firewall zone check"
+      script: |
+          testfw-libvirt.sh "libvirt"
+      register: testfw_libvirt
+
+    - name: "libvirt-setup : enable http/https firewalld services (zone=libvirt)"
+      firewalld:
+        service: "{{ item }}"
+        immediate: yes
+        permanent: yes
+        state: enabled
+        zone: libvirt
+      with_items:
+        - "http"
+        - "https"
+      when: testfw_libvirt.stdout == "yes"
+    
+    - name: "libvirt-setup : add custom http firewalld ports (zone=libvirt)"
+      firewalld:
+        port: "{{ xtoph_deploy.deployhost.http_port }}/tcp"
+        immediate: yes
+        permanent: yes
+        state: enabled
+        zone: libvirt
+      when: xtoph_deploy.deployhost.http_port != "80"  and
+            xtoph_deploy.deployhost.http_port != "443" and
+            testfw_libvirt.stdout == "yes"
+
+
 
     ##    NOTE: I should probably just develop a selinux 
     ##          test to see if port needs to be added  
@@ -315,46 +356,7 @@
 
 
 ##
-##    Install and enable dnsmasq services/ports
-##
-
-
-
-- block:
-
-      - name: "libvirt-setup : install dnsmasq package"
-        yum: name=dnsmasq state=installed
-
-      - name: "libvirt-setup : adjust /etc/dnsmasq.conf with except-interface"
-        lineinfile:
-          dest: "/etc/dnsmasq.conf"
-          insertafter: "^#except-interface=.*$"
-          line: "except-interface=virbr0"
-          state: present
-   
-      - name: "libvirt-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
-        lineinfile:
-          dest: "/etc/dnsmasq.conf"
-          insertafter: "^#bind-interfaces.*$"
-          line: "bind-interfaces"
-          state: present
-   
-      - name: "libvirt-setup :  enable dnsmasq system services"
-        service: name="dnsmasq" state=restarted enabled=yes masked=no
-    
-      - name: "libvirt-setup :  add dns firewalld services"
-        firewalld:
-          service:   "dns"
-          immediate: yes
-          permanent: yes
-          state: enabled
-  
-  when: xtoph_deploy.deployhost.dnsmasq_enable == true
-
-
-
-##
-##    NOTE: with the possiblity of firewalld being restarted
+##    NOTE: with the possiblity of firewalld be restarted
 ##          during setup, we restart libvirtd to cover
 ##          our bases.  this ensures firewall rules 
 ##          created by libvirtd are all in place

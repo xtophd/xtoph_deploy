@@ -186,14 +186,14 @@
               cmd: |
                 xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
 
-          - name: "ovirt-deploy : preserve the ISO volume id"
+          - name: "libvirt-deploy : preserve the ISO volume id"
             vars:
               t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
             shell:
               cmd: |
                 isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
             register: isoinfo_volume_id
-    
+
     
     
           ##
@@ -251,19 +251,7 @@
               insertafter: "^.*label linux.*$"
               line: "  menu default"
               state: present
-
-
-
-          ##
-          ##    Determine the nameserver provided to client
-          ##
-
-
-
-          - name: "ovirt-deploy : determine primary nameserver for host"
-            set_fact:
-              client_primary_ns: "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.ovirt.network.net0.nameserver }}"
-
+    
     
     
           ##
@@ -276,7 +264,7 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ client_primary_ns }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }}'
+              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }}'
             when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
     
@@ -291,7 +279,7 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ client_primary_ns }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
             when: xtoph_deploy.kickstart_profile.method == "network"
     
     
@@ -398,10 +386,15 @@
           - xtoph_deploy.libvirt.network.net0.fwd_type != "nat"
           - xtoph_deploy.libvirt.network.net0.fwd_type != "bridge"
 
-      - name: "libvirt-deploy : network status check"
-        script: |
-            testnet-libvirt.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
-        register: testnet_libvirt
+
+
+# 2/11/2021 (remove) This was deprecated with the introduction of mknet-libvirt.sh, which already
+#                    checks for pre-existing configs. remove in the near future
+#
+#      - name: "libvirt-deploy : network status check"
+#        script: |
+#            testnet-libvirt.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+#        register: testnet_libvirt
 
 
 
