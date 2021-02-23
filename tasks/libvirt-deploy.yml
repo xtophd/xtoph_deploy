@@ -534,7 +534,7 @@
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
         register: mknet_results
-        changed_when: 'CHANGED' in mknet_results.stdout
+        changed_when: "'CHANGED' in mknet_results.stdout"
         notify:
           - restart_httpd
           - restart_dnsmasq
