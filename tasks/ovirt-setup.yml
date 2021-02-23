@@ -138,27 +138,27 @@
 
 - block:
 
-      - name: "libvirt-setup : install dnsmasq package"
+      - name: "ovirt-setup : install dnsmasq package"
         yum: name=dnsmasq state=installed
 
-      - name: "libvirt-setup : adjust /etc/dnsmasq.conf with except-interface"
+      - name: "ovirt-setup : adjust /etc/dnsmasq.conf with except-interface"
         lineinfile:
           dest: "/etc/dnsmasq.conf"
           insertafter: "^#except-interface=.*$"
           line: "except-interface=virbr0"
           state: present
 
-      - name: "libvirt-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
+      - name: "ovirt-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
         lineinfile:
           dest: "/etc/dnsmasq.conf"
           insertafter: "^#bind-interfaces.*$"
           line: "bind-interfaces"
           state: present
 
-      - name: "libvirt-setup :  enable dnsmasq system services"
+      - name: "ovirt-setup :  enable dnsmasq system services"
         service: name="dnsmasq" state=restarted enabled=yes masked=no
 
-      - name: "libvirt-setup :  add dns firewalld services"
+      - name: "ovirt-setup :  add dns firewalld services"
         firewalld:
           service:   "dns"
           immediate: yes
