@@ -533,6 +533,30 @@
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+        register: mknet_results
+        changed_when: 'CHANGED' in mknet_results.stdout
+        notify:
+          - restart_httpd
+          - restart_dnsmasq
+
+
+
+      ##
+      ##    Because we may have just created a new network bridge
+      ##    we need flush looming handlers now
+      ##
+
+
+
+      - name: Flush handlers
+        meta: flush_handlers
+
+
+
+      ##
+      ##    Create the virtual machine
+      ##
+
 
       - name: "libvirt-deploy : create virtual machine"
         throttle: 1
