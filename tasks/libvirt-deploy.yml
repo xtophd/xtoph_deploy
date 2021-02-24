@@ -536,8 +536,8 @@
         register: mknet_results
         changed_when: "'CHANGED' in mknet_results.stdout"
         notify:
-          - restart_httpd
-          - restart_dnsmasq
+          - delegated_restart_httpd
+          - delegated_restart_dnsmasq
 
 
 

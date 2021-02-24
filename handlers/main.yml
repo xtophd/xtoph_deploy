@@ -5,21 +5,29 @@
     - "cockpit"
     - "cockpit.socket"
 
-
-
 - name:    "xtoph_deploy (handler) : restart httpd"
   listen:  "restart_httpd"
   service: name="httpd" state=restarted
-
-
 
 - name:    "xtoph_deploy (handler) : restart libvirtd"
   listen:  "restart_libvirtd"
   service: name="libvirtd" state=restarted
 
-
-
 - name:    "xtoph_deploy (handler) : restart dnsmasq"
   listen:  "restart_dnsmasq"
   service: name="dnsmasq" state=restarted
   when: xtoph_deploy.deployhost.dnsmasq_enable == true
+
+
+
+- name:    "xtoph_deploy (delegated handler) : restart dnsmasq"
+  listen:  "delegated_restart_dnsmasq"
+  service: name="dnsmasq" state=restarted
+  delegate_to: localhost
+  when: xtoph_deploy.deployhost.dnsmasq_enable == true
+
+- name:    "xtoph_deploy (delegated handler) : restart httpd"
+  listen:  "delegated_restart_httpd"
+  service: name="httpd" state=restarted
+  delegate_to: localhost
+
