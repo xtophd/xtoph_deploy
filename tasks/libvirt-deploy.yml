@@ -264,7 +264,11 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }}'
+              replace: >
+                \1append\2 
+                inst.ks=cdrom:/ks.cfg 
+                ip={{ xtoph_deploy.ovirt.network.net0.ip }}:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}:::none
+                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
             when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
     
@@ -279,7 +283,12 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+              replace: >
+                '\1append\2 
+                inst.ks=cdrom:/ks.cfg 
+                ip={{ xtoph_deploy.ovirt.network.net0.ip }}:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}:::none
+                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
+                inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
             when: xtoph_deploy.kickstart_profile.method == "network"
     
     

@@ -70,6 +70,7 @@ xtoph_hardware_profiles:
       network:
         model:  "virtio"
         profile: "ovirtmgmt"
+        dev:    "ens3"
     
   ovirt_vda:
     hardware_profile:
@@ -83,6 +84,7 @@ xtoph_hardware_profiles:
       network:
         model:  "virtio"
         profile: "ovirtmgmt"
+        dev:    "ens3"
     
   vmware_sda:
     hardware_profile:
