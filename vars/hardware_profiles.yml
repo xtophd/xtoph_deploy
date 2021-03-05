@@ -98,6 +98,13 @@ xtoph_hardware_profiles:
       disk:
         dev:    "sda"
     
+  dell_r630:
+    hardware_profile:
+      platform: "baremetal"
+      description: "DELL r630 example"
+      disk:
+        dev:    "sda"
+    
   hp_dl380:
     hardware_profile:
       platform: "baremetal"
