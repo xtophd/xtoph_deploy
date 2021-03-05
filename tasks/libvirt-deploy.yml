@@ -186,14 +186,14 @@
               cmd: |
                 xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
 
-          - name: "ovirt-deploy : preserve the ISO volume id"
+          - name: "libvirt-deploy : preserve the ISO volume id"
             vars:
               t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
             shell:
               cmd: |
                 isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
             register: isoinfo_volume_id
-    
+
     
     
           ##
@@ -386,10 +386,15 @@
           - xtoph_deploy.libvirt.network.net0.fwd_type != "nat"
           - xtoph_deploy.libvirt.network.net0.fwd_type != "bridge"
 
-      - name: "libvirt-deploy : network status check"
-        script: |
-            testnet-libvirt.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
-        register: testnet_libvirt
+
+
+# 2/11/2021 (remove) This was deprecated with the introduction of mknet-libvirt.sh, which already
+#                    checks for pre-existing configs. remove in the near future
+#
+#      - name: "libvirt-deploy : network status check"
+#        script: |
+#            testnet-libvirt.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+#        register: testnet_libvirt
 
 
 
@@ -528,6 +533,30 @@
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+        register: mknet_results
+        changed_when: "'CHANGED' in mknet_results.stdout"
+        notify:
+          - delegated_restart_httpd
+          - delegated_restart_dnsmasq
+
+
+
+      ##
+      ##    Because we may have just created a new network bridge
+      ##    we need flush looming handlers now
+      ##
+
+
+
+      - name: Flush handlers
+        meta: flush_handlers
+
+
+
+      ##
+      ##    Create the virtual machine
+      ##
+
 
       - name: "libvirt-deploy : create virtual machine"
         throttle: 1

@@ -55,6 +55,27 @@
 
 
       ##
+      ##    Restart dnsmasq if xtoph_deploy.deployhost.dnsmasq_enable == true
+      ##
+      ##    NOTE: run_once should cause this step to
+      ##          only be execute for the 1st host in the
+      ##          current batch.
+      ##
+      ##    NOTE: I would prefer a 'reload' (sighup) option
+      ##          but the dnsmasq service does not support it
+      ##          at the moment (maybe switch to using shell/pkill)
+      ##
+
+
+
+      - name: "ovirt-deploy-preprocess : service restart dnsmasq"
+        run_once: true
+        service: name="dnsmasq" state=restarted
+        when: xtoph_deploy.deployhost.dnsmasq_enable == true
+
+
+
+      ##
       ##    Create MAC addresses if not already configured
       ##    and store it in the ../config/host_vars directory
       ##

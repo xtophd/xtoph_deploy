@@ -104,7 +104,7 @@
 
 
 ##
-##   Enable network services/ports
+##   Enable firewall services/ports
 ##
 
 
@@ -127,6 +127,45 @@
     state: enabled
   with_items:
     - "{{ xtoph_deploy.deployhost.http_port }}/tcp"
+
+
+
+##
+##    Install and enable dnsmasq services/ports
+##
+
+
+
+- block:
+
+      - name: "ovirt-setup : install dnsmasq package"
+        yum: name=dnsmasq state=installed
+
+      - name: "ovirt-setup : adjust /etc/dnsmasq.conf with except-interface"
+        lineinfile:
+          dest: "/etc/dnsmasq.conf"
+          insertafter: "^#except-interface=.*$"
+          line: "except-interface=virbr0"
+          state: present
+
+      - name: "ovirt-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
+        lineinfile:
+          dest: "/etc/dnsmasq.conf"
+          insertafter: "^#bind-interfaces.*$"
+          line: "bind-interfaces"
+          state: present
+
+      - name: "ovirt-setup :  enable dnsmasq system services"
+        service: name="dnsmasq" state=restarted enabled=yes masked=no
+
+      - name: "ovirt-setup :  add dns firewalld services"
+        firewalld:
+          service:   "dns"
+          immediate: yes
+          permanent: yes
+          state: enabled
+
+  when: xtoph_deploy.deployhost.dnsmasq_enable == true
 
 
 

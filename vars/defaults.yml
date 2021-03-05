@@ -12,6 +12,26 @@ xtoph_deploy:
 
     ip: ""
 
+    ##
+    ##    dnsmasq_enable:    ensures dnsmasq is installed
+    ##                       and enabled on the deployhost
+    ##
+    ##    dnsmasq_asprimary: deployed hosts/vms will be
+    ##                       configured to use deployhost's
+    ##                       dns as primary resolver
+    ##
+    ##                       host/vm resolves to ->
+    ##                         deployhost which forwards to ->
+    ##                           real-dns
+    ##
+
+    dnsmasq_enable:  false
+    dnsmasq_asprimary:  false
+
+    ##     install, enable and manage dnsmasq 
+
+    dnsmasq_enable:  false
+
     ##     httpd,kickstart,repo service port
 
     http_port:    "8008"

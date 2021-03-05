@@ -31,5 +31,7 @@ if ! virsh net-info "{{ xtoph_deploy.libvirt.network.net0.network_name }}"; then
 
 
     virsh net-autostart "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+
+    echo "libvirt network CHANGED for ansible's benefit"
     
 fi

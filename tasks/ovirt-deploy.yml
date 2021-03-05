@@ -300,8 +300,8 @@
                 line: "  menu default"
                 state: present
   
-  
-  
+
+
             ##
             ##    Kernel arguments for method = cdrom
             ##
