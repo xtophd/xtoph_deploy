@@ -284,7 +284,7 @@
               replace: >
                 \1append\2 
                 inst.ks=cdrom:/ks.cfg 
-                ip={{ xtoph_deploy.ovirt.network.net0.ip }}:1:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
+                ip={{ xtoph_deploy.libvirt.network.net0.ip }}:1:{{ xtoph_deploy.libvirt.network.net0.gateway }}:{{ xtoph_deploy.libvirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
                 nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
             when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
@@ -303,7 +303,7 @@
               replace: >
                 '\1append\2 
                 inst.ks=cdrom:/ks.cfg 
-                ip={{ xtoph_deploy.ovirt.network.net0.ip }}:1:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
+                ip={{ xtoph_deploy.libvirt.network.net0.ip }}:1:{{ xtoph_deploy.libvirt.network.net0.gateway }}:{{ xtoph_deploy.libvirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
                 nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
                 inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
             when: xtoph_deploy.kickstart_profile.method == "network"

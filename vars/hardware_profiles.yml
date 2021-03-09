@@ -20,6 +20,7 @@ xtoph_hardware_profiles:
         dev:    "vda"
       network:
         model:  "virtio"
+        dev:    "enp1s0"
     
   kvm_nest_vda:
     hardware_profile:
@@ -33,6 +34,7 @@ xtoph_hardware_profiles:
         dev:    "vda"
       network:
         model:  "virtio"
+        dev:    "enp1s0"
     
   kvm_sda:
     hardware_profile:
@@ -44,6 +46,7 @@ xtoph_hardware_profiles:
         dev:    "sda"
       network:
         model:  "virtio"
+        dev:    "enp1s0"
     
   kvm_nest_sda:
     hardware_profile:
@@ -57,6 +60,7 @@ xtoph_hardware_profiles:
         dev:    "sda"
       network:
         model:  "virtio"
+        dev:    "enp1s0"
     
   ovirt_sda:
     hardware_profile:
