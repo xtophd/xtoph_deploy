@@ -255,6 +255,23 @@
     
     
           ##
+          ##    NOTE:
+          ##
+          ##      Reference: 'man -7 dracut.cmdline', format for static ip= is as follows:
+          ##
+          ##        ip=<client-IP>:[<peer>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off|dhcp|on|any|dhcp6|auto6|ibft}[:[<dns1>][:<dns2>]]
+          ##
+          ##      Reference: http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
+          ##
+          ##        interface names 'enoX = onboard', 'ensX = pci-express', 'enp2s0 = physical location', 'enxYYYYYYYYYYYY = macaddress'
+          ##
+          ##      More discussions:
+          ##
+          ##        https://fedoraproject.org/wiki/Dracut/Options#Network
+          ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
+          ##
+
+          ##
           ##    Kernel arguments for method = cdrom
           ##
     
@@ -264,7 +281,11 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }}'
+              replace: >
+                \1append\2 
+                inst.ks=cdrom:/ks.cfg 
+                ip={{ xtoph_deploy.ovirt.network.net0.ip }}:1:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
+                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
             when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
     
@@ -279,7 +300,12 @@
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
-              replace: '\1append\2 inst.ks=cdrom:/ks.cfg ip={{ xtoph_deploy.libvirt.network.net0.ip }} netmask={{ xtoph_deploy.libvirt.network.net0.netmask }} nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} gateway={{ xtoph_deploy.libvirt.network.net0.gateway }} inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+              replace: >
+                '\1append\2 
+                inst.ks=cdrom:/ks.cfg 
+                ip={{ xtoph_deploy.ovirt.network.net0.ip }}:1:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
+                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
+                inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
             when: xtoph_deploy.kickstart_profile.method == "network"
     
     
