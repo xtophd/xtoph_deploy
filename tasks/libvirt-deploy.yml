@@ -279,13 +279,13 @@
     
           - name: "libvirt-deploy : isolinux.cfg: add kickstart and network info"
             replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+              path:   "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
               replace: >
-                \1append\2 
-                inst.ks=cdrom:/ks.cfg 
+                \1append\2
+                inst.ks=cdrom:/ks.cfg
                 ip={{ xtoph_deploy.libvirt.network.net0.ip }}:1:{{ xtoph_deploy.libvirt.network.net0.gateway }}:{{ xtoph_deploy.libvirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
-                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
+                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }}
             when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
     
@@ -301,11 +301,11 @@
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
               regexp: '(\s+)append(\s+.*)?$'
               replace: >
-                '\1append\2 
-                inst.ks=cdrom:/ks.cfg 
+                \1append\2
+                inst.ks=cdrom:/ks.cfg
                 ip={{ xtoph_deploy.libvirt.network.net0.ip }}:1:{{ xtoph_deploy.libvirt.network.net0.gateway }}:{{ xtoph_deploy.libvirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
-                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }} 
-                inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}'
+                nameserver={{ xtoph_deploy.libvirt.network.net0.nameserver }}
+                inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}
             when: xtoph_deploy.kickstart_profile.method == "network"
     
     
