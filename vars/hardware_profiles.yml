@@ -8,7 +8,7 @@ xtoph_hardware_profiles:
     hardware_profile:
       description: "Default system hardware profile"
       disk:
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
     
   kvm_vda:
     hardware_profile:
@@ -17,10 +17,10 @@ xtoph_hardware_profiles:
       disk:
         bus:    "virtio"
         sparse: "true"
-        dev:    "vda"
+        dev:    "{{ h_blkDEV | default('vda') }}"
       network:
         model:  "virtio"
-        dev:    "enp1s0"
+        dev:    "{{ h_netDEV | default('enp1s0') }}"
     
   kvm_nest_vda:
     hardware_profile:
@@ -31,10 +31,10 @@ xtoph_hardware_profiles:
       disk:
         bus:    "virtio"
         sparse: "true"
-        dev:    "vda"
+        dev:    "{{ h_blkDEV | default('vda') }}"
       network:
         model:  "virtio"
-        dev:    "enp1s0"
+        dev:    "{{ h_netDEV | default('enp1s0') }}"
     
   kvm_sda:
     hardware_profile:
@@ -43,10 +43,10 @@ xtoph_hardware_profiles:
       disk:
         bus:    "virtio-scsi"
         sparse: "true"
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         model:  "virtio"
-        dev:    "enp1s0"
+        dev:    "{{ h_netDEV | default('enp1s0') }}"
     
   kvm_nest_sda:
     hardware_profile:
@@ -57,10 +57,10 @@ xtoph_hardware_profiles:
       disk:
         bus:    "virtio-scsi"
         sparse: "true"
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         model:  "virtio"
-        dev:    "enp1s0"
+        dev:    "{{ h_netDEV | default('enp1s0') }}"
     
   ovirt_sda:
     hardware_profile:
@@ -70,11 +70,11 @@ xtoph_hardware_profiles:
       disk:
         bus:    "virtio_scsi"
         sparse: "true"
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         model:  "virtio"
         profile: "ovirtmgmt"
-        dev:    "ens3"
+        dev:    "{{ h_netDEV | default('ens3') }}"
     
   ovirt_vda:
     hardware_profile:
@@ -84,32 +84,39 @@ xtoph_hardware_profiles:
       disk:
         bus:    "virtio"
         sparse: "true"
-        dev:    "vda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         model:  "virtio"
         profile: "ovirtmgmt"
-        dev:    "ens3"
+        dev:    "{{ h_netDEV | default('ens3') }}"
     
   vmware_sda:
     hardware_profile:
       platform: "vmware"
       description: "VMWare based virtual machine using disk.bus = TBD"
       disk:
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
     
   dell_r720:
     hardware_profile:
       platform: "baremetal"
       description: "DELL r710 example"
       disk:
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
     
   dell_r630:
     hardware_profile:
       platform: "baremetal"
       description: "DELL r630 example"
       disk:
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
+    
     
   hp_dl380:
     hardware_profile:
@@ -117,18 +124,27 @@ xtoph_hardware_profiles:
       description: "HP DL380"
       usb_delay: "10"
       disk:
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
+    
 
   pc_nvme:
     hardware_profile:
       platform: "baremetal"
       description: "Generic PC with nvme"
       disk:
-        dev:    "nvme0n1"
+        dev:    "{{ h_blkDEV | default('nvme0n1') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
+    
 
   pc_sda:
     hardware_profile:
       platform: "baremetal"
       description: "Generic PC with nvme"
       disk:
-        dev:    "sda"
+        dev:    "{{ h_blkDEV | default('sda') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
+    
