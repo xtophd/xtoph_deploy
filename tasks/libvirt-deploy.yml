@@ -391,6 +391,8 @@
             loop:
               - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg" 
               - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
+              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
+
            
           - name: "libvirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
             copy:
