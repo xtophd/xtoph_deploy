@@ -325,7 +325,7 @@
                 replace:
                   path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
                   regexp: '(\s+)linuxefi(\s+.*)?$'
-                      replace: >
+                  replace: >
                       \1linuxefi\2
                       inst.text
                       inst.ks=cdrom:/ks.cfg
