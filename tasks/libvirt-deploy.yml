@@ -366,9 +366,9 @@
     
             vars:
               t_net_dev:  "{{ xtoph_deploy.hardware_profile.network.dev   }}"
-              t_net_ip:   "{{ xtoph_deploy.baremetal.network.net0.ip      }}"
-              t_net_nm:   "{{ xtoph_deploy.baremetal.network.net0.netmask }}"
-              t_net_gw:   "{{ xtoph_deploy.baremetal.network.net0.gateway }}"
+              t_net_ip:   "{{ xtoph_deploy.libvirt.network.net0.ip      }}"
+              t_net_nm:   "{{ xtoph_deploy.libvirt.network.net0.netmask }}"
+              t_net_gw:   "{{ xtoph_deploy.libvirt.network.net0.gateway }}"
               t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.libvirt.network.net0.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
               t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
