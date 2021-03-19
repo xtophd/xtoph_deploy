@@ -75,7 +75,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.3-x86_64-dvd.iso"
-#      boot_iso_label:    "RHEL-8-3-0-BaseOS-x86_64"
       repo_iso:          "rhel-8.3-x86_64-dvd.iso"
       mnt:               "rhel-8.3"
       kvm_os_type:       "rhel_8x64"
@@ -96,7 +95,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel8-bootiso.j2"
       boot_iso:          "rhel-8.3-x86_64-boot.iso"
-#      boot_iso_label:    "RHEL-8-3-0-BaseOS-x86_64"
       repo_iso:          "rhel-8.3-x86_64-dvd.iso"
       mnt:               "rhel-8.3"
       kvm_os_type:       "rhel_8x64"
@@ -125,7 +123,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.2-x86_64-dvd.iso"
-#      boot_iso_label:    "RHEL-8-2-0-BaseOS-x86_64"
       repo_iso:          "rhel-8.2-x86_64-dvd.iso"
       mnt:               "rhel-8.2"
       kvm_os_type:       "rhel_8x64"
@@ -146,7 +143,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel8-bootiso.j2"
       boot_iso:          "rhel-8.2-x86_64-boot.iso"
-#      boot_iso_label:    "RHEL-8-2-0-BaseOS-x86_64"
       repo_iso:          "rhel-8.2-x86_64-dvd.iso"
       mnt:               "rhel-8.2"
       kvm_os_type:       "rhel_8x64"
@@ -175,7 +171,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.1-x86_64-dvd.iso"
-#      boot_iso_label:    "RHEL-8-1-0-BaseOS-x86_64"
       repo_iso:          "rhel-8.1-x86_64-dvd.iso"
       mnt:               "rhel-8.1"
       kvm_os_type:       "rhel_8x64"
@@ -204,7 +199,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel7.j2"
       boot_iso:          "rhel-server-7.9-x86_64-dvd.iso"
-#      boot_iso_label:    "RHEL-7.9 Server.x86_64"
       repo_iso:          "rhel-server-7.9-x86_64-dvd.iso"
       mnt:               "rhel-7.9"
       kvm_os_type:       "rhel_7x64"
@@ -224,7 +218,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel7-bootiso.j2"
       boot_iso:          "rhel-server-7.9-x86_64-boot.iso"
-#      boot_iso_label:    "RHEL-7.9 Server.x86_64"
       repo_iso:          "rhel-server-7.9-x86_64-dvd.iso"
       mnt:               "rhel-7.9"
       kvm_os_type:       "rhel_7x64"
@@ -250,7 +243,6 @@ xtoph_kickstart_profiles:
       wait_for_ssh     : true
       template:          "ks-rhel7.j2"
       boot_iso:          "rhel-server-7.8-x86_64-dvd.iso"
-#      boot_iso_label:    "RHEL-7.8 Server.x86_64"
       repo_iso:          "rhel-server-7.8-x86_64-dvd.iso"
       mnt:               "rhel-7.8"
       kvm_os_type:       "rhel_7x64"
