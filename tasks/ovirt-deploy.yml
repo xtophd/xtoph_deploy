@@ -300,6 +300,26 @@
                 line: "  menu default"
                 state: present
 
+
+
+            ##
+            ##    Adjust the grub.cfg (UEFI)
+            ##
+      
+      
+      
+            - name: "ovirt-deploy : grub.cfg : change default menu option"
+              replace:
+                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
+                regexp: '^set timeout=.*$'
+                replace: 'set timeout=30'
+      
+            - name: "ovirt-deploy : grub.cfg : change default timeout to 3 seconds"
+              replace:
+                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
+                regexp: '^set default=.*$'
+                replace: 'set default="0"'
+
   
 
             ##    
@@ -319,45 +339,88 @@
             ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
             ##
 
-            ##
-            ##    Kernel arguments for method = cdrom
-            ##
+
+            - block:
+      
+                ##
+                ##    All tasks in this block are related to
+                ##    kernel parameter adjustments for
+                ##    the installation media
+                ##
+                ##    * NOTE * vars are defined once for the
+                ##             for the whole block at the end
+                ##             of the block
+                ##
+      
+                - name: "ovirt-deploy : isolinux.cfg : kernel args for BIOS iso (cdrom install)"
+                  replace:
+                    path:   "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                    regexp: '(\s+)append(\s+.*)?$'
+                    replace: >
+                        \1append\2
+                        inst.text
+                        inst.ks=cdrom:/ks.cfg
+                        ksdevice={{ t_net_dev }}
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        nameserver={{ t_net_dns }}
+                  when: xtoph_deploy.kickstart_profile.method == "cdrom"
+      
+                - name: "ovirt-deploy : grub.cfg : kernel args for UEFI iso (cdrom install)"
+                  replace:
+                    path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
+                    regexp: '(\s+)linuxefi(\s+.*)?$'
+                    replace: >
+                        \1linuxefi\2
+                        inst.text
+                        inst.ks=cdrom:/ks.cfg
+                        ksdevice={{ t_net_dev }}
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        nameserver={{ t_net_dns }}
+                  when: xtoph_deploy.kickstart_profile.method == "cdrom"
+
+                - name: "ovirt-deploy : isolinux.cfg : kernel args for BIOS boot-iso (network install)"
+                  replace:
+                    path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                    regexp: '(\s+)append(\s+.*)?$'
+                    replace: >
+                        \1append\2
+                        inst.text
+                        inst.ks={{ t_ks_url }}
+                        inst.repo={{ t_ks_repo }}
+                        ksdevice={{ t_net_dev }}
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        nameserver={{ t_net_dns }}
+                  when: xtoph_deploy.kickstart_profile.method == "network"
+      
+                - name: "ovirt-deploy : grub.cfg : kernel args for UEFI boot-iso (network install)"
+                  replace:
+                    path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
+                    regexp: '(\s+)linuxefi(\s+.*)?$'
+                    replace: >
+                        \1linuxefi\2
+                        inst.text
+                        inst.ks={{ t_ks_url }}
+                        inst.repo={{ t_ks_repo }}
+                        ksdevice={{ t_net_dev }}
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        nameserver={{ t_net_dns }}
+                  when: xtoph_deploy.kickstart_profile.method == "network"
+      
+      
+      
+              vars:
+                t_net_dev:  "{{ xtoph_deploy.hardware_profile.network.dev   }}"
+                t_net_ip:   "{{ xtoph_deploy.baremetal.network.net0.ip      }}"
+                t_net_nm:   "{{ xtoph_deploy.baremetal.network.net0.netmask }}"
+                t_net_gw:   "{{ xtoph_deploy.baremetal.network.net0.gateway }}"
+                t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.ovirt.network.net0.nameserver }}"
+                t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+                t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+      
+              ## End-Of-Block
 
 
-        
-            - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
-              replace:
-                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-                regexp: '(\s+)append(\s+.*)?$'
-                replace: >
-                  \1append\2 
-                  inst.ks=cdrom:/ks.cfg 
-                  ip={{ xtoph_deploy.ovirt.network.net0.ip }}:1:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
-                  nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }}
-              when: xtoph_deploy.kickstart_profile.method == "cdrom"
-        
-        
-        
-            ##
-            ##    Kernel arguments for method = network
-            ##
-  
-    
-        
-            - name: "ovirt-deploy : isolinux.cfg: add kickstart and network info"
-              replace:
-                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-                regexp: '(\s+)append(\s+.*)?$'
-                replace: >
-                  \1append\2 
-                  inst.ks=cdrom:/ks.cfg 
-                  ip={{ xtoph_deploy.ovirt.network.net0.ip }}:1:{{ xtoph_deploy.ovirt.network.net0.gateway }}:{{ xtoph_deploy.ovirt.network.net0.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:off
-                  nameserver={{ xtoph_deploy.ovirt.network.net0.nameserver }}
-                  inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}
-              when: xtoph_deploy.kickstart_profile.method == "network"
-    
-    
-    
+
             ##
             ##    Preserve some files in the temp workspace
             ##    artifacts directory for easy debugging

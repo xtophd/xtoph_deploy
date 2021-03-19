@@ -1,0 +1,77 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+
+##
+##
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    NOTE: All tasks here are blocked and delegated to excute
+      ##          on the deployhost/localhost when deploy_node = true
+      ##
+
+
+    
+      ##
+      ##    Update /etc/hosts with hostnames and IPs of new cluster
+      ##
+      ##    NOTE: to avoid cuncurrency problems editing a single
+      ##          file, we set 'throttle = 1'
+      ##
+
+
+
+      - name: "baremetal-deploy-preprocess : cleanup conflicting IP in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          regexp: "{{ h_pubIP }} .*$"
+          state:  absent
+      
+      - name: "baremetal-deploy-preprocess: cleanup conflicting name in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.baremetal.network.net0.fqdn }}.*"
+          state:  absent
+      
+      - name: "baremetal-deploy-preprocess: add entry in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{  xtoph_deploy.baremetal.network.net0.fqdn }}"
+          state:  present
+
+
+
+      ##
+      ##    Restart dnsmasq if xtoph_deploy.deployhost.dnsmasq_enable == true
+      ##
+      ##    NOTE: run_once should cause this step to
+      ##          only be execute for the 1st host in the 
+      ##          current batch.
+      ##
+      ##    NOTE: I would prefer a 'reload' (sighup) option
+      ##          but the dnsmasq service does not support it
+      ##          at the moment (maybe switch to using shell/pkill)
+      ##
+
+
+
+      - name: "baremetal-deploy-preprocess : service restart dnsmasq"
+        run_once: true
+        service: name="dnsmasq" state=restarted
+        when: xtoph_deploy.deployhost.dnsmasq_enable == true
+
+
+

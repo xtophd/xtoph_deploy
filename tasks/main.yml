@@ -84,6 +84,11 @@
     - xtoph_deploy_action == "setup" 
     - xtoph_deploy.deployhost.platform == "libvirt" 
 
+- import_tasks: libvirt-setup.yml
+  when: 
+    - xtoph_deploy_action == "setup" 
+    - xtoph_deploy.deployhost.platform == "baremetal" 
+
 
 
 ##
@@ -155,3 +160,33 @@
             xtoph_deploy.hardware_profile.platform == "libvirt"
 
   when: xtoph_deploy.deployhost.platform == "libvirt"
+
+
+
+##
+##    BAREMETAL  setup/preprocess/undeploy/deploy
+##
+
+
+
+- block:
+
+    #- import_tasks: libvirt-undeploy.yml
+    #  when: xtoph_deploy_action == "undeploy" and
+    #        xtoph_deploy.hardware_profile.platform == "libvirt"
+
+    - import_tasks: baremetal-deploy-preprocess.yml
+      when: xtoph_deploy_action == "preprocess"
+
+    - block:
+    
+        - import_tasks: baremetal-deploy.yml
+    
+    #    - import_tasks: baremetal-deploy-monitor.yml
+
+    #    - import_tasks: baremetal-deploy-post.yml
+
+      when: xtoph_deploy_action == "deploy" and
+            xtoph_deploy.hardware_profile.platform == "baremetal"
+
+  when: xtoph_deploy.deployhost.platform == "baremetal"
