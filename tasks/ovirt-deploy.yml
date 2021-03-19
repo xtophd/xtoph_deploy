@@ -137,7 +137,7 @@
   
             ##
             ##    All tasks in this block are related to
-            ##    kickstart repo and ks.cfg setup
+            ##    kickstart repo and kickstart url setup
             ##
             ##    * NOTE * to avoid concurrency problems when
             ##             when detecting and mounting the iso
@@ -249,7 +249,7 @@
             ##
             ##    Create the kickstart config
             ##
-            ##    NOTE: put 1 copy in http directory
+            ##    NOTE: put 1 copy in kcisktart url directory
             ##          and 1 on the ISO
             ##
   
@@ -265,7 +265,7 @@
                 p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
               template:
                 src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-                dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
+                dest:  "{{ item }}"
                 owner: root
                 group: root
                 mode: 0444
