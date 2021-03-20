@@ -259,7 +259,7 @@
               replace: >
                   \1append\2
                   inst.text
-                  inst.ks=cdrom:/ks.cfg
+                  inst.ks={{ t_ks_hd }}
                   ksdevice={{ t_net_dev }} 
                   ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                   nameserver={{ t_net_dns }}
@@ -272,7 +272,7 @@
               replace: >
                   \1linuxefi\2 
                   inst.text
-                  inst.ks=cdrom:/ks.cfg
+                  inst.ks={{ t_ks_hd }}
                   ksdevice={{ t_net_dev }} 
                   ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                   nameserver={{ t_net_dns }} 
@@ -315,6 +315,7 @@
           t_net_gw:   "{{ xtoph_deploy.baremetal.network.net0.gateway }}"
           t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.baremetal.network.net0.nameserver }}"
           t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+          t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout }}"
           t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
   
         ## End-Of-Block

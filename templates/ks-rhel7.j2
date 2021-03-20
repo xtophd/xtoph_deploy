@@ -23,6 +23,7 @@ sshkey --username=root "{{ p_ssh_key }}"
 zerombr
 clearpart --drives={{ p_diskDevice }} --all --initlabel
 part /boot --fstype=ext2 --size=512 --ondisk={{ p_diskDevice }} --asprimary
+part /boot/efi --fstype=efi --size=512 --ondisk={{ p_diskDevice }} --asprimary
 part pv.01 --size=16000 --grow --ondisk={{ p_diskDevice }} --asprimary
 volgroup vg_rhel pv.01
 logvol /     --fstype=ext4  --vgname=vg_rhel --name=root   --size=6000 --grow
