@@ -180,7 +180,7 @@
   
   
   
-      - name: "baremetal-deploy : isolinux.cfg: change default timeout to 30 seconds"
+      - name: "baremetal-deploy : isolinux.cfg: change default timeout to 3 seconds"
         replace:
           path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
           regexp: '^timeout(\s+.*)?$'
@@ -207,7 +207,7 @@
 
 
 
-      - name: "baremetal-deploy : grub.cfg : change default timeout to 30 seconds"
+      - name: "baremetal-deploy : grub.cfg : change default timeout to 3 seconds"
         replace:
           path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
           regexp: '^set timeout=.*$'

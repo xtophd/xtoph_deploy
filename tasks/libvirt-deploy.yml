@@ -261,13 +261,13 @@
 
 
 
-          - name: "libvirt-deploy : grub.cfg : change default menu option"
+          - name: "libvirt-deploy : grub.cfg : change default timeout to 3 seconds"
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
               regexp: '^set timeout=.*$'
               replace: 'set timeout=30'
 
-          - name: "libvirt-deploy : grub.cfg : change default timeout to 3 seconds"
+          - name: "libvirt-deploy : grub.cfg : change default menu option"
             replace:
               path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
               regexp: '^set default=.*$'
