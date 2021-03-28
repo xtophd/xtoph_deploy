@@ -55,6 +55,9 @@ xtoph_deploy:
       dir: "/var/www/html/repos"
       url: "http://192.168.1.170:8008/repos"
 
+  hardware_profile:
+
+    platform: ""
 
     
   ovirt:

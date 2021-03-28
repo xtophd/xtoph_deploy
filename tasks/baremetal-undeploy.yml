@@ -1,0 +1,38 @@
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+- delegate_to: localhost
+  block:
+
+
+
+    ##
+    ##    NOTE: All tasks here are delegated to excute
+    ##          on the deployhost/localhost
+    ##
+
+
+
+    ##
+    ##    Execute baremetal ipmi calls to power off system
+    ##
+
+    - block:
+
+        - name: "baremetal-undeploy : ipmi set power off"
+          throttle: 1
+          shell:
+            cmd: |
+              ipmitool -I lanplus -U {{ ipmi_username }} -P {{ ipmi_password }} -H {{ ipmi_fqdn }} chassis power off
+          ignore_errors: yes
+
+      when:
+        - xtoph_deploy.kickstart_profile is defined and
+          xtoph_deploy.kickstart_profile.method == "pxe" and
+          ipmi_fqdn is defined
+
+
+
+

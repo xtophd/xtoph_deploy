@@ -23,7 +23,7 @@
 
     ##
     ##    NOTE: All kickstarts are assumed to shutdown
-    ##          at completion.  That's how we now it
+    ##          at completion.  That's how we know it
     ##          finished.
     ##
 
