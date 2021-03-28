@@ -81,11 +81,14 @@
 
 
 ##
-##    Run platform setup for each platform defined by xtoph_deploy.deployhost.platform
+##    SETUP
+##
+##        Run platform setup for each platform defined by 
+##        xtoph_deploy.deployhost.platform
 ##
 ##        NOTE: xtoph_deploy.deployhost.platform can be a single
 ##              item or a list.  I use a jinja built-in template
-##              filter determine if a key exists is "in" the list
+##              filter determine if the key exists is "in" the list
 ##
 ##              the platform_item declares the 'platform' and the 
 ##              'playbook' to include if matched
@@ -94,101 +97,131 @@
 
 
 - name: "main.yml : setup platforms"
-  include_tasks: "{{ platform_item.playbook }}"
+  include_tasks: "{{ platform_item.tasks }}"
   when: 
     - xtoph_deploy_action == "setup" 
     - platform_item.platform in xtoph_deploy.deployhost.platform
   loop_control:
     loop_var: platform_item
   with_items:
-    - { platform: 'libvirt',   playbook: 'libvirt-setup.yml'   } 
-    - { platform: 'ovirt',     playbook: 'ovirt-setup.yml'     } 
-    - { platform: 'baremetal', playbook: 'baremetal-setup.yml' } 
+    - { platform: 'libvirt',   tasks: 'libvirt-setup.yml'   } 
+    - { platform: 'ovirt',     tasks: 'ovirt-setup.yml'     } 
+    - { platform: 'baremetal', tasks: 'baremetal-setup.yml' } 
 
 
 
 ##
-##    BAREMETAL  undeploy/preprocess/deploy
+##    UNDEPLOY
+##
+##        If action == 'undeploy' and the machine's hardware platform 
+##        is platform_item.platform, include the platform_item.tasks
 ##
 
 
 
-- block:
-
-    - import_tasks: baremetal-undeploy.yml
-      when: xtoph_deploy_action == "undeploy"
-
-    - import_tasks: baremetal-deploy-preprocess.yml
-      when: xtoph_deploy_action == "preprocess"
-
-    - block:
-    
-        - import_tasks: baremetal-deploy.yml
-    
-    #    - import_tasks: baremetal-deploy-monitor.yml
-
-    #    - import_tasks: baremetal-deploy-post.yml
-
-      when: xtoph_deploy_action == "deploy"
-
-  when: xtoph_deploy.hardware_profile.platform == "baremetal"
+- name: "main.yml : undeploy machines"
+  include_tasks: "{{ platform_item.tasks }}"
+  when: 
+    - xtoph_deploy_action == "undeploy" 
+    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+  loop_control:
+    loop_var: platform_item
+  with_items:
+    - { platform: 'libvirt',   tasks: 'libvirt-undeploy.yml'   } 
+    - { platform: 'ovirt',     tasks: 'ovirt-undeploy.yml'     } 
+    - { platform: 'baremetal', tasks: 'baremetal-undeploy.yml' } 
 
 
 
 ##
-##    OVIRT undeploy/preprocess/deploy
+##    PRE-PROCESS
+##
+##        If action == 'preprocess' and the machine's hardware platform 
+##        is platform_item.platform, include the platform_item.tasks
 ##
 
 
 
-- block:
-
-    - import_tasks: ovirt-undeploy.yml
-      when: xtoph_deploy_action == "undeploy"
-
-    - import_tasks: ovirt-deploy-preprocess.yml
-      when: xtoph_deploy_action == "preprocess"
-
-    - block:
-
-        - import_tasks: ovirt-deploy.yml
-    
-        - import_tasks: ovirt-deploy-monitor.yml
-
-        - import_tasks: ovirt-deploy-post.yml
-
-      when: xtoph_deploy_action == "deploy" 
-
-  when: xtoph_deploy.hardware_profile.platform == "ovirt"
+- name: "main.yml : perform deployment pre-processing"
+  include_tasks: "{{ platform_item.playbook }}"
+  when: 
+    - xtoph_deploy_action == "preprocess" 
+    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+  loop_control:
+    loop_var: platform_item
+  with_items:
+    - { platform: 'libvirt',   playbook: 'libvirt-deploy-preprocess.yml'   } 
+    - { platform: 'ovirt',     playbook: 'ovirt-deploy-preprocess.yml'     } 
+    - { platform: 'baremetal', playbook: 'baremetal-deploy-preprocess.yml' } 
 
 
 
 ##
-##    LIBVIRT  undeploy/preprocess/deploy
+##    DEPLOY
+##
+##        If action == 'deploy' and the machine's hardware platform 
+##        is platform_item.platform, include the platform_item.tasks
 ##
 
 
 
-- block:
+- name: "main.yml : deploy machines"
+  include_tasks: "{{ platform_item.playbook }}"
+  when: 
+    - xtoph_deploy_action == "deploy" 
+    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+  loop_control:
+    loop_var: platform_item
+  with_items:
+    - { platform: 'libvirt',   playbook: 'libvirt-deploy.yml'   } 
+    - { platform: 'ovirt',     playbook: 'ovirt-deploy.yml'     } 
+    - { platform: 'baremetal', playbook: 'baremetal-deploy.yml' } 
 
-    - import_tasks: libvirt-undeploy.yml
-      when: xtoph_deploy_action == "undeploy"
 
-    - import_tasks: libvirt-deploy-preprocess.yml
-      when: xtoph_deploy_action == "preprocess"
 
-    - block:
-    
-        - import_tasks: libvirt-deploy.yml
-    
-        - import_tasks: libvirt-deploy-monitor.yml
+##
+##    MONITOR
+##
+##        If action == 'deploy' and the machine's hardware platform 
+##        is platform_item.platform, include the platform_item.tasks
+##
 
-        - import_tasks: libvirt-deploy-post.yml
 
-      when: xtoph_deploy_action == "deploy"
 
-  when: xtoph_deploy.hardware_profile.platform == "libvirt"
+- name: "main.yml : monitor deployment of machines"
+  include_tasks: "{{ platform_item.playbook }}"
+  when: 
+    - xtoph_deploy_action == "deploy" 
+    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+  loop_control:
+    loop_var: platform_item
+  with_items:
+    - { platform: 'libvirt',   playbook: 'libvirt-deploy-monitor.yml'   } 
+    - { platform: 'ovirt',     playbook: 'ovirt-deploy-monitor.yml'     } 
+#    - { platform: 'baremetal', playbook: 'baremetal-deploy-post.yml' } 
 
+
+
+##
+##    POST-PROCESS
+##
+##        If action == 'deploy' and the machine's hardware platform 
+##        is platform_item.platform, include the platform_item.tasks
+##
+
+
+
+- name: "main.yml : perform deployment post-procesing"
+  include_tasks: "{{ platform_item.playbook }}"
+  when: 
+    - xtoph_deploy_action == "deploy" 
+    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+  loop_control:
+    loop_var: platform_item
+  with_items:
+    - { platform: 'libvirt',   playbook: 'libvirt-deploy-post.yml'   } 
+    - { platform: 'ovirt',     playbook: 'ovirt-deploy-post.yml'     } 
+    - { platform: 'baremetal', playbook: 'baremetal-deploy-post.yml' } 
 
 
 
@@ -199,5 +232,5 @@
 
 
 - name: "main.yml : ***** END XTOPH_DEPLOY ROLE PROCESSING *****"
-  debug: msg="inventory_hostname={{ inventory_hostname }} hardware_platform={{ xtoph_deploy.hardware_profile.platform }}  xtoph_deploy_action={{ xtoph_deploy_action }}"
+  debug: msg="inventory_hostname={{ inventory_hostname }}  xtoph_deploy_action={{ xtoph_deploy_action }}"
 
