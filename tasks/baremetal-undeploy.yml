@@ -25,9 +25,12 @@
           throttle: 1
           shell:
             cmd: |
-              ipmitool -I lanplus -U {{ ipmi_username }} -P {{ ipmi_password }} -H {{ ipmi_fqdn }} chassis power off
+              ipmitool -I lanplus -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} chassis power off
           ignore_errors: yes
 
+      vars:
+        t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
+        t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
       when:
         - xtoph_deploy.kickstart_profile is defined and
           xtoph_deploy.kickstart_profile.method == "pxe" and

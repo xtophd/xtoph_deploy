@@ -457,12 +457,16 @@
           - name: "baremetal-deploy : ipmi set bootdev pxe"
             shell:
               cmd: |
-                ipmitool -I lanplus -U {{ ipmi_username }} -P {{ ipmi_password }} -H {{ ipmi_fqdn }} chassis bootdev pxe
+                ipmitool -I lanplus -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} chassis bootdev pxe
     
           - name: "baremetal-deploy : ipmi set power on"
             shell:
               cmd: |
-                ipmitool -I lanplus -U {{ ipmi_username }} -P {{ ipmi_password }} -H {{ ipmi_fqdn }} chassis power on
+                ipmitool -I lanplus -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} chassis power on
+
+        vars:
+          t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
+          t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
         when: 
           - deploy_node == true
 
