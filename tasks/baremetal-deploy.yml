@@ -38,7 +38,12 @@
 
       - set_fact:
           deploy_node: true
-        when: vminfo_result.rc == 0
+        when:
+          - xtoph_deploy.kickstart_profile is defined and
+            xtoph_deploy.kickstart_profile.method == "pxe" and
+            ipmi_fqdn is defined and
+            vminfo_result.rc == 0
+
 
     
 
