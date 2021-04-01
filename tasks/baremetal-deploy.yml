@@ -50,23 +50,6 @@
 
     
 
-- delegate_to: localhost
-  block:
-
-
-
-      ##
-      ##    All tasks here are blocked and 
-      ##    delegated to excute on the deployhost
-      ##
-      ##    The design is:
-      ##
-      ##      method != pxe create bootable media 
-      ##      method == pxe skip straight to ipmi calls
-      ##
-
-
-
       ##
       ##    Cleanup and create a fresh temp workspace
       ##
@@ -92,6 +75,24 @@
         loop:
           - iso
           - artifacts 
+
+
+
+
+- delegate_to: localhost
+  block:
+
+
+
+      ##
+      ##    All tasks here are blocked and 
+      ##    delegated to excute on the deployhost
+      ##
+      ##    The design is:
+      ##
+      ##      method != pxe create bootable media 
+      ##      method == pxe skip straight to ipmi calls
+      ##
 
 
 
@@ -455,7 +456,7 @@
               cmd: |
                 ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
             loop:
-              - "{{ xtoph_deploy.hardware_profile.ipmi.config_steps }}"
+              "{{ xtoph_deploy.hardware_profile.ipmi.config_steps }}"
     
           - name: "baremetal-deploy : ipmi set power on"
             shell:
