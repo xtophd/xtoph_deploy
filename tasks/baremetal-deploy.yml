@@ -25,10 +25,13 @@
       - set_fact:
           deploy_node: false
 
-      - name: "baremetal-deploy : determine state of vm"
+      - name: "baremetal-deploy : ipmi verify power of machine is off"
         shell:
           cmd: |
-              ipmitool -I lanplus -U {{ ipmi_username }} -P {{ ipmi_password }} -H {{ ipmi_fqdn }} chassis power status | grep -q 'off'
+            ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.get_power }} | grep -q 'off'
+        vars:
+          t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
+          t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
         register: vminfo_result
         ignore_errors: true
         when: 
@@ -447,33 +450,23 @@
 
       - block:
 
-          #
-          # TO DO: set hardware_profile variable to bios/efi during 
-          # intialization and then use that to set the bootflag.
-          # Something like this:
-          #
-          #- name: "baremetal-deploy : ipmi set bootflag force_bios"
-          #  shell:
-          #    cmd: |
-          #      ipmitool -I lanplus -U {{ ipmi_username }} -P {{ ipmi_password }} -H {{ ipmi_fqdn }} chassis bootparam set bootflag force_bios
-          #  when: xtoph_deploy.hardware_profile.bootmode == "bios"
-          #
-    
-          - name: "baremetal-deploy : ipmi set bootdev pxe"
+          - name: "baremetal-deploy : ipmi config steps"
             shell:
               cmd: |
-                ipmitool -I lanplus -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} chassis bootdev pxe
+                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
+            with_items:  xtoph_deploy.hardware_profile.ipmi.config_steps
     
           - name: "baremetal-deploy : ipmi set power on"
             shell:
               cmd: |
-                ipmitool -I lanplus -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} chassis power on
+                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.power_on }}
 
         vars:
           t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
           t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
         when: 
-          - deploy_node == true
+          - xtoph_deploy.hardware_profile.ipmi is defined and
+            deploy_node == true
 
 
 

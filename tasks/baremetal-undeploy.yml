@@ -25,7 +25,7 @@
           throttle: 1
           shell:
             cmd: |
-              ipmitool -I lanplus -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} chassis power off
+              ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.power_off }}
           ignore_errors: yes
 
       vars:
@@ -35,7 +35,4 @@
         - xtoph_deploy.kickstart_profile is defined and
           xtoph_deploy.kickstart_profile.method == "pxe" and
           ipmi_fqdn is defined
-
-
-
 

@@ -9,6 +9,14 @@ xtoph_hardware_profiles:
       description: "Default system hardware profile"
       disk:
         dev:    "{{ h_blkDEV | default('sda') }}"
+
+
+
+  ##
+  ## LIBVIRT/KVM ENTRIES
+  ##
+
+
     
   kvm_vda:
     hardware_profile:
@@ -61,6 +69,14 @@ xtoph_hardware_profiles:
       network:
         model:  "virtio"
         dev:    "{{ h_netDEV | default('enp1s0') }}"
+
+
+
+  ##
+  ## OVIRT ENTRIES
+  ##
+
+
     
   ovirt_sda:
     hardware_profile:
@@ -98,11 +114,19 @@ xtoph_hardware_profiles:
         dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         dev:    "{{ h_netDEV | default('eno0') }}"
-    
+  
+
+ 
+  ##
+  ## DELL ENTRIES
+  ##
+
+
+ 
   dell_r720:
     hardware_profile:
       platform: "baremetal"
-      description: "DELL r710 example"
+      description: "DELL r720 example"
       disk:
         dev:    "{{ h_blkDEV | default('sda') }}"
       network:
@@ -111,12 +135,40 @@ xtoph_hardware_profiles:
   dell_r630:
     hardware_profile:
       platform: "baremetal"
-      description: "DELL r630 example"
+      description: "DELL r630"
       disk:
         dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         dev:    "{{ h_netDEV | default('eno0') }}"
-    
+      ipmi:
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus chassis bootdev pxe"
+
+  dell_r740:
+    hardware_profile:
+      platform: "baremetal"
+      description: "DELL r740"
+      disk:
+        dev:    "{{ h_blkDEV | default('sda') }}"
+      network:
+        dev:    "{{ h_netDEV | default('eno0') }}"
+      ipmi:
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus chassis bootdev pxe"
+
+
+
+  ##
+  ## HP ENTRIES   
+  ##
+
+
     
   hp_dl380:
     hardware_profile:
@@ -127,7 +179,8 @@ xtoph_hardware_profiles:
         dev:    "{{ h_blkDEV | default('sda') }}"
       network:
         dev:    "{{ h_netDEV | default('eno0') }}"
-    
+   
+ 
 
   pc_nvme:
     hardware_profile:
@@ -142,7 +195,7 @@ xtoph_hardware_profiles:
   pc_sda:
     hardware_profile:
       platform: "baremetal"
-      description: "Generic PC with nvme"
+      description: "Generic PC with (sata/sas/scsi) sda"
       disk:
         dev:    "{{ h_blkDEV | default('sda') }}"
       network:
