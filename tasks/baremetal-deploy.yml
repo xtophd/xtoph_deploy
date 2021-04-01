@@ -454,7 +454,8 @@
             shell:
               cmd: |
                 ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
-            with_items:  xtoph_deploy.hardware_profile.ipmi.config_steps
+            loop:
+              - "{{ xtoph_deploy.hardware_profile.ipmi.config_steps }}"
     
           - name: "baremetal-deploy : ipmi set power on"
             shell:
