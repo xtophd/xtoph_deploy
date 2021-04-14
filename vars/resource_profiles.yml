@@ -71,7 +71,7 @@ xtoph_resource_profiles:
       memsize:  8000
       storage:
         root:
-          size: 30 
+          size: 50 
   
   sat6:
     resource_profile:

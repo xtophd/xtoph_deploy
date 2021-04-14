@@ -156,10 +156,12 @@ xtoph_hardware_profiles:
       network:
         dev:    "{{ h_netDEV | default('eno0') }}"
       ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
         get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
         power_on:     "-I lanplus chassis power on"
         power_off:    "-I lanplus chassis power off"
         config_steps:
+          - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
 
 
