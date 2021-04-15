@@ -74,8 +74,8 @@ xtoph_kickstart_profiles:
       wait_for_shutdown: true
       wait_for_ssh     : true
       template:          "ks-rhel8.j2"
-      boot_iso:          "rhel-8.4-beta-x86_64-dvd.iso"
-      repo_iso:          "rhel-8.4-beta-x86_64-dvd.iso"
+      boot_iso:          "rhel-8.4-beta-1-x86_64-dvd.iso"
+      repo_iso:          "rhel-8.4-beta-1-x86_64-dvd.iso"
       mnt:               "rhel-8.4"
       kvm_os_type:       "rhel_8x64"
       repos:
@@ -96,8 +96,8 @@ xtoph_kickstart_profiles:
       wait_for_shutdown: true
       wait_for_ssh     : true
       template:          "ks-rhel8-bootiso.j2"
-      boot_iso:          "rhel-8.4-beta-x86_64-boot.iso"
-      repo_iso:          "rhel-8.4-beta-x86_64-dvd.iso"
+      boot_iso:          "rhel-8.4-beta-1-x86_64-boot.iso"
+      repo_iso:          "rhel-8.4-beta-1-x86_64-dvd.iso"
       mnt:               "rhel-8.4"
       kvm_os_type:       "rhel_8x64"
       repos:
