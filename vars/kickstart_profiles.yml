@@ -279,24 +279,41 @@ xtoph_kickstart_profiles:
 
 
   ##
+  ## CentOS 7
   ##
-  ##
 
 
 
-  rhel78:
+  centos7:
     kickstart_profile:
-      name:              "rhel78"
-      description:       "Red Hat Enterprise Linux 7.8 DVD" 
+      name:              "centos7"
+      description:       "CentOS 7 DVD" 
       method:            "cdrom"
       wait_for_shutdown: true
       wait_for_ssh     : true
       template:          "ks-rhel7.j2"
-      boot_iso:          "rhel-server-7.8-x86_64-dvd.iso"
-      repo_iso:          "rhel-server-7.8-x86_64-dvd.iso"
-      mnt:               "rhel-7.8"
+      boot_iso:          "CentOS-7-x86_64-DVD-2009.iso"
+      repo_iso:          "CentOS-7-x86_64-DVD-2009.iso"
+      mnt:               "centos-7"
       kvm_os_type:       "rhel_7x64"
       repos:
         baseos :
-          name:          "my-rhel-7-server-rpms"
+          name:          "my-centos-7-rpms"
+          subpath:       ""
+
+  centos7-netinstall:
+    kickstart_profile:
+      name:              "centos7-netinstall"
+      description:       "CentOS 7 NetInstall" 
+      method:            "network"
+      wait_for_shutdown: true
+      wait_for_ssh     : true
+      template:          "ks-rhel7-bootiso.j2"
+      boot_iso:          "CentOS-7-x86_64-NetInstall-2009.iso"
+      repo_iso:          "CentOS-7-x86_64-DVD-2009.iso"
+      mnt:               "centos-7"
+      kvm_os_type:       "rhel_7x64"
+      repos:
+        baseos :
+          name:          "my-centos-7-rpms"
           subpath:       ""
