@@ -11,8 +11,12 @@
 
 
 
-- name: "baremetal-setup : install packages"
+- name: "baremetal-setup : install baremetal supporting packages"
   yum: name=ipmitool state=installed
+
+- name: "libvirt-setup : install common supporting packages"
+  yum: name=genisoimage,syslinux,xorriso,git,tree,wget,yum-utils,firewalld,net-tools,traceroute,nmap state=installed
+
 
 
 ##

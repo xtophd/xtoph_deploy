@@ -24,8 +24,8 @@
 
 
 
-- name: "ovirt-setup : install supporting packages"
-  yum: name=genisoimage,xorriso,git,tree,wget,yum-utils,firewalld,httpd,net-tools,traceroute,nmap state=installed
+- name: "ovirt-setup : install common supporting packages"
+  yum: name=genisoimage,xorriso,syslinux,git,tree,wget,yum-utils,firewalld,httpd,net-tools,traceroute,nmap state=installed
 
 
 

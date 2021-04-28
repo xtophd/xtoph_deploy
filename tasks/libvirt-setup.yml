@@ -56,11 +56,11 @@
 
 
 
-- name: "libvirt-setup : install libvirt virtualization packages"
+- name: "libvirt-setup : install libvirt virtualization supporting packages"
   yum: name=qemu-kvm,libvirt,virt-install,libvirt-client,libguestfs-tools state=installed
 
-- name: "libvirt-setup : install supporting packages"
-  yum: name=genisoimage,xorriso,git,tree,wget,yum-utils,firewalld,net-tools,traceroute,nmap state=installed
+- name: "libvirt-setup : install common supporting packages"
+  yum: name=genisoimage,syslinux,xorriso,git,tree,wget,yum-utils,firewalld,net-tools,traceroute,nmap state=installed
 
 
 
