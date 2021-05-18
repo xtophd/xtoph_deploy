@@ -9,7 +9,7 @@
   block:
 
       ##
-      ##    NOTE: All tasks here are blocked and delegated to excute
+      ##    NOTE: All tasks here are blocked and delegated to execute
       ##          on the deployhost/localhost 
       ##
 
@@ -25,7 +25,7 @@
       - set_fact:
           deploy_node: false
 
-      - name: "baremetal-deploy : ipmi verify power of machine is off"
+      - name: "baremetal-deploy : ipmi verify machine power is off"
         shell:
           cmd: |
             ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.get_power }} | grep -q 'off'
@@ -49,36 +49,6 @@
 
 
     
-
-      ##
-      ##    Cleanup and create a fresh temp workspace
-      ##
-
-
-
-      - name: "baremetal-deploy : DEBUG temp workspace details"
-        debug: 
-          msg:
-          - "temp workspace = {{ xtoph_deploy.deployhost.tmp_dir }}"
-        when: xtoph_deploy.debug == true
-
-      - name: "baremetal-deploy : delete old temp workspace"
-        shell:
-          cmd: |
-            if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.tmp_dir }} ; fi
-  
-      - name: "baremetal-deploy : create new temp workspace"
-        file:
-          path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
-          mode="0755"
-          state=directory
-        loop:
-          - iso
-          - artifacts 
-
-
-
-
 - delegate_to: localhost
   block:
 
@@ -86,7 +56,7 @@
 
       ##
       ##    All tasks here are blocked and 
-      ##    delegated to excute on the deployhost
+      ##    delegated to execute on the deployhost
       ##
       ##    The design is:
       ##
@@ -97,54 +67,7 @@
 
 
       - block:
-  
 
-  
-          ##
-          ##    All tasks in this block are related to
-          ##    kickstart repo and ks.cfg setup and only
-          ##    execute if method != pxe
-          ##
-          ##    * NOTE * to avoid concurrency problems when
-          ##             when detecting and mounting the iso
-          ##             mount, we set 'throttle = 1'
-          ##
-
-
-     
-          - name: "baremetal-deploy : DEBUG repo loopback details"
-            debug: 
-              msg:
-               - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-               - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-            when: xtoph_deploy.debug == true
-    
-          - name: "baremetal-deploy : stat repo mount point"
-            throttle: 1
-            stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-            register: test_repo_mount
-            when: xtoph_deploy.kickstart_profile is defined and 
-                  xtoph_deploy.kickstart_profile.repo_iso != ""
-    
-          - name: "baremetal-deploy : create repo mount point"
-            throttle: 1
-            file: 
-              path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}" 
-              mode:  "0755"
-              state: directory
-            when: test_repo_mount.stat.exists == false
-    
-          - name: "baremetal-deploy : mount iso"
-            throttle: 1
-            vars:
-            mount:
-              path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-              opts:   "loop,ro"
-              state:  "mounted"
-              fstype: "iso9660"
-            when: xtoph_deploy.kickstart_profile.repo_iso != ""
-    
     
     
           ##
@@ -378,11 +301,6 @@
               - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
               - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
                
-          - name: "baremetal-deploy : save state of xtoph_deploy dictionary to artifacts directory"
-            copy:
-              dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
-              content:  "{{ xtoph_deploy | to_nice_yaml }}"
-         
   
       
           ##
@@ -415,7 +333,7 @@
           ##
           ##    NOTE: to avoid concurrency problems with
           ##          disk space and i/o bandwidth, we
-          ##          set 'throttle = 1'
+          ##          set 'throttle: 1'
           ##
     
        
@@ -424,7 +342,7 @@
             throttle: 1
             copy:
               src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.baremetal.vm.name }}.iso"
-              dest: "{{ xtoph_deploy.baremetal.iso.dir }}"
+              dest: "{{ xtoph_deploy.deployhost.iso.dir }}"
     
           - name: "baremetal-deploy : clean-up temporary work-space"
             shell:
@@ -475,8 +393,4 @@
   ##
   ## End-Of-Block
   ##
-
-
-
-
 

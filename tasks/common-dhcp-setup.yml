@@ -1,0 +1,175 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+##
+
+
+
+- name: "common-dhcp-setup : package installation (RHEL7)"
+  yum: name=dhcp state=installed
+  when:
+    - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "7"
+
+
+
+- name: "common-dhcp-setup : package installation (RHEL8)"
+  yum: name=dhcp-server state=installed
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version == "8"
+
+
+
+- name: "common-dhcp-setup : package installation"
+  yum: name=tftp-server,ipxe-bootimgs,syslinux-tftpboot,yum-utils state=installed
+
+
+
+- name: "common-dhcp-setup : create tftpboot directories"
+  file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  with_items:
+    - "/var/lib/tftpboot/bios"
+    - "/var/lib/tftpboot/efi"
+
+
+
+- name: "common-dhcp-setup : clean-up temp workspaces"
+  shell:
+    cmd: |
+      if [[ -d "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.dhcp.tmp_dir }} ; fi
+
+
+
+- name: "common-dhcp-setup : create new temp workspaces"
+  file:
+    path="{{ item }}"
+    mode="0755"
+    state=directory
+  loop:
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}"
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi"
+  when: xtoph_deploy.deployhost.dhcp.enable == true
+
+
+
+##
+##    Setup for BIOS based deployments
+##
+
+
+
+- name: "common-dhcp-setup : copy bios files to tftpboot/pxelinux"
+  copy:
+    src:   "{{ item }}"
+    dest:  "/var/lib/tftpboot/bios"
+    mode:  "0644"
+    owner: root
+    group: root
+    remote_src: yes
+  with_items:
+    - "/usr/share/syslinux/pxelinux.0"
+    - "/usr/share/syslinux/menu.c32"
+    #- "/usr/share/ipxe/undionly.kpxe"
+    #- "/usr/share/ipxe/ipxe.lkrn"
+
+
+
+##
+##    Setup for UEFI based deployments
+##
+
+
+
+- name: "common-dhcp-setup : download rpms (do not install) for efi artifacts"
+  yum:
+    name: shim-x64,grub2-efi-x64
+    state: latest
+    download_dir: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
+    download_only: yes
+
+
+
+- name: "common-dhcp-setup : unpack contents of rpms for efi artifacts"
+  shell:
+    cmd: |
+      cd {{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi; rpm2cpio {{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms/{{ item }}*.rpm | cpio -dimv
+  with_items:
+    - "shim-x64"
+    - "grub2-efi"
+
+
+
+- name: "common-dhcp-setup : copy efi artifacts to tftpboot/efi (Red Hat)"
+  copy:
+    src:   "{{ item }}"
+    dest:  "/var/lib/tftpboot/efi"
+    mode:  "0644"
+    owner: root
+    group: root
+    remote_src: yes
+  with_items:
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi/boot/efi/EFI/redhat/shimx64.efi"
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi/boot/efi/EFI/redhat/grubx64.efi"
+  when:
+    - ansible_distribution == "RedHat"
+
+
+
+- name: "common-dhcp-setup : copy efi files to tftpboot (CentOS)"
+  copy:
+    src:   "{{ item }}"
+    dest:  "/var/lib/tftpboot/efi"
+    mode:  "0644"
+    owner: root
+    group: root
+    remote_src: yes
+  with_items:
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi/boot/efi/EFI/centos/shimx64.efi"
+    - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi/boot/efi/EFI/centos/grubx64.efi"
+  when:
+    - ansible_distribution == "CentOS"
+
+
+
+- name: "common-dhcp-setup : determine bastion pub IP"
+  set_fact:
+    f_bastionName: "{{ hostvars[item]['inventory_hostname_short']}}"
+    f_bastionIP:   "{{ hostvars[item]['h_pubIP'] }}"
+  loop: "{{ groups['myBastion'] }}"
+
+
+
+- name: "common-dhcp-setup : deploy grub.cfg in tftpboot directory"
+  vars:
+    - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
+    - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
+  template:
+    src:   "pxe-grub-config.j2"
+    dest:  "/var/lib/tftpboot/efi/grub.cfg"
+    mode:  "0644"
+    owner: root
+    group: root
+
+
+
+###
+###    Clean up
+###
+
+
+
+- name: "common-dhcp-setup : clean-up temporary work-space"
+  shell:
+    cmd: |
+      if [[ -d "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}" ]] ; then 
+        rm -rf {{ xtoph_deploy.deployhost.dhcp.tmp_dir }} 
+      fi
+  when: xtoph_deploy.cleanup == true
+

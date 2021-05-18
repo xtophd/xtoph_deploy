@@ -9,7 +9,7 @@
   block:
 
     ##
-    ##    NOTE: All tasks here are blocked and delegated to excute
+    ##    NOTE: All tasks here are blocked and delegated to execute
     ##          on the deployhost/localhost 
     ##
 
@@ -96,90 +96,19 @@
 - delegate_to: localhost
   block:
 
-
-
+      ##    deploy the current machine
       ##
-      ##    NOTE: All tasks here are blocked and delegated to excute
-      ##          on the deployhost/localhost when deploy_node = true
+      ##    WHEN:
+      ##          deploy_node = true
       ##
-
-
-
+      ##    NOTE:
+      ##          all tasks here are blocked and delegated 
+      ##          to execute on the deployhost/localhost 
       ##
-      ##    Cleanup and create a fresh temp workspace
-      ##
-
-
-
-      - name: "ovirt-deploy : DEBUG temp workspace details"
-        debug: 
-          msg:
-          - "temp workspace = {{ xtoph_deploy.deployhost.tmp_dir }}"
-        when: xtoph_deploy.debug == true
-
-      - name: "ovirt-deploy : delete old temp workspace"
-        shell:
-          cmd: |
-            if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.tmp_dir }} ; fi
-  
-      - name: "ovirt-deploy : create new temp workspace"
-        file:
-          path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
-          mode="0755"
-          state=directory
-        loop:
-          - iso
-          - artifacts 
 
 
 
       - block:
-  
-            ##
-            ##    All tasks in this block are related to
-            ##    kickstart repo and kickstart url setup
-            ##
-            ##    * NOTE * to avoid concurrency problems when
-            ##             when detecting and mounting the iso
-            ##             mount, we set 'throttle = 1'
-            ##
-  
-  
-  
-            - name: "ovirt-deploy : DEBUG repo loopback details"
-              debug: 
-                msg:
-                 - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-                 - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-              when: xtoph_deploy.debug == true
-  
-            - name: "ovirt-deploy : stat repo mount point"
-              throttle: 1
-              stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              register: test_repo_mount
-              when: xtoph_deploy.kickstart_profile is defined and 
-                    xtoph_deploy.kickstart_profile.repo_iso != ""
-  
-            - name: "ovirt-deploy : create repo mount point"
-              throttle: 1
-              file: 
-                path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}" 
-                mode:  "0755"
-                state: directory
-              when: test_repo_mount.stat.exists == false
-  
-            - name: "ovirt-deploy : mount iso"
-              throttle: 1
-              vars:
-              mount:
-                path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-                src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-                opts:   "loop,ro"
-                state:  "mounted"
-                fstype: "iso9660"
-              when: xtoph_deploy.kickstart_profile.repo_iso != ""
-  
-  
   
             ##
             ##
@@ -187,9 +116,9 @@
             ##    deployments we currently cook the ks.cfg
             ##    directly into the ISO.
             ##
-            ##    NOTE: using run-once and specifying kernel,
+            ##    NOTE: using ovirt run-once and specifying kernel,
             ##          initrd and kernel args only works with
-            ##          local and iso storage domains (BUG?).
+            ##          'local' and 'iso storage' domains (BUG?).
             ##
             ##          ovirt api does not support uploads to
             ##          the iso-domain
@@ -249,7 +178,7 @@
             ##
             ##    Create the kickstart config
             ##
-            ##    NOTE: put 1 copy in kcisktart url directory
+            ##    NOTE: put 1 copy in kickstart url directory
             ##          and 1 on the ISO
             ##
   
@@ -438,12 +367,6 @@
                 - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
                 - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
 
-             
-            - name: "ovirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
-              copy:
-                dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
-                content:  "{{ xtoph_deploy | to_nice_yaml }}"
-           
       
       
             ##

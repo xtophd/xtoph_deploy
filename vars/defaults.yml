@@ -1,5 +1,6 @@
 xtoph_deploy: 
 
+  hostname: "{{ inventory_hostname }}"
 
 
   deployhost:
@@ -54,6 +55,11 @@ xtoph_deploy:
     repos:
       dir: "/var/www/html/repos"
       url: "http://192.168.1.170:8008/repos"
+
+    ephemeral_pxe:
+      enable:   false
+      efi_http: true
+      tmp_dir:  "/home/tmp/e_pxe"
 
 
     

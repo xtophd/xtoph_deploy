@@ -96,7 +96,14 @@
 
 
 
-- name: "main.yml : setup platforms"
+- name: "main.yml : setup common stuff"
+  include_tasks: "common-setup.yml"
+  when: 
+    - xtoph_deploy_action == "setup" 
+
+
+
+- name: "main.yml : setup platform specifics"
   include_tasks: "{{ platform_item.tasks }}"
   when: 
     - xtoph_deploy_action == "setup" 
@@ -107,6 +114,14 @@
     - { platform: 'libvirt',   tasks: 'libvirt-setup.yml'   } 
     - { platform: 'ovirt',     tasks: 'ovirt-setup.yml'     } 
     - { platform: 'baremetal', tasks: 'baremetal-setup.yml' } 
+
+
+
+- name: "main.yml : setup dhcp/pxe"
+  include_tasks: "common-dhcp-setup.yml"
+  when:
+    - xtoph_deploy_action == "setup" 
+    - xtoph_deploy.deployhost.dhcp.enable
 
 
 
@@ -142,7 +157,7 @@
 
 
 
-- name: "main.yml : perform deployment pre-processing"
+- name: "main.yml : platform deploy pre-processing"
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "preprocess" 
@@ -156,6 +171,24 @@
 
 
 
+- name: "main.yml : common deploy pre-processing"
+  include_tasks: "common-deploy-preprocess.yml"
+  when: 
+    - xtoph_deploy_action == "preprocess" 
+
+
+
+- name: "main.yml : dhcp (pxe) pre-processing"
+  include_tasks: "common-dhcp-preprocess.yml"
+  when: 
+    - xtoph_deploy_action == "preprocess" 
+    - xtoph_deploy.deployhost.dhcp.enable
+    - xtoph_deploy.kickstart_profile.method   == "pxe"
+    - xtoph_deploy.kickstart_profile.repo_iso is defined
+    - xtoph_deploy.kickstart_profile.repo_iso != ""
+
+
+
 ##
 ##    DEPLOY
 ##
@@ -165,7 +198,7 @@
 
 
 
-- name: "main.yml : deploy machines"
+- name: "main.yml : platform deploy machines"
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "deploy" 
@@ -188,7 +221,7 @@
 
 
 
-- name: "main.yml : monitor deployment of machines"
+- name: "main.yml : platform deployment monitor of machines"
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "deploy" 
@@ -198,7 +231,7 @@
   with_items:
     - { platform: 'libvirt',   playbook: 'libvirt-deploy-monitor.yml'   } 
     - { platform: 'ovirt',     playbook: 'ovirt-deploy-monitor.yml'     } 
-#    - { platform: 'baremetal', playbook: 'baremetal-deploy-post.yml' } 
+    - { platform: 'baremetal', playbook: 'baremetal-deploy-monitor.yml' } 
 
 
 
@@ -211,7 +244,7 @@
 
 
 
-- name: "main.yml : perform deployment post-procesing"
+- name: "main.yml : platform deployment post-procesing of machines"
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "deploy" 
@@ -222,6 +255,24 @@
     - { platform: 'libvirt',   playbook: 'libvirt-deploy-post.yml'   } 
     - { platform: 'ovirt',     playbook: 'ovirt-deploy-post.yml'     } 
     - { platform: 'baremetal', playbook: 'baremetal-deploy-post.yml' } 
+
+
+
+- name: "main.yml : common deployment post-processing of machines"
+  include_tasks: "common-deploy-post.yml"
+  when: 
+    - xtoph_deploy_action == "deploy" 
+
+
+
+- name: "main.yml : dhcp/pxe post-processing"
+  include_tasks: "common-dhcp-post.yml"
+  when: 
+    - xtoph_deploy_action == "deploy" 
+    - xtoph_deploy.deployhost.dhcp.enable
+    - xtoph_deploy.kickstart_profile.method   == "pxe"
+    - xtoph_deploy.kickstart_profile.repo_iso is defined
+    - xtoph_deploy.kickstart_profile.repo_iso != ""
 
 
 

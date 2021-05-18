@@ -1,0 +1,195 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    Cleanup and create fresh temp workspaces
+      ##    
+
+      - name: "common-deploy-preprocess : DEBUG temp workspace details"
+        debug:
+          msg:
+          - "temp workspace = {{ xtoph_deploy.deployhost.tmp_dir }}"
+        when: xtoph_deploy.debug == true
+
+      - name: "common-deploy-preprocess : delete old temp workspace"
+        run_once: true
+        shell:
+          cmd: |
+            if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.tmp_dir }} ; fi
+
+      - name: "common-deploy-preprocess : create new temp workspace"
+        file:
+          path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
+          mode="0755"
+          state=directory
+        loop:
+          - iso
+          - artifacts
+
+      ##
+      ##    Save a copy of the xtoph_deploy dictionary
+      ##
+
+      - name: "common-deploy-preprocess : save state of xtoph_deploy dictionary to artifacts directory"
+        copy:
+          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+          content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    Cleanup ssh known hosts
+      ##
+      ##    WHEN:
+      ##          xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
+      ##          xtoph_deploy.kickstart_profile.wait_for_ssh
+      ##
+      ##    NOTE: has not become a problem yet, but I am
+      ##          unsure of file handling (locking) by
+      ##          ssh-keygen.  So to avoid concurrency
+      ##          problems, set 'throttle: 1'
+      ##
+  
+      - name: "common-deploy-preprocess : clean up old ssh keys for node"
+        throttle: 1
+        shell:
+          cmd: |
+            ssh-keygen -R "{{ inventory_hostname }}"
+            ssh-keygen -R "{{ inventory_hostname_short }}"
+            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.network.default.fqdn }}"
+            ssh-keygen -R "{{ xtoph_deploy.network.default.ip }}"
+        ignore_errors: yes
+
+#
+# 2021-05-14 : Machine is not built, this is already duplicated
+#              in common-deploy-post.yml.  Marked for removal
+#      - name: "common-deploy-preprocess : add new ssh keys for node"
+#        throttle: 1
+#        vars:
+#          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.network.default.fqdn }}"
+#        shell:
+#          cmd: |
+#            ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
+#        ignore_errors: yes
+#
+
+  when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
+        xtoph_deploy.kickstart_profile.wait_for_ssh
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    Update /etc/hosts with hostnames and IPs of new cluster
+      ##
+      ##    NOTE: 
+      ##          to avoid cuncurrency problems editing a single
+      ##          file, we set 'throttle = 1'
+      ##
+
+      - name: "common-deploy-preprocess : cleanup conflicting IP in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          regexp: "{{ h_pubIP }} .*$"
+          state:  absent
+
+      - name: "common-deploy-preprocess: cleanup conflicting name in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.network.default.fqdn }}.*"
+          state:  absent
+
+      - name: "common-deploy-preprocess: add entry in /etc/hosts"
+        throttle: 1
+        lineinfile:
+          dest:   "/etc/hosts"
+          line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{  xtoph_deploy.network.default.fqdn }}"
+          state:  present
+
+      ##
+      ##    Restart dnsmasq if xtoph_deploy.deployhost.dnsmasq_enable == true
+      ##
+      ##    NOTE: run_once should cause this step to
+      ##          only be execute for the 1st host in the
+      ##          current batch.
+      ##
+      ##    NOTE: I would prefer a 'reload' (sighup) option
+      ##          but the dnsmasq service does not support it
+      ##          at the moment (maybe switch to using shell/pkill)
+      ##
+
+      - name: "baremetal-deploy-preprocess : service restart dnsmasq"
+        run_once: true
+        service: name="dnsmasq" state=restarted
+        when: xtoph_deploy.deployhost.dnsmasq_enable == true
+
+
+
+
+- delegate_to: localhost
+  block:
+
+        ##
+        ##    Mount repos and configure kickstart configs
+        ##
+        ##    WHEN:
+        ##          xtoph_deploy.kickstart_profile is defined and
+        ##          xtoph_deploy.kickstart_profile.repo_iso != ""
+        ##
+        ##    NOTE: 
+        ##          to avoid concurrency problems when
+        ##          when detecting and mounting the iso
+        ##          mount, we set 'throttle = 1'
+        ##
+
+        - name: "common-repo-preprocess : DEBUG repo loopback details"
+          debug:
+            msg:
+             - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+             - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+          when: xtoph_deploy.debug == true
+  
+        - name: "common-repo-preprocess : stat repo mount point"
+          throttle: 1
+          stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+          register: test_repo_mount
+  
+        - name: "common-repo-preprocess : create repo mount point"
+          throttle: 1
+          file:
+            path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+            mode:  "0755"
+            state: directory
+          when: test_repo_mount.stat.exists == false
+  
+        - name: "common-repo-preprocess : mount iso"
+          throttle: 1
+          vars:
+          mount:
+            path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+            src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+            opts:   "loop,ro"
+            state:  "mounted"
+            fstype: "iso9660"
+
+  when: xtoph_deploy.kickstart_profile.repo_iso is defined and
+        xtoph_deploy.kickstart_profile.repo_iso != ""
+
+
+
+

@@ -1,0 +1,41 @@
+
+subnet {{ p_network }} netmask {{ p_netmask }} {
+
+    option domain-name         "{{ p_cluster }}.{{ p_domain }}";
+    option domain-name-servers {{ p_dns }};
+    option routers             {{ p_gateway }};
+    option broadcast-address   {{ p_broadcast }};
+    option subnet-mask         {{ p_netmask }};
+{%if p_ntp is defined and p_ntp|length %}
+    option ntp-servers         {{ p_ntp }};
+{% endif %}
+
+    if known {
+       log (info, concat ("dhcpd-debug: CLIENT HOSTNAME: ", host-decl-name ));
+       log (info, concat ("dhcpd-debug: CLIENT IP: ",       binary-to-ascii (10, 8, ".", leased-address)));
+       log (info, concat ("dhcpd-debug: CLIENT MAC: ",      binary-to-ascii (16, 8, ":", substring (hardware, 1, 6))));
+    }
+
+  class "pxeclients" {	
+
+    match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
+
+    log (info, "dhcpd-debug: CLIENT IDENTIFIER: PXEClient");
+
+    next-server {{ p_nextsvr }};
+
+    if option client-system-arch = 00:07 or option client-system-arch = 00:09 {
+
+      log (info, "dhcpd-debug: CLIENT FILENAME: shimx64.efi");
+      filename "/efi/shimx64.efi";
+
+    } else {
+
+      # log (info, "dhcpd-debug: CLIENT FILENAME: undionly.kpxe");
+      # filename "/bios/undionly.kpxe";
+
+      log (info, "dhcpd-debug: CLIENT FILENAME: pxelinux.0");
+      filename "/bios/pxelinux.0";
+    }
+  }
+

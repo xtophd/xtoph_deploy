@@ -9,7 +9,7 @@
   block:
 
       ##
-      ##    NOTE: All tasks here are blocked and delegated to excute
+      ##    NOTE: All tasks here are blocked and delegated to execute
       ##          on the deployhost/localhost 
       ##
 
@@ -62,109 +62,42 @@
 
 
 
-##
-##
-##
 
 
 
 - delegate_to: localhost
   block:
 
-
-
+      ##    deploy the current machine
       ##
-      ##    NOTE: All tasks here are blocked and delegated to excute
-      ##          on the deployhost/localhost when deploy_node = true
+      ##    WHEN:
+      ##          deploy_node = true
       ##
+      ##    NOTE: 
+      ##          all tasks here are blocked and delegated
+      ##          to execute on the deployhost/localhost
 
 
 
-      ##
-      ##    Cleanup and create a fresh temp workspace
-      ##
-  
-  
-  
-      - name: "libvirt-deploy : DEBUG temp workspace details"
-        debug: 
-          msg:
-          - "temp workspace = {{ xtoph_deploy.deployhost.tmp_dir }}"
-        when: xtoph_deploy.debug == true
-  
-      - name: "libvirt-deploy : delete old temp workspace"
-        shell:
-          cmd: |
-            if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.tmp_dir }} ; fi
-  
-      - name: "libvirt-deploy : create new temp workspace"
+      - name: "libvirt-deploy : create additional temp workspace"
         file:
           path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
           mode="0755"
           state=directory
         loop:
-          - iso
-          - artifacts 
           - virt-install-fragments
 
 
 
       - block:
-  
-
- 
-          ## 
-          ##    All tasks in this block are related to 
-          ##    kickstart repo and ks.cfg setup
-          ##
-          ##    * NOTE * to avoid concurrency problems when
-          ##             when detecting and mounting the iso 
-          ##             mount, we set 'throttle = 1'
-          ##
-
-
-
-          - name: "libvirt-deploy : DEBUG repo loopback details"
-            debug: 
-              msg:
-               - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-               - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-            when: xtoph_deploy.debug == true
-  
-          - name: "libvirt-deploy : stat repo mount point"
-            throttle: 1
-            stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-            register: test_repo_mount
-            when: xtoph_deploy.kickstart_profile is defined and xtoph_deploy.kickstart_profile.repo_iso != ""
-  
-          - name: "libvirt-deploy : create repo mount point"
-            throttle: 1
-            file: 
-              path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}" 
-              mode:  "0755"
-              state: directory
-            when: test_repo_mount.stat.exists == false
-  
-          - name: "libvirt-deploy : mount iso"
-            throttle: 1
-            vars:
-            mount:
-              path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
-              opts:   "loop,ro"
-              state:  "mounted"
-              fstype: "iso9660"
-            when: xtoph_deploy.kickstart_profile.repo_iso != ""
-
-
 
           ##
           ##    Create the custom ISO for the OS installation
           ##
-          ##    * NOTE * to avoid concurrency problems with
-          ##             disk space and i/o bandwidth, we
-          ##             use serial at the import_task level
-          ##             DO NOT use "throttle" here as a stop gap
+          ##    NOTE:  to avoid concurrency problems with
+          ##           disk space and i/o bandwidth, we
+          ##           use serial at the import_task level
+          ##           DO NOT use "throttle" here as a stop gap
           ##
 
 
@@ -395,12 +328,6 @@
               - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
 
            
-          - name: "libvirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
-            copy:
-              dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
-              content:  "{{ xtoph_deploy | to_nice_yaml }}"
-       
-    
     
           ##
           ##    Generate the custom ISO image
@@ -481,16 +408,6 @@
         when:
           - xtoph_deploy.libvirt.network.net0.fwd_type != "nat"
           - xtoph_deploy.libvirt.network.net0.fwd_type != "bridge"
-
-
-
-# 2/11/2021 (remove) This was deprecated with the introduction of mknet-libvirt.sh, which already
-#                    checks for pre-existing configs. remove in the near future
-#
-#      - name: "libvirt-deploy : network status check"
-#        script: |
-#            testnet-libvirt.sh "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
-#        register: testnet_libvirt
 
 
 
@@ -644,7 +561,7 @@
 
 
 
-      - name: Flush handlers
+      - name: "Flush handlers"
         meta: flush_handlers
 
 

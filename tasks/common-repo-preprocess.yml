@@ -1,0 +1,64 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    NOTE: All tasks here are blocked and delegated to execute
+      ##          on the deployhost/localhost
+      ##
+
+      ##
+      ##    All tasks in this block are related to
+      ##    kickstart repo and ks.cfg setup and only
+      ##    execute if :
+      ##
+      ##      xtoph_deploy.kickstart_profile is defined and
+      ##      xtoph_deploy.kickstart_profile.repo_iso != ""
+      ##
+      ##    * NOTE * to avoid concurrency problems when
+      ##             when detecting and mounting the iso
+      ##             mount, we set 'throttle = 1'
+      ##
+
+
+
+      - name: "common-repo-preprocess : DEBUG repo loopback details"
+        debug:
+          msg:
+           - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+           - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+        when: xtoph_deploy.debug == true
+
+      - name: "common-repo-preprocess : stat repo mount point"
+        throttle: 1
+        stat: path="{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+        register: test_repo_mount
+
+      - name: "common-repo-preprocess : create repo mount point"
+        throttle: 1
+        file:
+          path:  "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+          mode:  "0755"
+          state: directory
+        when: test_repo_mount.stat.exists == false
+
+      - name: "common-repo-preprocess : mount iso"
+        throttle: 1
+        vars:
+        mount:
+          path:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+          src:    "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+          opts:   "loop,ro"
+          state:  "mounted"
+          fstype: "iso9660"
+
+
+
+  when: xtoph_deploy.kickstart_profile is defined and
+        xtoph_deploy.kickstart_profile.repo_iso != ""
+

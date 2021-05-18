@@ -12,7 +12,7 @@
 
 
     ##
-    ##    NOTE: All tasks here are delegated to excute
+    ##    NOTE: All tasks here are delegated to execute
     ##          on the deployhost/localhost
     ##
 
@@ -80,13 +80,15 @@
             when: xtoph_deploy.kickstart_profile.method != "pxe"
       
           - name: "ovirt-deploy-monitor : vm change state to RUNNING (BOOT)"
+            throttle: 1
             ovirt_vm:
               auth: "{{ ovirt_auth }}"
               name: "{{ xtoph_deploy.ovirt.vm.name }}"
               cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
               state: "running"
               wait: yes
-            retries: 3
+            retries: 10
+            delay: 5
             when: xtoph_deploy.kickstart_profile.wait_for_shutdown == true
       
           - name: "ovirt-deploy-monitor : undeploy iso in storage domain"

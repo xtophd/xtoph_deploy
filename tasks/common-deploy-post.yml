@@ -24,9 +24,9 @@
       
       
       
-      - name: "libvirt-deploy-post : wait for ssh alive"
+      - name: "common-deploy-post : wait for ssh alive"
         wait_for:
-          host: "{{ xtoph_deploy.libvirt.network.net0.ip }}"
+          host: "{{ ansible_host }}"
           connect_timeout: 5
           port: 22
           sleep: 15
@@ -35,40 +35,10 @@
 
 
 
-# MOVED TO COMMON-SSH-PREPROCESS 5/12/2021
-#
-#
-#      ##
-#      ##    Cleanup ssh known hosts
-#      ##
-#      ##    * NOTE * has not become a problem yet, but I am
-#      ##             unsure of file handling (locking) by
-#      ##             ssh-keygen.  So to avoid concurrency
-#      ##             problems, set 'throttle: 1'
-#      ##
-#
-#
-#  
-#      - name: "libvirt-deploy-post : DEBUG hostname details"
-#        debug:
-#          msg:
-#           - "host fqdn  = {{ inventory_hostname_short }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}"
-#        when: xtoph_deploy.debug == true
-#  
-#      - name: "libvirt-deploy-post : clean up old ssh keys for node"
-#        throttle: 1
-#        shell:
-#          cmd: |
-#            ssh-keygen -R "{{ inventory_hostname }}"
-#            ssh-keygen -R "{{ inventory_hostname_short }}"
-#            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}"
-#            ssh-keygen -R "{{ xtoph_deploy.libvirt.network.net0.ip }}"
-#        ignore_errors: yes
-#  
-      - name: "libvirt-deploy-post : add new ssh keys for node"
+      - name: "common-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
-          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.libvirt.network.net0.fqdn }}"
+          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.network.default.fqdn }}"
         shell:
           cmd: |
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
@@ -83,12 +53,14 @@
 ##
 ##
 ##    This is the first time tasks run on the hosts themselves
-##    Reminder that gather_facts was NOT executed
+##
+##    NOTE: 
+##          Reminder that gather_facts was NOT executed
 ##   
 
 
 
-- name: "libvirt-deploy-post : DEBUG repo details"
+- name: "common-deploy-post : DEBUG repo details"
   debug:
     msg:
      - "repo name     = {{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
@@ -101,7 +73,7 @@
 
 
 
-- name: "libvirt-deploy-post : configure yum repositories"
+- name: "common-deploy-post : configure yum repositories"
   yum_repository:
     name:        "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
     description: "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"

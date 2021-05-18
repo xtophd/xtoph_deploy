@@ -7,7 +7,7 @@
 
 
 ##
-##    Following block of tasks here are delegated to excute
+##    Following block of tasks here are delegated to execute
 ##    on the deployhost/localhost
 ##
 
@@ -35,32 +35,34 @@
 
 
 
-      ##
-      ##
-      ##    Cleanup ssh known hosts
-      ##
-      ##    * NOTE * has not become a problem yet, but I am
-      ##             unsure of file handling (locking) by
-      ##             ssh-keygen.  So to avoid concurrency
-      ##             problems, set 'throttle: 1'
-      ##
-  
-      - name: "ovirt-deploy-post : DEBUG hostname details"
-        debug:
-          msg:
-           - "host fqdn  = {{ inventory_hostname_short }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
-        when: xtoph_deploy.debug == true
-  
-      - name: "ovirt-deploy-post : clean up old ssh keys for node"
-        throttle: 1
-        shell:
-          cmd: |
-            ssh-keygen -R "{{ inventory_hostname }}"
-            ssh-keygen -R "{{ inventory_hostname_short }}"
-            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
-            ssh-keygen -R "{{ xtoph_deploy.ovirt.network.net0.ip }}"
-        ignore_errors: yes
-  
+# MOVED TO COMMON-SSH-PREPROCESS 5/12/2021
+#
+#      ##
+#      ##
+#      ##    Cleanup ssh known hosts
+#      ##
+#      ##    * NOTE * has not become a problem yet, but I am
+#      ##             unsure of file handling (locking) by
+#      ##             ssh-keygen.  So to avoid concurrency
+#      ##             problems, set 'throttle: 1'
+#      ##
+#  
+#      - name: "ovirt-deploy-post : DEBUG hostname details"
+#        debug:
+#          msg:
+#           - "host fqdn  = {{ inventory_hostname_short }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
+#        when: xtoph_deploy.debug == true
+#  
+#      - name: "ovirt-deploy-post : clean up old ssh keys for node"
+#        throttle: 1
+#        shell:
+#          cmd: |
+#            ssh-keygen -R "{{ inventory_hostname }}"
+#            ssh-keygen -R "{{ inventory_hostname_short }}"
+#            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.ovirt.network.net0.fqdn }}"
+#            ssh-keygen -R "{{ xtoph_deploy.ovirt.network.net0.ip }}"
+#        ignore_errors: yes
+#  
       - name: "ovirt-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
@@ -70,6 +72,10 @@
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
         ignore_errors: yes
 
+
+
+  when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
+        xtoph_deploy.kickstart_profile.wait_for_ssh == true
 
 
 ##

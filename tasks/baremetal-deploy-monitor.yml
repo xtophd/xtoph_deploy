@@ -17,7 +17,6 @@
   block:
 
 
-        - name: "baremetal-deploy-post : platform post install tasks"
-          debug: msg="No special post install tasks for baremetal"
-
+        - name: "baremetal-deploy-monitor : platform monitoring tasks"
+          debug: msg="No special monitoring tasks for baremetal"
 

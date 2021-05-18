@@ -14,8 +14,10 @@
 - name: "baremetal-setup : install baremetal supporting packages"
   yum: name=ipmitool state=installed
 
-- name: "libvirt-setup : install common supporting packages"
-  yum: name=genisoimage,syslinux,xorriso,git,tree,wget,yum-utils,firewalld,net-tools,traceroute,nmap state=installed
+
+
+#- name: "baremetal-setup : install common supporting packages"
+#  yum: name=genisoimage,syslinux,xorriso,git,tree,wget,yum-utils,firewalld,net-tools,traceroute,nmap state=installed
 
 
 
@@ -25,11 +27,11 @@
 
 
 
-- name: "baremetal-setup : enable required system services"
-  service: name="{{ item }}" state=started enabled=yes masked=no
-  with_items:
-    - "NetworkManager"
-    - "firewalld"
+#- name: "baremetal-setup : enable required system services"
+#  service: name="{{ item }}" state=started enabled=yes masked=no
+#  with_items:
+#    - "NetworkManager"
+#    - "firewalld"
 
 
 
@@ -39,19 +41,23 @@
 
 
 
-- name: "baremetal-setup : Create ssh directory"
-  file:
-    path: /root/.ssh
-    mode: "0700"
-    state: directory
+#- name: "baremetal-setup : Create ssh directory"
+#  file:
+#    path: /root/.ssh
+#    mode: "0700"
+#    state: directory
 
-- name: "baremetal-setup : test deployhost ssh key"
-  stat: path="/root/.ssh/id_rsa.pub"
-  register: test_ssh_key
 
-- name: "baremetal-setup : create deployhost ssh key"
-  command: "ssh-keygen -t rsa -b 2048 -N '' -f /root/.ssh/id_rsa"
-  when: test_ssh_key.stat.exists == false
+
+#- name: "baremetal-setup : test deployhost ssh key"
+#  stat: path="/root/.ssh/id_rsa.pub"
+#  register: test_ssh_key
+
+
+
+#- name: "baremetal-setup : create deployhost ssh key"
+#  command: "ssh-keygen -t rsa -b 2048 -N '' -f /root/.ssh/id_rsa"
+#  when: test_ssh_key.stat.exists == false
 
 
 
@@ -61,13 +67,13 @@
 
 
 
-- name: "baremetal-setup : create iso directory"
-  file:
-    path: "{{ xtoph_deploy.deployhost.iso.dir }}"
-    mode: "0755"
-    owner: "root"
-    group: "root"
-    state: directory
+#- name: "baremetal-setup : create iso directory"
+#  file:
+#    path: "{{ xtoph_deploy.deployhost.iso.dir }}"
+#    mode: "0755"
+#    owner: "root"
+#    group: "root"
+#    state: directory
 
 
 
@@ -77,53 +83,64 @@
 
 
 
-- block:
-
-    - name: "baremetal-setup : install httpd packages"
-      yum: name=httpd state=installed
-
-    - name: "baremetal-setup : enable http system services"
-      service: name="{{ item }}" state=started enabled=yes masked=no
-      with_items:
-        - "NetworkManager"
-        - "firewalld"
-        - "httpd"
-    
-    - name: "baremetal-setup: deploy httpd configuration"
-      vars:
-        - p_port: "{{ xtoph_deploy.deployhost.http_port }}"
-      template:
-        src: "deployhost-httpd-conf.j2"
-        dest: "/etc/httpd/conf/httpd.conf"
-        owner: root
-        group: root
-        mode: 0644
-      notify: restart_httpd
-
-    - name: "baremetal-setup: selinux restorecon on /var/www/html"
-      shell: restorecon -R /var/www/html
-
-   
-    - name: "baremetal-setup : enable http/https firewalld services"
-      firewalld:
-        service: "{{ item }}"
-        immediate: yes
-        permanent: yes
-        state: enabled
-      with_items:
-        - "http"
-        - "https"
-    
-    - name: "baremetal-setup : add custom http firewalld ports"
-      firewalld:
-        port: "{{ xtoph_deploy.deployhost.http_port }}/tcp"
-        immediate: yes
-        permanent: yes
-        state: enabled
-      when: xtoph_deploy.deployhost.http_port != "80"  and
-            xtoph_deploy.deployhost.http_port != "443"
-
-
+#- block:
+#
+#
+#
+#    - name: "baremetal-setup : install httpd packages"
+#      yum: name=httpd state=installed
+#
+#
+#
+#    - name: "baremetal-setup : enable http system services"
+#      service: name="{{ item }}" state=started enabled=yes masked=no
+#      with_items:
+#        - "NetworkManager"
+#        - "firewalld"
+#        - "httpd"
+#
+#
+#    
+#    - name: "baremetal-setup: deploy httpd configuration"
+#      vars:
+#        - p_port: "{{ xtoph_deploy.deployhost.http_port }}"
+#      template:
+#        src: "deployhost-httpd-conf.j2"
+#        dest: "/etc/httpd/conf/httpd.conf"
+#        owner: root
+#        group: root
+#        mode: 0644
+#      notify: restart_httpd
+#
+#
+#
+#    - name: "baremetal-setup: selinux restorecon on /var/www/html"
+#      shell: restorecon -R /var/www/html
+#
+#
+#   
+#    - name: "baremetal-setup : enable http/https firewalld services"
+#      firewalld:
+#        service: "{{ item }}"
+#        immediate: yes
+#        permanent: yes
+#        state: enabled
+#      with_items:
+#        - "http"
+#        - "https"
+#
+#
+#    
+#    - name: "baremetal-setup : add custom http firewalld ports"
+#      firewalld:
+#        port: "{{ xtoph_deploy.deployhost.http_port }}/tcp"
+#        immediate: yes
+#        permanent: yes
+#        state: enabled
+#      when: xtoph_deploy.deployhost.http_port != "80"  and
+#            xtoph_deploy.deployhost.http_port != "443"
+#
+#
 
 
     ##    NOTE: I should probably just develop a selinux 
@@ -137,7 +154,9 @@
     ##         cmd: |
     ##           semanage port -a -t http_port_t -p tcp {{ xtoph_deploy.deployhost.http_port }}
 
-  when: xtoph_deploy.deployhost.http_enable == true
+
+
+#  when: xtoph_deploy.deployhost.http_enable == true
 
 
 
@@ -147,34 +166,46 @@
 
 
 
-- block:
-
-      - name: "baremetal-setup : install dnsmasq package"
-        yum: name=dnsmasq state=installed
-
-      - name: "baremetal-setup : adjust /etc/dnsmasq.conf with except-interface"
-        lineinfile:
-          dest: "/etc/dnsmasq.conf"
-          insertafter: "^#except-interface=.*$"
-          line: "except-interface=virbr0"
-          state: present
-
-      - name: "baremetal-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
-        lineinfile:
-          dest: "/etc/dnsmasq.conf"
-          insertafter: "^#bind-interfaces.*$"
-          line: "bind-interfaces"
-          state: present
-
-      - name: "baremetal-setup :  enable dnsmasq system services"
-        service: name="dnsmasq" state=restarted enabled=yes masked=no
-
-      - name: "baremetal-setup :  add dns firewalld services"
-        firewalld:
-          service:   "dns"
-          immediate: yes
-          permanent: yes
-          state: enabled
-
-  when: xtoph_deploy.deployhost.dnsmasq_enable == true
+#- block:
+#
+#
+#
+#      - name: "baremetal-setup : install dnsmasq package"
+#        yum: name=dnsmasq state=installed
+#
+#
+#
+#      - name: "baremetal-setup : adjust /etc/dnsmasq.conf with except-interface"
+#        lineinfile:
+#          dest: "/etc/dnsmasq.conf"
+#          insertafter: "^#except-interface=.*$"
+#          line: "except-interface=virbr0"
+#          state: present
+#
+#
+#
+#      - name: "baremetal-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
+#        lineinfile:
+#          dest: "/etc/dnsmasq.conf"
+#          insertafter: "^#bind-interfaces.*$"
+#          line: "bind-interfaces"
+#          state: present
+#
+#
+#
+#      - name: "baremetal-setup :  enable dnsmasq system services"
+#        service: name="dnsmasq" state=restarted enabled=yes masked=no
+#
+#
+#
+#      - name: "baremetal-setup :  add dns firewalld services"
+#        firewalld:
+#          service:   "dns"
+#          immediate: yes
+#          permanent: yes
+#          state: enabled
+#
+#
+#
+#  when: xtoph_deploy.deployhost.dnsmasq_enable == true
 

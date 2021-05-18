@@ -1,0 +1,245 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+- delegate_to: localhost
+  block:
+      
+        ##
+        ##    NOTE: All tasks here are blocked and delegated to execute
+        ##          on the deployhost/localhost
+        ##
+      
+        ##
+        ##    All of these check are performed in main.yml 
+        ##    before importing this playbook.
+        ##    Performing checks again would be redundant 
+        ##
+        ##      when xtoph_deploy.deployhost.dhcp.enable     == true    and
+        ##           xtoph_deploy.kickstart_profile.method   == "pxe"   and
+        ##           xtoph_deploy.kickstart_profile.repo_iso is defined and
+        ##           xtoph_deploy.kickstart_profile.repo_iso != ""
+        ##
+      
+      
+      
+        - name: "common-dhcp-preprocess : populate service facts"
+          service_facts:
+      
+      
+      
+        - name: "common-dhcp-preprocess : create temp workspaces"
+          file:
+            path="{{ item }}"
+            mode="0755"
+            state=directory
+          loop:
+            - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}"
+            - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments"
+      
+      
+      
+        ##
+        ##    We will need facts about the bastion host below, so save them
+        ##
+      
+      
+      
+        - name: "common-dhcp-preprocess : determine bastion pub IP"
+          set_fact:
+            f_bastionName: "{{ hostvars[item]['inventory_hostname_short']}}"
+            f_bastionIP:   "{{ hostvars[item]['h_pubIP'] }}"
+          loop: "{{ groups['myBastion'] }}"
+      
+      
+      
+        - block:
+      
+                ##
+                ##    NOTE: All tasks here are blocked so that vars
+                ##          can be declared once at the bottom of 
+                ##          the block
+                ##
+        
+                - name: "common-dhcp-preprocess : deploy standard options"
+                  run_once: true
+                  template:
+                    src: "dhcp-standard-opts.j2"
+                    dest: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments/10-standard-opts.conf"    
+                    owner: root
+              
+                - name: "common-dhcp-preprocess : deploy subnet-start config fragment"
+                  run_once: true
+                  template:
+                    src: "dhcp-subnet-start.j2"
+                    dest: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments/20-subnet-start.conf"    
+                    owner: root
+                    group: root
+                    mode: 644
+        
+                - name: "common-dhcp-preprocess : deploy dhcp group-start config fragment"
+                  run_once: true
+                  template:
+                    src: "dhcp-group-start.j2"
+                    dest: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments/30-group-start.conf"    
+                    owner: root
+                    group: root
+                    mode: 644
+        
+                - name: "common-dhcp-preprocess : deploy host config fragments"
+                  template:
+                    src: "dhcp-host-entry.j2"
+                    dest: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments/40-host-{{ p_domain }}-{{ p_name }}.conf"    
+                    owner: root
+                    group: root
+                    mode: 644
+        
+                - name: "common-dhcp-preprocess : deploy dhcp group-finish config fragment"
+                  run_once: true
+                  template:
+                    src: "dhcp-group-finish.j2"
+                    dest: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments/50-group-finish.conf"    
+                    owner: root
+        
+                - name: "common-dhcp-preprocess : deploy subnet-finish config frament"
+                  run_once: true
+                  template:
+                    src: "dhcp-subnet-finish.j2"
+                    dest: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments/60-subnet-finish.conf"    
+                    owner: root
+                    group: root
+                    mode: 644
+        
+          vars:
+            - p_item:      "{{ item }}"
+            - p_name:      "{{ inventory_hostname_short }}"
+            - p_addr:      "{{ h_pubIP  }}"
+            - p_mac:       "{{ h_pubMAC }}"
+            - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
+            - p_network:   "{{ xtoph_deploy.network.default.network }}"
+            - p_netmask:   "{{ xtoph_deploy.network.default.netmask }}"
+            - p_broadcast: "{{ xtoph_deploy.network.default.broadcast }}"
+            - p_gateway:   "{{ xtoph_deploy.network.default.gateway }}"
+            - p_dns:       "{{ xtoph_deploy.deployhost.ip if g_useDNS else xtoph_deploy.network.default.nameserver }}"
+            - p_ntp:       "{{ xtoph_deploy.deployhost.ip if g_useNTP else xtoph_deploy.network.default.timeserver }}"
+            - p_domain:    "{{ xtoph_deploy.network.default.basedomain }}"
+            - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
+            - p_cluster:   "{{ g_clusterName }}"
+            - p_dhcpgroup: "{{ g_clusterName }}"
+      
+      
+      
+        - name: "common-dhcp-preprocess : assemble config fragments"
+          run_once: true
+          assemble:
+            src:  "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments"    
+            dest: "/etc/dhcp/dhcpd.conf"    
+            owner: root
+            group: root
+            mode: 644
+      
+      
+      
+        - name: "common-dhcp-preprocess : start services"
+          run_once: true
+          service: name={{ item }} state=restarted enabled=no masked=no
+          when: xtoph_deploy.deployhost.dhcp.enable
+          with_items:
+            - "dhcpd"
+            - "tftp"
+      
+      
+      
+        - name: "common-dhcp-preprocess : add firewalld ports and services"
+          run_once: true
+          firewalld:
+            service: "{{ item }}"
+            immediate: yes
+            permanent: yes
+            state: enabled
+          with_items:
+            - "dhcp"
+            - "tftp"
+          when: ansible_facts['services']['firewalld.service']['state'] == 'running'
+      
+      
+      
+        ##
+        ##    NOTE: the release ISO should already be mounted
+        ##          for repo purposes, so copy necessary files
+        ##          to tftpboot folder
+        ##
+      
+      
+      
+        - name: "common-dhcp-preprocess : create tftpboot directories"
+          throttle: 1
+          file:
+            path:  "{{ item }}" 
+            mode:  "0755"
+            owner: root
+            group: root
+            state: directory
+          with_items:
+            - "/var/lib/tftpboot/bios/"
+            - "/var/lib/tftpboot/bios/pxelinux.cfg"
+            - "/var/lib/tftpboot/bios/images"
+            - "/var/lib/tftpboot/bios/images/{{ xtoph_deploy.kickstart_profile.mnt }}"
+      
+      
+      
+        - name: "common-dhcp-preprocess : copy release specific PXE artifacts to tftpboot image directory"
+          throttle: 1
+          copy:
+            src:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}/images/pxeboot/{{ item }}"
+            dest:  "/var/lib/tftpboot/bios/images/{{ xtoph_deploy.kickstart_profile.mnt }}/{{ item }}"
+            mode:  "0644"
+            owner: root
+            group: root
+            remote_src: yes
+          with_items:
+            - "vmlinuz"
+            - "initrd.img"
+
+
+        #
+        #    Create machine specific configuration file
+        #
+        #    NOTE:  
+        #          pxelinux.0 looks for config files in
+        #          a specific order. See link for details
+        #
+        #          We use: ../pxelinux.cfg/01-{{ MAC-ADDRESS }}
+        #
+        #                  "{{ h_pubMAC | replace(':','-') }}"
+        #
+        #          Alternative could be a HEX version of the IP,
+        #          Note that ip4_hex requires python-netaddr package
+        #
+        #                  "{{ xtoph_deploy.network.default.ip | ip4_hex | upper }}"
+        #
+        #    REFERENCE:
+        #               https://wiki.syslinux.org/wiki/index.php?title=PXELINUX
+        #
+        #
+        #
+
+        - name: "common-dhcp-preprocess : deploy machine pxelinux.cfg"
+          vars:
+            t_name: "{{ h_pubMAC | replace(':','-') }}"
+          template:
+            src: "pxelinux-machine-config.j2"
+            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/01-{{ t_name }}"
+            owner: root
+
+
+
+        - name: "common-dhcp-preprocess : deploy pxelinux.cfg/default"
+          run_once: true
+          template:
+            src: "pxelinux-default-config.j2"
+            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/default"
+            owner: root
+

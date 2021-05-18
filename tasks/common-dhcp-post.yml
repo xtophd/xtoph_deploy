@@ -1,0 +1,28 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    NOTE: All tasks here are blocked and delegated to execute
+      ##          on the deployhost/localhost
+      ##
+
+
+
+      - name: "common-dhcp-preprocess : stop services"
+        throttle: 1
+        service: name={{ item }} state=stopped enabled=no masked=no
+        when: xtoph_deploy.deployhost.dhcp.enable
+        with_items:
+          - "dhcpd"
+          - "tftp"
+
+  when: xtoph_deploy.kickstart_profile.method == "pxe" and
+        xtoph_deploy.kickstart_profile.repo_iso is defined and
+        xtoph_deploy.kickstart_profile.repo_iso != ""
+

@@ -78,5 +78,9 @@ head -n1 /dev/urandom | md5sum | awk {'print $1'} | passwd --stdin root
 ## How to end installation (shutdown, reboot, halt)
 ##
 
+{% if (xtoph_deploy.kickstart_profile.wait_for_shutdown) %}
 shutdown
+{% else %}
+reboot
+{% endif %}
 
