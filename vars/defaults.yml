@@ -151,19 +151,17 @@ xtoph_deploy:
 
       name: ""
 
-      profiles:
+      default:
+        description:   "Default network using ovirtmgmt"
+        ovirt_network: "ovirtmgmt"
+        ovirt_model:   "virtio"
+        managed:       "no"
 
-        default:
-          description:   "Default network using ovirtmgmt"
-          ovirt_network: "ovirtmgmt"
-          ovirt_model:   "virtio"
-          managed:       "no"
-
-        private:
-          description:   "Private network created/managed"
-          ovirt_network: "TBD"
-          ovirt_model:   "virtio"
-          managed:       "yes"
+      private:
+        description:   "Private network created/managed"
+        ovirt_network: "TBD"
+        ovirt_model:   "virtio"
+        managed:       "yes"
 
     storage:
 
