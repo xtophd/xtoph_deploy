@@ -1,8 +1,8 @@
 <network>
-  <name>{{ xtoph_deploy.libvirt.network.net0.network_name }}</name>
-  <forward mode='{{ xtoph_deploy.libvirt.network.net0.fwd_type }}' />
-  <bridge name='{{ xtoph_deploy.libvirt.network.net0.network_name }}' stp='on' delay='0' />
-  <ip address='{{ xtoph_deploy.libvirt.network.net0.gateway }}' netmask='{{ xtoph_deploy.libvirt.network.net0.netmask }}' />
+  <name>{{ xtoph_deploy.libvirt.network.default.network_name }}</name>
+  <forward mode='{{ xtoph_deploy.libvirt.network.default.fwd_type }}' />
+  <bridge name='{{ xtoph_deploy.libvirt.network.default.network_name }}' stp='on' delay='0' />
+  <ip address='{{ xtoph_deploy.network.default.gateway }}' netmask='{{ xtoph_deploy.network.default.netmask }}' />
   <dns enable='no' />
 </network>
 

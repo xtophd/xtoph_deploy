@@ -339,10 +339,10 @@
       
               vars:
                 t_net_dev:  "{{ xtoph_deploy.hardware_profile.network.dev   }}"
-                t_net_ip:   "{{ xtoph_deploy.ovirt.network.net0.ip      }}"
-                t_net_nm:   "{{ xtoph_deploy.ovirt.network.net0.netmask }}"
-                t_net_gw:   "{{ xtoph_deploy.ovirt.network.net0.gateway }}"
-                t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.ovirt.network.net0.nameserver }}"
+                t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
+                t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
+                t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
+                t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
                 t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
                 t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout }}"
                 t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
@@ -456,7 +456,7 @@
           nics:
             - name: "nic1"
               interface: "{{ xtoph_deploy.hardware_profile.network.model }}"
-              profile_name: "{{ xtoph_deploy.ovirt.network.net0.ovirt_network }}"
+              profile_name: "{{ xtoph_deploy.ovirt.network.default.ovirt_network }}"
               mac_address: "{{ h_pubMAC }}"
           graphical_console:
              protocol:

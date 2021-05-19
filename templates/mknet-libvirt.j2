@@ -18,7 +18,7 @@
 
 
 
-if ! virsh net-info "{{ xtoph_deploy.libvirt.network.net0.network_name }}"; then
+if ! virsh net-info "{{ xtoph_deploy.libvirt.network.default.network_name }}"; then
  
     ##
     ##    Create & Start the libvirt network
@@ -27,10 +27,10 @@ if ! virsh net-info "{{ xtoph_deploy.libvirt.network.net0.network_name }}"; then
     virsh net-define "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
  
     
-    virsh net-start "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+    virsh net-start "{{ xtoph_deploy.libvirt.network.default.network_name }}"
 
 
-    virsh net-autostart "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+    virsh net-autostart "{{ xtoph_deploy.libvirt.network.default.network_name }}"
 
     echo "libvirt network CHANGED for ansible's benefit"
     

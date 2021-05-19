@@ -16,15 +16,15 @@
 
 
 
-if virsh net-info "{{ xtoph_deploy.libvirt.network.net0.network_name }}"; then
+if virsh net-info "{{ xtoph_deploy.libvirt.network.default.network_name }}"; then
  
     ##
     ##    Destroy and Undefine the libvirt network
     ##
     
-    virsh net-destroy "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+    virsh net-destroy "{{ xtoph_deploy.libvirt.network.default.network_name }}"
 
 
-    virsh net-undefine "{{ xtoph_deploy.libvirt.network.net0.network_name }}"
+    virsh net-undefine "{{ xtoph_deploy.libvirt.network.default.network_name }}"
     
 fi

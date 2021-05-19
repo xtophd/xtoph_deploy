@@ -3,7 +3,7 @@
 virt-install --name "{{ xtoph_deploy.libvirt.vm.name }}" \
     --ram "{{ xtoph_deploy.resource_profile.memsize }}" \
     --check disk_size=off \
-    --network "network={{ xtoph_deploy.libvirt.network.net0.network_name }},mac={{ h_pubMAC }},model={{ xtoph_deploy.hardware_profile.network.model }}" \
+    --network "network={{ xtoph_deploy.libvirt.network.default.network_name }},mac={{ h_pubMAC }},model={{ xtoph_deploy.hardware_profile.network.model }}" \
     --graphics vnc \
     --vcpus {{ xtoph_deploy.resource_profile.vcpus }} \
     --cpu {{ xtoph_deploy.hardware_profile.cpu.type | default ('host-model') }} \

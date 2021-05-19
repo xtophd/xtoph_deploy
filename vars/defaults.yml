@@ -14,6 +14,13 @@ xtoph_deploy:
     ip: ""
 
     ##
+    ##    firewalld_enable:  ensures firewalld is installed
+    ##                       and enabled on the deployhost
+    ##
+
+    firewalld_enable: true
+
+    ##
     ##    dnsmasq_enable:    ensures dnsmasq is installed
     ##                       and enabled on the deployhost
     ##
@@ -26,16 +33,32 @@ xtoph_deploy:
     ##                           real-dns
     ##
 
-    dnsmasq_enable:  false
-    dnsmasq_asprimary:  false
+    dnsmasq_enable: false
+    dnsmasq_asprimary: false
 
-    ##     install, enable and manage dnsmasq 
+    ##
+    ##    http_enable:    must be true unless http content
+    ##                    is hosted elsewhere
+    ##
+    ##    http_port:      port to provide endpoints for:
+    ##                        yum repos 
+    ##                        kickstart configs
+    ##                        ipxe host configs
+    ##
 
-    dnsmasq_enable:  false
+    http_enable: true
+    http_port: "8008"
 
-    ##     httpd,kickstart,repo service port
+    ##
+    ##    cockpit_enable: install and configure cockpit
+    ##
+    ##    cockpit_port:   defaults to 9090 if left empty
+    ##                    if you change it, the config will
+    ##                    ADD the specifed port NOT replace.
+    ##
 
-    http_port:    "8008"
+    cockpit_enable: true
+    cockpit_port: ""
 
     ##
     ##     temporary directory for various tasks
@@ -45,21 +68,65 @@ xtoph_deploy:
 
     tmp_dir: "/home/tmp/{{ g_clusterName }}/{{ inventory_hostname }}"
 
+    ##
+    ##    Where with the kickstart configs are stored
+    ##    What is the URL to access the kickstarts
+    ##
+
     kickstart:
       dir: "/var/www/html/ks"
       url: "http://192.168.1.170:8008/ks"
 
-    iso:
-      dir: "/home/iso"
+    ##
+    ##    Where will the repos be mounted
+    ##    What is the URL to access the repos
+    ##
 
     repos:
       dir: "/var/www/html/repos"
       url: "http://192.168.1.170:8008/repos"
 
-    ephemeral_pxe:
-      enable:   false
+    ##
+    ##    Where are the ISOs stored
+    ##
+
+    iso:
+      dir: "/home/iso"
+
+    ##
+    ##    Enable the creation of the ephemeral dhcp service
+    ##
+
+    dhcp:
+      enable:   true
       efi_http: true
-      tmp_dir:  "/home/tmp/e_pxe"
+      tmp_dir:  "/home/tmp/{{ g_clusterName }}/dhcp"
+
+
+
+  libvirt:
+
+    ##
+    ##    netsted_virt_enable:   add flags to the OS kernel
+    ##                           to allow passtrough virt
+    ##
+
+    nested_virt_enable: false
+
+    vm:
+      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
+
+    network:
+
+      default:
+        network_name:    "virbr_{{ g_clusterName }}"
+        fwd_type:        "nat"
+        dev:             "eno1"
+        description:     "Primary interface"
+
+    storage:
+
+      qcow_dir: "/home/virt-images"
 
 
     
@@ -67,6 +134,10 @@ xtoph_deploy:
 
     cluster_name:  "Default"
     engine_cafile: "/etc/pki/ovirt-engine/ca.pem"
+    insecure:      true
+
+    vm:
+      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
 
     api:
 
@@ -101,7 +172,7 @@ xtoph_deploy:
       profiles:
 
         default:
-          description: "Default storage using virtio-scsi (sda)"
+          description: "Default storage using sparse virtio-scsi (sda)"
           bus:         "virtio_scsi"
           sparse:      "true"
       
@@ -114,4 +185,34 @@ xtoph_deploy:
           description: "Default storage using virtio (vda)"
           bus:         "virtio"
           sparse:      "false"
+
+  baremetal:
+
+    vm:
+      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
+
+    network:
+
+      default:
+        dev:             "eno4"
+        description:     "Primary interface"
+
+  network:
+
+    default:
+
+        dev:             ""
+        description:     "Default Network"
+
+        ip:              ""
+        basedomain:      ""
+        network:         ""
+        netmask:         ""
+        broadcast:       ""
+        prefix:          ""
+        gateway:         ""
+        nameserver:      ""
+        timeserver:      ""
+        fqdn:            ""
+
 

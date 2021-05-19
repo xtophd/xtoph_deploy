@@ -299,10 +299,10 @@
     
             vars:
               t_net_dev:  "{{ xtoph_deploy.hardware_profile.network.dev   }}"
-              t_net_ip:   "{{ xtoph_deploy.libvirt.network.net0.ip      }}"
-              t_net_nm:   "{{ xtoph_deploy.libvirt.network.net0.netmask }}"
-              t_net_gw:   "{{ xtoph_deploy.libvirt.network.net0.gateway }}"
-              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.libvirt.network.net0.nameserver }}"
+              t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
+              t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
+              t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
+              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
               t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout }}"
               t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
@@ -406,8 +406,8 @@
       - name: "libvirt-deploy : network validate fwd_type"
         fail: msg="currently only support network.fwd_type = [ nat | bridge ]"
         when:
-          - xtoph_deploy.libvirt.network.net0.fwd_type != "nat"
-          - xtoph_deploy.libvirt.network.net0.fwd_type != "bridge"
+          - xtoph_deploy.libvirt.network.default.fwd_type != "nat"
+          - xtoph_deploy.libvirt.network.default.fwd_type != "bridge"
 
 
 
@@ -424,7 +424,7 @@
           owner: root
           group: root
           mode: 0644
-        when: xtoph_deploy.libvirt.network.net0.fwd_type == "nat"
+        when: xtoph_deploy.libvirt.network.default.fwd_type == "nat"
 
       - name: "libvirt-deploy : xml to define libvirt-network as 'bridge'"
         template:
@@ -433,7 +433,7 @@
           owner: root
           group: root
           mode: 0644
-        when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
+        when: xtoph_deploy.libvirt.network.default.fwd_type == "bridge"
 
 
      
@@ -456,7 +456,7 @@
           owner: root
           group: root
           mode: 0755
-        when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
+        when: xtoph_deploy.libvirt.network.default.fwd_type == "bridge"
 
       - name: "libvirt-deploy : script to create libvirt network"
         vars:
@@ -539,7 +539,7 @@
         shell:
           cmd: |
             bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
-        when: xtoph_deploy.libvirt.network.net0.fwd_type == "bridge"
+        when: xtoph_deploy.libvirt.network.default.fwd_type == "bridge"
 
       - name: "libvirt-deploy : create libvirt network"
         throttle: 1

@@ -71,19 +71,6 @@
             ssh-keygen -R "{{ xtoph_deploy.network.default.ip }}"
         ignore_errors: yes
 
-#
-# 2021-05-14 : Machine is not built, this is already duplicated
-#              in common-deploy-post.yml.  Marked for removal
-#      - name: "common-deploy-preprocess : add new ssh keys for node"
-#        throttle: 1
-#        vars:
-#          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.network.default.fqdn }}"
-#        shell:
-#          cmd: |
-#            ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
-#        ignore_errors: yes
-#
-
   when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
         xtoph_deploy.kickstart_profile.wait_for_ssh
 
