@@ -4,8 +4,8 @@
 ## Summary:
 ##
 
-
-- delegate_to: localhost
+- name: "ovirt-deploy : BEGIN"
+  delegate_to: localhost
   block:
 
     ##
@@ -432,6 +432,37 @@
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe"
+
+
+
+      ##
+      ##    Create the kickstart config for PXE supported installs
+      ##
+
+
+
+      - block:
+
+          - name: "ovirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
+            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
+
+
+          - name: "ovirt-deploy : deploy kickstart config iso to http dir"
+            vars:
+              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
+              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+            template:
+              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
+              dest:  "{{ item }}"
+              owner: root
+              group: root
+              mode: 0444
+            loop:
+              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+
+        when: xtoph_deploy.kickstart_profile is defined and
+              xtoph_deploy.kickstart_profile.template is defined and
+              xtoph_deploy.kickstart_profile.method == "pxe"
 
 
 

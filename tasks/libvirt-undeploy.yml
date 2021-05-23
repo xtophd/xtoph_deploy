@@ -3,7 +3,9 @@
 ## Summary:
 ##
 
-- delegate_to: localhost
+
+- name: "libvirt-undeploy : BEGIN"
+  delegate_to: localhost
   block:
 
 

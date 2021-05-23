@@ -3,7 +3,8 @@
 ## Summary:
 ##
 
-- delegate_to: localhost
+- name: "baremetal-undeploy : BEGIN"
+  delegate_to: localhost
   block:
 
 

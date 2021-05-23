@@ -5,7 +5,8 @@
 ##
 
 
-- delegate_to: localhost
+- name: "libvirt-undeploy : BEGIN"
+  delegate_to: localhost
   block:
 
       ##
@@ -130,21 +131,15 @@
     
     
           ##
-          ##    Create the kickstart config
-          ##
-          ##    NOTE: put 1 copy in http directory
-          ##          and 1 on the ISO
+          ##    Create the kickstart config for the ISO
           ##
       
       
       
           - name: "libvirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-            file: 
-              path: "{{ xtoph_deploy.deployhost.kickstart.dir }}" 
-              mode: "0755" 
-              state: directory
+            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
       
-          - name: "libvirt-deploy : deploy kickstart config iso temp workspace and http dir"
+          - name: "libvirt-deploy : deploy kickstart config iso temp workspace"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
               p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
@@ -156,7 +151,6 @@
               mode: 0444
             loop:
               - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
     
     
     
@@ -394,6 +388,37 @@
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe"
+
+
+
+      ##
+      ##    Create the kickstart config for PXE supported installs
+      ##
+
+
+
+      - block:
+
+          - name: "libvirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
+            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
+
+
+          - name: "libvirt-deploy : deploy kickstart config iso to http dir"
+            vars:
+              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
+              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+            template:
+              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
+              dest:  "{{ item }}"
+              owner: root
+              group: root
+              mode: 0444
+            loop:
+              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+
+        when: xtoph_deploy.kickstart_profile is defined and
+              xtoph_deploy.kickstart_profile.template is defined and
+              xtoph_deploy.kickstart_profile.method == "pxe"
 
 
 
