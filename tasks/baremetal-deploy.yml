@@ -58,10 +58,24 @@
       ##    All tasks here are blocked and 
       ##    delegated to execute on the deployhost
       ##
-      ##    The design is:
       ##
-      ##      method != pxe create bootable media 
-      ##      method == pxe skip straight to ipmi calls
+      ##    WHEN:
+      ##      always
+      ##
+      ##
+      ##    NOTE:
+      ##
+      ##      this section is blocked primarily to follow the 
+      ##      flow of other platforms, although here we do
+      ##      NOT test for 'node_deploy'.  Some baremetal
+      ##      deployuments are manual and we cannot always test
+      ##      the machine status with ipmi.
+      ##
+      ##      so we always prepare media, kickstart configs, etc...
+      ##      based on the template parameters ... but relay on
+      ##      the user to manually engage pxe (when ipmi is not
+      ##      available)
+      ##
       ##
 
 
