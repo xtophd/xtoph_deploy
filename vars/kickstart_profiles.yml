@@ -66,9 +66,9 @@ xtoph_kickstart_profiles:
 
 
 
-  rhel84beta:
+  rhel84:
     kickstart_profile:
-      name:              "rhel84beta"
+      name:              "rhel84"
       description:       "Red Hat Enterprise Linux 8.4 DVD" 
       method:            "cdrom"
       wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
@@ -88,9 +88,9 @@ xtoph_kickstart_profiles:
 
 
 
-  rhel84beta-bootiso:
+  rhel84-bootiso:
     kickstart_profile:
-      name:              "rhel84beta-bootiso"
+      name:              "rhel84-bootiso"
       description:       "Red Hat Enterprise Linux 8.4 Boot ISO" 
       method:            "network"
       wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
