@@ -69,13 +69,13 @@ xtoph_kickstart_profiles:
   rhel84beta:
     kickstart_profile:
       name:              "rhel84beta"
-      description:       "Red Hat Enterprise Linux 8.4 BETA DVD" 
+      description:       "Red Hat Enterprise Linux 8.4 DVD" 
       method:            "cdrom"
       wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
       wait_for_ssh:      true
       template:          "ks-rhel8.j2"
-      boot_iso:          "rhel-8.4-beta-1-x86_64-dvd.iso"
-      repo_iso:          "rhel-8.4-beta-1-x86_64-dvd.iso"
+      boot_iso:          "rhel-8.4-x86_64-dvd.iso"
+      repo_iso:          "rhel-8.4-x86_64-dvd.iso"
       mnt:               "rhel-8.4"
       kvm_os_type:       "rhel_8x64"
       repos:
@@ -91,13 +91,13 @@ xtoph_kickstart_profiles:
   rhel84beta-bootiso:
     kickstart_profile:
       name:              "rhel84beta-bootiso"
-      description:       "Red Hat Enterprise Linux 8.4 BETA Boot ISO" 
+      description:       "Red Hat Enterprise Linux 8.4 Boot ISO" 
       method:            "network"
       wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
       wait_for_ssh:      true
       template:          "ks-rhel8-bootiso.j2"
-      boot_iso:          "rhel-8.4-beta-1-x86_64-boot.iso"
-      repo_iso:          "rhel-8.4-beta-1-x86_64-dvd.iso"
+      boot_iso:          "rhel-8.4-x86_64-boot.iso"
+      repo_iso:          "rhel-8.4-x86_64-dvd.iso"
       mnt:               "rhel-8.4"
       kvm_os_type:       "rhel_8x64"
       repos:
