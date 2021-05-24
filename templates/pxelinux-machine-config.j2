@@ -10,7 +10,7 @@ label {{ xtoph_deploy.kickstart_profile.mnt }}
   menu default
   say Starting installation...
   kernel images/{{ xtoph_deploy.kickstart_profile.mnt }}/vmlinuz
-  append initrd=images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img rd.live.check quiet inst.text inst.ks=http://192.168.1.170:8008/ks/ocp4mixed-bastion.cfg inst.repo=http://192.168.1.170:8008/repos/rhel-8.2 ip={{ xtoph_deploy.network.default.ip }}::{{ xtoph_deploy.network.default.gateway }}:{{ xtoph_deploy.network.default.netmask }}::{{ xtoph_deploy.network.default.dev }}:none nameserver={{ xtoph_deploy.network.default.nameserver }}
+  append initrd=images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img rd.live.check quiet inst.text inst.ks={{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }} ip={{ xtoph_deploy.network.default.ip }}::{{ xtoph_deploy.network.default.gateway }}:{{ xtoph_deploy.network.default.netmask }}::{{ xtoph_deploy.network.default.dev }}:none nameserver={{ xtoph_deploy.network.default.nameserver }}
 
 label local
   menu label Boot from ^local drive

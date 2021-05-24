@@ -110,6 +110,28 @@ xtoph_kickstart_profiles:
 
 
 
+  rhel84-pxe:
+    kickstart_profile:
+      name:              "rhel84-pxe"
+      description:       "Red Hat Enterprise Linux 8.4 PXE"
+      method:            "pxe"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+      wait_for_ssh:      true
+      template:          "ks-rhel8-bootiso.j2"
+      boot_iso:          "rhel-8.4-x86_64-boot.iso"
+      repo_iso:          "rhel-8.4-x86_64-dvd.iso"
+      mnt:               "rhel-8.4"
+      kvm_os_type:       "rhel_8x64"
+      repos:
+        baseos:
+          name:          "my-rhel-8-baseos-rpms"
+          subpath:       "/BaseOS"
+        appstream:
+          name:          "my-rhel-8-appstream-rpms"
+          subpath:       "/AppStream"
+
+
+
   ##
   ##
   ##
@@ -208,8 +230,8 @@ xtoph_kickstart_profiles:
    
   rhel82-pxe:
     kickstart_profile:
-      name:              "rhel82-bootiso"
-      description:       "Red Hat Enterprise Linux 8.2 Boot ISO" 
+      name:              "rhel82-pxe"
+      description:       "Red Hat Enterprise Linux 8.2 PXE" 
       method:            "pxe"
       wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
