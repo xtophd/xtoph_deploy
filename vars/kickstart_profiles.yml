@@ -39,7 +39,7 @@ xtoph_kickstart_profiles:
       name:              "pxe_wait"
       description:       "There is no kickstart or repo, just pxe boot"
       method:            "pxe"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
 
 
@@ -55,7 +55,7 @@ xtoph_kickstart_profiles:
       name:              "pxe_nowait"
       description:       "There is no kickstart or repo, just pxe boot"
       method:            "pxe"
-      wait_for_shutdown: "{{ h_pwrOFF | default('False') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
       wait_for_ssh:      true
 
 
@@ -71,7 +71,7 @@ xtoph_kickstart_profiles:
       name:              "rhel84"
       description:       "Red Hat Enterprise Linux 8.4 DVD" 
       method:            "cdrom"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.4-x86_64-dvd.iso"
@@ -93,7 +93,7 @@ xtoph_kickstart_profiles:
       name:              "rhel84-bootiso"
       description:       "Red Hat Enterprise Linux 8.4 Boot ISO" 
       method:            "network"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel8-bootiso.j2"
       boot_iso:          "rhel-8.4-x86_64-boot.iso"
@@ -143,7 +143,7 @@ xtoph_kickstart_profiles:
       name:              "rhel83"
       description:       "Red Hat Enterprise Linux 8.3 DVD" 
       method:            "cdrom"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.3-x86_64-dvd.iso"
@@ -163,7 +163,7 @@ xtoph_kickstart_profiles:
       name:              "rhel83-bootiso"
       description:       "Red Hat Enterprise Linux 8.3 Boot ISO" 
       method:            "network"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel8-bootiso.j2"
       boot_iso:          "rhel-8.3-x86_64-boot.iso"
@@ -191,7 +191,7 @@ xtoph_kickstart_profiles:
       name:              "rhel82"
       description:       "Red Hat Enterprise Linux 8.2 DVD" 
       method:            "cdrom"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.2-x86_64-dvd.iso"
@@ -262,7 +262,7 @@ xtoph_kickstart_profiles:
       name:              "rhel81"
       description:       "Red Hat Enterprise Linux 8.1 DVD" 
       method:            "cdrom"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel8.j2"
       boot_iso:          "rhel-8.1-x86_64-dvd.iso"
@@ -290,7 +290,7 @@ xtoph_kickstart_profiles:
       name:              "rhel79"
       description:       "Red Hat Enterprise Linux 7.9 DVD" 
       method:            "cdrom"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel7.j2"
       boot_iso:          "rhel-server-7.9-x86_64-dvd.iso"
@@ -309,7 +309,7 @@ xtoph_kickstart_profiles:
       name:              "rhel79-bootiso"
       description:       "Red Hat Enterprise Linux 7.9 Boot ISO" 
       method:            "network"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel7-bootiso.j2"
       boot_iso:          "rhel-server-7.9-x86_64-boot.iso"
@@ -323,6 +323,24 @@ xtoph_kickstart_profiles:
 
 
 
+  rhel79-pxe:
+    kickstart_profile:
+      name:              "rhel79-pxe"
+      description:       "Red Hat Enterprise Linux 7.9 PXE" 
+      method:            "pxe"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+      wait_for_ssh:      true
+      template:          "ks-rhel7-bootiso.j2"
+      boot_iso:          "rhel-server-7.9-x86_64-boot.iso"
+      repo_iso:          "rhel-server-7.9-x86_64-dvd.iso"
+      mnt:               "rhel-7.9"
+      kvm_os_type:       "rhel_7x64"
+      repos:
+        baseos:
+          name:          "my-rhel-7-server-rpms"
+          subpath:       ""
+
+
   ##
   ## CentOS 7
   ##
@@ -334,7 +352,7 @@ xtoph_kickstart_profiles:
       name:              "centos7"
       description:       "CentOS 7 DVD" 
       method:            "cdrom"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel7.j2"
       boot_iso:          "CentOS-7-x86_64-DVD-2009.iso"
@@ -351,7 +369,7 @@ xtoph_kickstart_profiles:
       name:              "centos7-netinstall"
       description:       "CentOS 7 NetInstall" 
       method:            "network"
-      wait_for_shutdown: "{{ h_pwrOFF | default('True') }}"
+      wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
       wait_for_ssh:      true
       template:          "ks-rhel7-bootiso.j2"
       boot_iso:          "CentOS-7-x86_64-NetInstall-2009.iso"
