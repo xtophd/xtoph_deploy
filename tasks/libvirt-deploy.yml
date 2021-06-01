@@ -129,7 +129,6 @@
             register: isoinfo_volume_id
 
     
-    
           ##
           ##    Create the kickstart config for the ISO
           ##
@@ -268,7 +267,7 @@
                   replace: >
                       \1append\2
                       inst.text
-                      inst.ks={{ t_ks_url }}
+                      inst.ks={{ t_ks_hd }}
                       inst.repo={{ t_ks_repo }}
                       ksdevice={{ t_net_dev }}
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
@@ -283,7 +282,7 @@
                       \1linuxefi\2
                       inst.text
                       inst.ks={{ t_ks_url }}
-                      inst.repo={{ t_ks_repo }}
+                      inst.repo={{ t_ks_hd }}
                       ksdevice={{ t_net_dev }}
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
@@ -298,7 +297,7 @@
               t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
               t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout }}"
+              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
               t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
     
             ## End-Of-Block
@@ -392,7 +391,7 @@
 
 
       ##
-      ##    Create the kickstart config for PXE supported installs
+      ##    Create the kickstart config for PXE/NETWORK supported installs
       ##
 
 
@@ -418,7 +417,7 @@
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.template is defined and
-              xtoph_deploy.kickstart_profile.method == "pxe"
+              xtoph_deploy.kickstart_profile.method != "cdrom"
 
 
 

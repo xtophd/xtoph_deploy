@@ -288,7 +288,7 @@
               t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
               t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout }}"
+              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
               t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
       
             ## End-Of-Block
@@ -372,7 +372,7 @@
 
 
       ##
-      ##    Create the kickstart config for PXE supported installs
+      ##    Create the kickstart config for PXE/NETWORK supported installs
       ##
 
 
