@@ -41,20 +41,6 @@
       
       
       
-        ##
-        ##    We will need facts about the bastion host below, so save them
-        ##
-      
-      
-      
-        - name: "common-dhcp-preprocess : determine bastion pub IP"
-          set_fact:
-            f_bastionName: "{{ hostvars[item]['inventory_hostname_short']}}"
-            f_bastionIP:   "{{ hostvars[item]['h_pubIP'] }}"
-          loop: "{{ groups['myBastion'] }}"
-      
-      
-      
         - block:
       
                 ##
@@ -122,8 +108,8 @@
             - p_netmask:   "{{ xtoph_deploy.network.default.netmask }}"
             - p_broadcast: "{{ xtoph_deploy.network.default.broadcast }}"
             - p_gateway:   "{{ xtoph_deploy.network.default.gateway }}"
-            - p_dns:       "{{ xtoph_deploy.deployhost.ip if g_useDNS else xtoph_deploy.network.default.nameserver }}"
-            - p_ntp:       "{{ xtoph_deploy.deployhost.ip if g_useNTP else xtoph_deploy.network.default.timeserver }}"
+            - p_dns:       "{{ xtoph_deploy.network.default.nameserver }}"
+            - p_ntp:       "{{ xtoph_deploy.network.default.timeserver }}"
             - p_domain:    "{{ xtoph_deploy.network.default.basedomain }}"
             - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
             - p_cluster:   "{{ g_clusterName }}"

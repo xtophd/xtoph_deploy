@@ -138,14 +138,6 @@
 
 
 
-- name: "common-dhcp-setup : determine bastion pub IP"
-  set_fact:
-    f_bastionName: "{{ hostvars[item]['inventory_hostname_short']}}"
-    f_bastionIP:   "{{ hostvars[item]['h_pubIP'] }}"
-  loop: "{{ groups['myBastion'] }}"
-
-
-
 - name: "common-dhcp-setup : deploy grub.cfg in tftpboot directory"
   vars:
     - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
