@@ -1,0 +1,14 @@
+set timeout=15
+
+insmod video_bochs
+insmod video_cirrus
+insmod all_video
+set gfxpayload=keep
+insmod gzio
+insmod part_gpt
+insmod ext2
+set timeout=10
+
+menuentry 'Machine Config is Missing' {
+}
+

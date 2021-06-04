@@ -1,0 +1,31 @@
+insmod video_bochs
+insmod video_cirrus
+insmod all_video
+set gfxpayload=keep
+insmod gzio
+insmod part_gpt
+insmod ext2
+set timeout=15
+
+
+
+menuentry 'Install {{ xtoph_deploy.kickstart_profile.mnt }}' {
+  linuxefi efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/vmlinuz rd.live.check quiet inst.text inst.ks={{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }} ip={{ xtoph_deploy.network.default.ip }}::{{ xtoph_deploy.network.default.gateway }}:{{ xtoph_deploy.network.default.netmask }}::{{ xtoph_deploy.network.default.dev }}:none nameserver={{ xtoph_deploy.network.default.nameserver }}
+  initrdefi efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img  
+
+  echo "Starting installation of {{ xtoph_deploy.kickstart_profile.mnt }}"
+  echo "Assets: "
+  echo "  efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/vmlinuz"
+  echo "  efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img"
+}
+
+
+
+menuentry 'Retry config grub.cfg-01-{{ t_name }}' {
+     insmod net
+     insmod http
+     echo 'Loading Linux ...'
+     configfile efi/grub.cfg-01-{{ t_name }}
+}
+
+
