@@ -234,7 +234,7 @@
 
         - name: "common-dhcp-preprocess : deploy machine pxe configs for BIOS and EFI"
           vars:
-            t_name: "{{ h_pubMAC | replace(':','-') }}"
+            t_name: "{{ h_pubMAC | lower | replace(':','-') }}"
           template:
             src:  "{{ item.src  }}"
             dest: "{{ item.dst }}"
