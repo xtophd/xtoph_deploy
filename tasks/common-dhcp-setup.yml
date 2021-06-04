@@ -137,17 +137,17 @@
     - ansible_distribution == "CentOS"
 
 
-
-- name: "common-dhcp-setup : deploy grub.cfg in tftpboot directory"
-  vars:
-    - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
-    - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
-  template:
-    src:   "pxe-grub-config.j2"
-    dest:  "/var/lib/tftpboot/efi/grub.cfg"
-    mode:  "0644"
-    owner: root
-    group: root
+# DEPRECATED: 6/4/2021
+#- name: "common-dhcp-setup : deploy grub.cfg in tftpboot directory"
+#  vars:
+#    - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
+#    - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
+#  template:
+#    src:   "pxe-grub-config.j2"
+#    dest:  "/var/lib/tftpboot/efi/grub.cfg"
+#    mode:  "0644"
+#    owner: root
+#    group: root
 
 
 

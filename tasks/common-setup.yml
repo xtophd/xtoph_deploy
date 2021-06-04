@@ -36,7 +36,7 @@
 
 
 - name: "common-setup : install supporting packages"
-  yum: name=python-netaddr,genisoimage,xorriso,syslinux,git,tree,wget,yum-utils,net-tools,traceroute,nmap state=installed
+  yum: name=genisoimage,xorriso,syslinux,git,tree,wget,yum-utils,net-tools,traceroute,nmap state=installed
 
 
 
