@@ -4,6 +4,8 @@
 ## Summary:
 ##
 
+
+
 - delegate_to: localhost
   block:
 
@@ -11,8 +13,6 @@
       ##    NOTE: All tasks here are blocked and delegated to execute
       ##          on the deployhost/localhost
       ##
-
-
 
       - name: "common-dhcp-preprocess : stop services"
         throttle: 1
@@ -22,7 +22,17 @@
           - "dhcpd"
           - "tftp"
 
+      - name: "common-dhcp-preprocess : cleanup machine pxe configs for BIOS and EFI"
+        vars:
+          t_name: "{{ h_pubMAC | replace(':','-') }}"
+        file:
+          path:  "{{ item  }}"
+          state: absent
+        loop:
+          - '/var/lib/tftpboot/bios/pxelinux.cfg/01-{{ t_name }}'
+          - '/var/lib/tftpboot/efi/grub.cfg-01-{{ t_name }}'
+        when: xtoph_deploy.cleanup == true
+
   when: xtoph_deploy.kickstart_profile.method == "pxe" and
         xtoph_deploy.kickstart_profile.repo_iso is defined and
         xtoph_deploy.kickstart_profile.repo_iso != ""
-

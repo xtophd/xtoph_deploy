@@ -160,7 +160,7 @@
       
       
       
-        - name: "common-dhcp-preprocess : create tftpboot directories"
+        - name: "common-dhcp-preprocess : create tftpboot directories for OS images"
           throttle: 1
           file:
             path:  "{{ item }}" 
@@ -169,14 +169,12 @@
             group: root
             state: directory
           with_items:
-            - "/var/lib/tftpboot/bios/"
-            - "/var/lib/tftpboot/bios/pxelinux.cfg"
-            - "/var/lib/tftpboot/bios/images"
             - "/var/lib/tftpboot/bios/images/{{ xtoph_deploy.kickstart_profile.mnt }}"
+            - "/var/lib/tftpboot/efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}"
       
       
       
-        - name: "common-dhcp-preprocess : copy release specific PXE artifacts to tftpboot image directory"
+        - name: "common-dhcp-preprocess : copy release specific PXE artifacts to tftpboot image directory (BIOS)"
           throttle: 1
           copy:
             src:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}/images/pxeboot/{{ item }}"
@@ -190,16 +188,36 @@
             - "initrd.img"
 
 
+
+        - name: "common-dhcp-preprocess : copy release specific PXE artifacts to tftpboot image directory (EFI)"
+          throttle: 1
+          copy:
+            src:   "{{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}/images/pxeboot/{{ item }}"
+            dest:  "/var/lib/tftpboot/efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/{{ item }}"
+            mode:  "0644"
+            owner: root
+            group: root
+            remote_src: yes
+          with_items:
+            - "vmlinuz"
+            - "initrd.img"
+
+
+
         #
         #    Create machine specific configuration file
         #
         #    NOTE:  
         #          pxelinux.0 looks for config files in
         #          a specific order. See link for details
+        #          
         #
         #          We use: ../pxelinux.cfg/01-{{ MAC-ADDRESS }}
         #
         #                  "{{ h_pubMAC | replace(':','-') }}"
+        #
+        #          the efi shim64.efi also uses this mechanism
+        #          looking for: ../grub.cfg-01-aa-bb-cc-dd-ee-ff
         #
         #          Alternative could be a HEX version of the IP,
         #          Note that ip4_hex requires python-netaddr package
@@ -212,20 +230,66 @@
         #
         #
 
-        - name: "common-dhcp-preprocess : deploy machine pxelinux.cfg"
+
+
+        - name: "common-dhcp-preprocess : deploy machine pxe configs for BIOS and EFI"
           vars:
             t_name: "{{ h_pubMAC | replace(':','-') }}"
           template:
-            src: "pxelinux-machine-config.j2"
-            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/01-{{ t_name }}"
+            src:  "{{ item.src  }}"
+            dest: "{{ item.dst }}"
             owner: root
+            group: root
+            mode: 0644
+          loop:
+            - { src: 'pxelinux-machine-config.j2', dst: '/var/lib/tftpboot/bios/pxelinux.cfg/01-{{ t_name }}' }
+            - { src: 'pxelinux-default-config.j2', dst: '/var/lib/tftpboot/bios/pxelinux.cfg/default'         }
+            - { src: 'grub-machine-config.j2',     dst: '/var/lib/tftpboot/efi/grub.cfg-01-{{ t_name }}'      }
+            - { src: 'grub-default-config.j2',     dst: '/var/lib/tftpboot/efi/grub.cfg'                      }
 
 
 
-        - name: "common-dhcp-preprocess : deploy pxelinux.cfg/default"
-          run_once: true
-          template:
-            src: "pxelinux-default-config.j2"
-            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/default"
-            owner: root
+#        - name: "common-dhcp-preprocess : deploy machine pxelinux.cfg (BIOS)"
+#          vars:
+#            t_name: "{{ h_pubMAC | replace(':','-') }}"
+#          template:
+#            src: "pxelinux-machine-config.j2"
+#            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/01-{{ t_name }}"
+#            owner: root
+#            group: root
+#            mode: 0644
+
+
+
+#        - name: "common-dhcp-preprocess : deploy machine grub.cfg (EFI)"
+#          vars:
+#            t_name: "{{ h_pubMAC | replace(':','-') }}"
+#          template:
+#            src: "pxelinux-machine-config.j2"
+#            dest: "/var/lib/tftpboot/efi/grub.cfg/01-{{ t_name }}"
+#            owner: root
+#            group: root
+#            mode: 0644
+
+
+
+#        - name: "common-dhcp-preprocess : deploy pxelinux.cfg/default (BIOS)"
+#          run_once: true
+#          template:
+#            src: "pxelinux-default-config.j2"
+#            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/default"
+#            owner: root
+#            group: root
+#            mode: 0644
+
+
+
+#        - name: "common-dhcp-preprocess : deploy pxelinux.cfg/default (EFI)"
+#          run_once: true
+#          template:
+#            src: "pxelinux-default-config.j2"
+#            dest: "/var/lib/tftpboot/efi/grub.cfg"
+#            owner: root
+#            group: root
+#            mode: 0644
 
