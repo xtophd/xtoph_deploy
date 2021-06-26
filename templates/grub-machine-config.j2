@@ -10,7 +10,7 @@ set timeout=15
 
 
 menuentry 'Install {{ xtoph_deploy.kickstart_profile.mnt }}' {
-  linuxefi efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/vmlinuz rd.live.check quiet inst.text inst.ks={{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }} ip={{ xtoph_deploy.network.default.ip }}::{{ xtoph_deploy.network.default.gateway }}:{{ xtoph_deploy.network.default.netmask }}::{{ xtoph_deploy.hardware_profile.network.dev }}:none nameserver={{ xtoph_deploy.network.default.nameserver }}
+  linuxefi efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/vmlinuz rd.live.check quiet inst.text inst.ks={{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }} ip={{ xtoph_deploy.network.default.ip }}::{{ xtoph_deploy.network.default.gateway }}:{{ xtoph_deploy.network.default.netmask }}::{{ xtoph_deploy.machine_profile.network.dev }}:none nameserver={{ xtoph_deploy.network.default.nameserver }}
   initrdefi efi/images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img  
 
   echo "Starting installation of {{ xtoph_deploy.kickstart_profile.mnt }}"

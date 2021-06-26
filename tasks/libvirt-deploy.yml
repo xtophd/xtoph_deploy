@@ -141,7 +141,7 @@
           - name: "libvirt-deploy : deploy kickstart config iso temp workspace"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+              p_diskDevice: "{{ xtoph_deploy.machine_profile.disk.dev }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -291,7 +291,7 @@
     
     
             vars:
-              t_net_dev:  "{{ xtoph_deploy.hardware_profile.network.dev   }}"
+              t_net_dev:  "{{ xtoph_deploy.machine_profile.network.dev   }}"
               t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
               t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
               t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
@@ -405,7 +405,7 @@
           - name: "libvirt-deploy : deploy kickstart config iso to http dir"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+              p_diskDevice: "{{ xtoph_deploy.machine_profile.disk.dev }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"

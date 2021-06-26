@@ -28,7 +28,7 @@
       - name: "baremetal-deploy : ipmi verify machine power is off"
         shell:
           cmd: |
-            ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.get_power }} | grep -q 'off'
+            ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
         vars:
           t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
           t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
@@ -135,7 +135,7 @@
           - name: "baremetal-deploy : deploy kickstart config iso temp workspace"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+              p_diskDevice: "{{ xtoph_deploy.machine_profile.disk.dev }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -282,7 +282,7 @@
         
         
             vars:
-              t_net_dev:  "{{ xtoph_deploy.hardware_profile.network.dev   }}"
+              t_net_dev:  "{{ xtoph_deploy.machine_profile.network.dev   }}"
               t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
               t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
               t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
@@ -386,7 +386,7 @@
           - name: "baremetal-deploy : deploy kickstart config iso to http dir"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.hardware_profile.disk.dev }}"
+              p_diskDevice: "{{ xtoph_deploy.machine_profile.disk.dev }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -415,18 +415,18 @@
               cmd: |
                 ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
             loop:
-              "{{ xtoph_deploy.hardware_profile.ipmi.config_steps }}"
+              "{{ xtoph_deploy.machine_profile.ipmi.config_steps }}"
     
           - name: "baremetal-deploy : ipmi set power on"
             shell:
               cmd: |
-                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.power_on }}
+                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_on }}
 
         vars:
           t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
           t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
         when: 
-          - xtoph_deploy.hardware_profile.ipmi is defined and
+          - xtoph_deploy.machine_profile.ipmi is defined and
             deploy_node == true
 
 

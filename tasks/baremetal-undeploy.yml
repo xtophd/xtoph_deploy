@@ -26,7 +26,7 @@
           throttle: 1
           shell:
             cmd: |
-              ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.hardware_profile.ipmi.power_off }}
+              ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_off }}
           ignore_errors: yes
 
       vars:

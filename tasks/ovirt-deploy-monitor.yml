@@ -27,9 +27,9 @@
 
     - name: "ovirt-deploy-monitor : Login to oVirt"
       ovirt_auth:
-        hostname: "{{ xtoph_deploy.ovirt.api.fqdn }}"
-        ca_file:  "{{ xtoph_deploy.ovirt.engine_cafile | default(omit) }}"
-        insecure: "{{ xtoph_deploy.ovirt.insecure |  default(true) }}"
+        hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
+        ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
+        insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
         username: "{{ ovirt_username }}"
         password: "{{ ovirt_password }}"
         state:    present
@@ -53,7 +53,7 @@
     
           - name: "ovirt-deploy-monitor : wait for vm shutdown"
             ovirt_vm_info:
-              pattern: name="{{ xtoph_deploy.ovirt.vm.name }}" cluster="{{ xtoph_deploy.ovirt.cluster_name }}"
+              pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
               auth: "{{ ovirt_auth }}"
             register: vminfo_result
             until: vminfo_result.ovirt_vms[0].status == "down"
@@ -64,16 +64,16 @@
           - name: "ovirt-deploy-monitor : eject iso"
             ovirt_vm:
               auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.ovirt.vm.name }}"
-              cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
+              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
               cd_iso: ""
             when: xtoph_deploy.kickstart_profile.method != "pxe"
       
           - name: "ovirt-deploy-monitor : vm change boot device to hd"
             ovirt_vm:
               auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.ovirt.vm.name }}"
-              cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
+              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
               boot_menu: "no"
               boot_devices:
                 - hd
@@ -83,8 +83,8 @@
             throttle: 1
             ovirt_vm:
               auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.ovirt.vm.name }}"
-              cluster: "{{ xtoph_deploy.ovirt.cluster_name }}"
+              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
               state: "running"
               wait: yes
             retries: 10
@@ -94,8 +94,8 @@
           - name: "ovirt-deploy-monitor : undeploy iso in storage domain"
             ovirt_disk:
               auth: '{{ ovirt_auth }}'
-              name: '{{ xtoph_deploy.ovirt.vm.name }}.iso'
-              storage_domain: '{{ xtoph_deploy.ovirt.storage.domain }}'
+              name: '{{ xtoph_deploy.platform_profile.vm.name }}.iso'
+              storage_domain: '{{ xtoph_deploy.machine_profile.storage.default.domain_name }}'
               state: absent
               wait: yes
             when: xtoph_deploy.kickstart_profile.method != "pxe"

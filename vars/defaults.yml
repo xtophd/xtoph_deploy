@@ -2,7 +2,6 @@ xtoph_deploy:
 
   hostname: "{{ inventory_hostname }}"
 
-
   deployhost:
 
     ##     platform type [ ovirt | libvirt ]
@@ -104,97 +103,88 @@ xtoph_deploy:
 
 
 
-  libvirt:
-
-    ##
-    ##    netsted_virt_enable:   add flags to the OS kernel
-    ##                           to allow passtrough virt
-    ##
-
-    nested_virt_enable: false
-
-    vm:
-      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
-
-    network:
-
-      default:
-        network_name:    "virbr_{{ g_clusterName }}"
-        fwd_type:        "nat"
-        dev:             "eno1"
-        description:     "Primary interface"
-
-    storage:
-
-      qcow_dir: "/home/virt-images"
-
-
-    
-  ovirt:
-
-    cluster_name:  "Default"
-    engine_cafile: "/etc/pki/ovirt-engine/ca.pem"
-    insecure:      true
-
-    vm:
-      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
-
-    api:
-
-      ip:   ""
-      fqdn: ""
-
-      username: ""
-      password: ""
-
-    network:
-
-      name: ""
-
-      default:
-        description:   "Default network using ovirtmgmt"
-        ovirt_network: "ovirtmgmt"
-        ovirt_model:   "virtio"
-        managed:       "no"
-
-      private:
-        description:   "Private network created/managed"
-        ovirt_network: "TBD"
-        ovirt_model:   "virtio"
-        managed:       "yes"
-
-    storage:
-
-      domain: ""
-
-      profiles:
-
-        default:
-          description: "Default storage using sparse virtio-scsi (sda)"
-          bus:         "virtio_scsi"
-          sparse:      "true"
-      
-        virtio-scsi:
-          description: "Default storage using virtio-scsi (sda)"
-          bus:         "virtio_scsi"
-          sparse:      "false"
-  
-        virtio:
-          description: "Default storage using virtio (vda)"
-          bus:         "virtio"
-          sparse:      "false"
-
-  baremetal:
-
-    vm:
-      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
-
-    network:
-
-      default:
-        dev:             "eno4"
-        description:     "Primary interface"
-
+#  libvirt:
+#
+#    ##
+#    ##    netsted_virt_enable:   add flags to the OS kernel
+#    ##                           to allow passtrough virt
+#    ##
+#
+#    nested_virt_enable: false
+#
+#    vm:
+#      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
+#
+#    network:
+#
+#      default:
+#        network_name:    "virbr_{{ g_clusterName }}"
+#        fwd_type:        "nat"
+#        dev:             "eno1"
+#        description:     "Primary interface"
+#
+#    storage:
+#
+#      qcow_dir: "/home/virt-images"
+#
+#
+#    
+#  ovirt:
+#
+#    cluster_name:  "Default"
+#    engine_cafile: "/etc/pki/ovirt-engine/ca.pem"
+#    insecure:      true
+#
+#    vm:
+#      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
+#
+#    api:
+#
+#      ip:   ""
+#      fqdn: ""
+#
+#      username: ""
+#      password: ""
+#
+#    network:
+#
+#      default:
+#        description:   "Default network using virtio on ovirtmgmt"
+#        ovirt_network: "ovirtmgmt"
+#        ovirt_model:   "virtio"
+#
+#    storage:
+#
+#      default:
+#        description: "Default storage using sparse virtio-scsi (sda)"
+#        bus:         "virtio_scsi"
+#        sparse:      "true"
+#        domain:      ""
+#
+#      ## Other examples
+#      #
+#      #      default:
+#      #        description: "Storage using virtio-scsi (sda)"
+#      #        bus:         "virtio_scsi"
+#      #        sparse:      "false"
+#      #  
+#      #      default:
+#      #        description: "Default storage using virtio (vda)"
+#      #        bus:         "virtio"
+#      #        sparse:      "false"
+#
+#
+#  baremetal:
+#
+#    vm:
+#      name: "{{ g_clusterName }}_{{ inventory_hostname }}"
+#
+#    network:
+#
+#      default:
+#        dev:             "eno4"
+#        description:     "Primary interface"
+#
   network:
 
     default:

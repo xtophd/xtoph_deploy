@@ -3,7 +3,7 @@
 
 
 ##
-##    DEBUG OUTPUT
+##        DEBUG OUTPUT
 ##
 
 
@@ -14,63 +14,155 @@
 
 
 ##
-##    Load variables
+##        Load variables
 ##
 
 
 
-- name: "main.yml : loading config variables"
+- name: "main.yml : loading required parameters"
   include_vars:
     file: "../../../config/{{ item }}"
   loop:
     - xtoph-deploy-config.yml
     - credentials.yml
 
-- name: "main.yml : loading xtoph_deploy/vars variables"
+- name: "main.yml : loading default parameters"
   include_vars:
     file: "../vars/{{ item }}"
   loop:
     - defaults.yml
+    - platform_profiles.yml
+    - machine_profiles.yml
     - resource_profiles.yml
-    - hardware_profiles.yml
     - kickstart_profiles.yml
 
+- name: "main.yml : loading optional platform customizations"
+  ignore_errors: yes
+  include_vars:
+    file: "../../../config/xtoph-custom-platform.yml"
+
+- name: "main.yml : loading optional machine customizations"
+  ignore_errors: yes
+  include_vars:
+    file: "../../../config/xtoph-custom-machine.yml"
+
+- name: "main.yml : loading optional resource customizations"
+  ignore_errors: yes
+  include_vars:
+    file: "../../../config/xtoph-custom-resource.yml"
+
+- name: "main.yml : loading optional kickstart customizations"
+  ignore_errors: yes
+  include_vars:
+    file: "../../../config/xtoph-custom-kickstart.yml"
+
 
 
 ##
-##    Combine variables under a single dictionary (xtoph_deploy)
+##        Combine variables under single dictionaries
 ##
-##    For the various profiles, we only merge the chunk 
-##    relevant to this host (inventory_hostname) which is
-##    determined by  xtoph_deploy.selected_profile.XXX variable
-## 
 
 
 
-- name: "main.yml : merging xtoph_deploy_config into single dictionary called 'xtoph_deploy'"
+- name: "main.yml : merging default and customer xtoph_deploy parameters  into single dictionary called 'xtoph_deploy'"
   set_fact:
     xtoph_deploy: "{{ xtoph_deploy | combine(xtoph_deploy_config, recursive=True) }}"
 
-- name: "main.yml : merge hardware_profile into xtoph_deploy"
+- name: "main.yml : merging default and custom platform profiles into single dictionary called 'xtoph_platform_profiles'"
   set_fact:
-    xtoph_deploy: "{{ xtoph_hardware_profiles[xtoph_deploy.selected_profile.hardware] | combine(xtoph_deploy) }}"
-  when: xtoph_deploy.selected_profile.hardware != ''
+    xtoph_platform_profiles: "{{ xtoph_platform_profiles | combine(xtoph_custom_platform, recursive=True) }}"
+  when:  xtoph_custom_platform is defined
 
-- name: "main.yml : merge kickstart_profile into xtoph_deploy"
+- name: "main.yml : merging default and custom machine profiles into single dictionary called 'xtoph_machine_profiles'"
   set_fact:
-    xtoph_deploy: "{{ xtoph_kickstart_profiles[xtoph_deploy.selected_profile.kickstart] | combine(xtoph_deploy) }}"
-  when: xtoph_deploy.selected_profile.kickstart != ''
+    xtoph_machine_profiles: "{{ xtoph_machine_profiles | combine(xtoph_custom_machine, recursive=True) }}"
+  when:  xtoph_custom_machine is defined
 
-- name: "main.yml : merge resource_profile into xtoph_deploy"
+- name: "main.yml : merging default and custom resource profiles into single dictionary called 'xtoph_resource_profiles'"
+  set_fact:
+    xtoph_resource_profiles: "{{ xtoph_resource_profiles | combine(xtoph_custom_resource, recursive=True) }}"
+  when:  xtoph_custom_resource is defined
+
+- name: "main.yml : merging default and custom kickstart profiles into single dictionary called 'xtoph_kickstart_profiles'"
+  set_fact:
+    xtoph_kickstart_profiles: "{{ xtoph_kickstart_profiles | combine(xtoph_custom_kickstart, recursive=True) }}"
+  when:  xtoph_custom_kickstart is defined
+
+
+
+##
+##        Graft resource / machine / platform / kickstart dictionaries onto xtoph_deploy
+##
+
+
+- name: "main.yml : graft resource_profile onto xtoph_deploy"
   set_fact:
     xtoph_deploy: "{{ xtoph_resource_profiles[xtoph_deploy.selected_profile.resource] | combine(xtoph_deploy) }}"
   when: xtoph_deploy.selected_profile.resource != ''
 
+- name: "main.yml : graft machine_profile onto xtoph_deploy"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_machine_profiles[xtoph_deploy.selected_profile.machine] | combine(xtoph_deploy) }}"
+  when: xtoph_deploy.selected_profile.machine != ''
+
+- name: "main.yml : graft platform_profile onto xtoph_deploy"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_platform_profiles[xtoph_deploy.machine_profile.platform] | combine(xtoph_deploy) }}"
+  when: xtoph_deploy.machine_profile.platform != ''
+
+- name: "main.yml : graft kickstart_profile onto xtoph_deploy"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_kickstart_profiles[xtoph_deploy.selected_profile.kickstart] | combine(xtoph_deploy) }}"
+  when: xtoph_deploy.selected_profile.kickstart != ''
+
 
 
 ##
-##    If xtoph_deploy.debug is 'true', 
-##    dump the current xtoph_deploy dictionary
+##        Copy platform_profile vm_name, kickstart, storage.defaults & 
+##        network.defaults to xtoph_deploy.machine_profile
+##
+##        NOTE: ansible 2.9 does NOT provide list_merge options for 
+##              the combine() filter as later releases do.  Thus, to 
+##              mimic the behaviour of right hash overriding the left 
+##              hash, I merely introduce a 'when' test to determine 
+##              if the key is already redfined
+##
+
+
+
+- name: "main.yml : copy platform_profile kickstart values to machine_profile"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {item.key: item.value}}}, recursive=True ) }}"
+  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart) }}"
+  when: 
+    - xtoph_deploy.machine_profile.platform != '' 
+    - xtoph_deploy.machine_profile.kickstart[item.key] is undefined
+
+- name: "main.yml : copy platform_profile default storage values to machine_profile"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'storage': {'default': {item.key: item.value}}}}, recursive=True ) }}"
+  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.storage.default) }}"
+  when: 
+    - xtoph_deploy.machine_profile.platform != '' 
+    - xtoph_deploy.machine_profile.storage.default[item.key] is undefined
+
+- name: "main.yml : copy platform_profile default network values to machine_profile"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {item.key: item.value}}}}, recursive=True ) }}"
+  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.network.default) }}"
+  when: 
+    - xtoph_deploy.machine_profile.platform != ''
+    - xtoph_deploy.machine_profile.network.default[item.key] is undefined
+
+
+
+##
+##        At this point, pruning and grafting 
+##        xtoph_deploy dictionary is complete
+##
+##
+##        If xtoph_deploy.debug is 'true', 
+##        dump the current xtoph_deploy dictionary
 ## 
 
 
@@ -138,7 +230,7 @@
   include_tasks: "{{ platform_item.tasks }}"
   when: 
     - xtoph_deploy_action == "undeploy" 
-    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+    - xtoph_deploy.machine_profile.platform == platform_item.platform
   loop_control:
     loop_var: platform_item
   with_items:
@@ -161,7 +253,7 @@
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "preprocess" 
-    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+    - xtoph_deploy.machine_profile.platform == platform_item.platform
   loop_control:
     loop_var: platform_item
   with_items:
@@ -202,7 +294,7 @@
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "deploy" 
-    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+    - xtoph_deploy.machine_profile.platform == platform_item.platform
   loop_control:
     loop_var: platform_item
   with_items:
@@ -225,7 +317,7 @@
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "deploy" 
-    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+    - xtoph_deploy.machine_profile.platform == platform_item.platform
   loop_control:
     loop_var: platform_item
   with_items:
@@ -248,7 +340,7 @@
   include_tasks: "{{ platform_item.playbook }}"
   when: 
     - xtoph_deploy_action == "deploy" 
-    - xtoph_deploy.hardware_profile.platform == platform_item.platform
+    - xtoph_deploy.machine_profile.platform == platform_item.platform
   loop_control:
     loop_var: platform_item
   with_items:

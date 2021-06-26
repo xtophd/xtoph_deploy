@@ -22,7 +22,7 @@ User work-flow:
   * manual steps on deployhost
       * provision system with an @base install of RHEL 7 or 8
       * install ansible and git
-      * installed needed ISOs of RHEL (default location: /home/iso)
+      * install needed ISOs of RHEL (default location: /home/iso)
       * pull the workshop/project that uses xtoph_deploy
       * edit the configs to match environment
   * run xtoph_deploy setup
