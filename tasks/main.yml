@@ -91,67 +91,72 @@
 
 
 ##
-##        Graft resource / machine / platform / kickstart dictionaries onto xtoph_deploy
+##        Graft specific resource, machine, platform and kickstart profiles onto xtoph_deploy
 ##
+
 
 
 - name: "main.yml : graft resource_profile onto xtoph_deploy"
   set_fact:
     xtoph_deploy: "{{ xtoph_resource_profiles[xtoph_deploy.selected_profile.resource] | combine(xtoph_deploy) }}"
-  when: xtoph_deploy.selected_profile.resource != ''
+  when: xtoph_deploy.selected_profile.resource is defined and xtoph_deploy.selected_profile.resource != ''
 
 - name: "main.yml : graft machine_profile onto xtoph_deploy"
   set_fact:
     xtoph_deploy: "{{ xtoph_machine_profiles[xtoph_deploy.selected_profile.machine] | combine(xtoph_deploy) }}"
-  when: xtoph_deploy.selected_profile.machine != ''
+  when: xtoph_deploy.selected_profile.machine is defined and xtoph_deploy.selected_profile.machine != ''
 
 - name: "main.yml : graft platform_profile onto xtoph_deploy"
   set_fact:
     xtoph_deploy: "{{ xtoph_platform_profiles[xtoph_deploy.machine_profile.platform] | combine(xtoph_deploy) }}"
-  when: xtoph_deploy.machine_profile.platform != ''
+  when: xtoph_deploy.machine_profile.platform is defined and xtoph_deploy.machine_profile.platform != ''
 
 - name: "main.yml : graft kickstart_profile onto xtoph_deploy"
   set_fact:
     xtoph_deploy: "{{ xtoph_kickstart_profiles[xtoph_deploy.selected_profile.kickstart] | combine(xtoph_deploy) }}"
-  when: xtoph_deploy.selected_profile.kickstart != ''
+  when: xtoph_deploy.selected_profile.kickstart is defined and xtoph_deploy.selected_profile.kickstart != ''
 
 
 
 ##
-##        Copy platform_profile vm_name, kickstart, storage.defaults & 
+##        Copy platform_profile kickstart, storage.defaults & 
 ##        network.defaults to xtoph_deploy.machine_profile
 ##
-##        NOTE: ansible 2.9 does NOT provide list_merge options for 
+##        NOTE: ansible 2.9 does NOT provide 'list_merge' option for 
 ##              the combine() filter as later releases do.  Thus, to 
 ##              mimic the behaviour of right hash overriding the left 
-##              hash, I merely introduce a 'when' test to determine 
-##              if the key is already redfined
+##              hash, we use a 'when' test to determine if the key is
+##              undefined
 ##
+##        NOTE: when running action = 'setup' a situation arises for
+##              the deployhost whereby the platform_profile is undefined,
+##              thus to avoid failure we provide the default({}) empty
+##              dictionary to the loop.  Also by using this technique
+##              we don't have to test if the dictionaries exist
+##              in the first place.  An empty set will have 0 elements
+##             
 
 
 
 - name: "main.yml : copy platform_profile kickstart values to machine_profile"
   set_fact:
     xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {item.key: item.value}}}, recursive=True ) }}"
-  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart) }}"
+  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart | default({}) ) }}"
   when: 
-    - xtoph_deploy.machine_profile.platform != '' 
     - xtoph_deploy.machine_profile.kickstart[item.key] is undefined
 
 - name: "main.yml : copy platform_profile default storage values to machine_profile"
   set_fact:
     xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'storage': {'default': {item.key: item.value}}}}, recursive=True ) }}"
-  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.storage.default) }}"
+  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.storage.default | default({}) ) }}"
   when: 
-    - xtoph_deploy.machine_profile.platform != '' 
     - xtoph_deploy.machine_profile.storage.default[item.key] is undefined
 
 - name: "main.yml : copy platform_profile default network values to machine_profile"
   set_fact:
     xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {item.key: item.value}}}}, recursive=True ) }}"
-  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.network.default) }}"
+  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.network.default | default({}) ) }}"
   when: 
-    - xtoph_deploy.machine_profile.platform != ''
     - xtoph_deploy.machine_profile.network.default[item.key] is undefined
 
 

@@ -19,7 +19,7 @@
 
 
 
-if ! nmcli dev show "{{ xtoph_deploy.libvirt.network.default.network_name }}" ; then
+if ! nmcli dev show "{{ xtoph_deploy.machine_profile.network.default.network_name }}" ; then
    
 
  
@@ -30,8 +30,8 @@ if ! nmcli dev show "{{ xtoph_deploy.libvirt.network.default.network_name }}" ; 
     
     
     nmcli con add type bridge \
-          con-name "{{ xtoph_deploy.libvirt.network.default.network_name }}" \
-          ifname   "{{ xtoph_deploy.libvirt.network.default.network_name }}" \
+          con-name "{{ xtoph_deploy.machine_profile.network.default.network_name }}" \
+          ifname   "{{ xtoph_deploy.machine_profile.network.default.network_name }}" \
           ip4      "{{ xtoph_deploy.deployhost.ip }}/{{ xtoph_deploy.network.default.prefix }}" \
           gw4      "{{ xtoph_deploy.network.default.gateway }}" \
           ipv4.dns "{{ xtoph_deploy.network.default..nameserver }}" \
@@ -46,11 +46,11 @@ if ! nmcli dev show "{{ xtoph_deploy.libvirt.network.default.network_name }}" ; 
     
     
     nmcli con add type ethernet \
-          con-name {{ xtoph_deploy.libvirt.network.default.network_name }} \
-          ifname   {{ xtoph_deploy.libvirt.network.default.dev }} \
-          master   {{ xtoph_deploy.libvirt.network.default.network_name }}
+          con-name {{ xtoph_deploy.machine_profile.network.default.network_name }} \
+          ifname   {{ xtoph_deploy.machine_profile.network.default.bridge_netdev }} \
+          master   {{ xtoph_deploy.machine_profile.network.default.network_name }}
     
-    nmcli con modify {{ xtoph_deploy.libvirt.network.default.network_name }} connection.autoconnect-slaves yes
+    nmcli con modify {{ xtoph_deploy.machine_profile.network.default.network_name }} connection.autoconnect-slaves yes
     
     
     
@@ -60,8 +60,8 @@ if ! nmcli dev show "{{ xtoph_deploy.libvirt.network.default.network_name }}" ; 
     
     
     
-    ifdown "{{ xtoph_deploy.libvirt.network.default.dev }}"
-    ifdown "{{ xtoph_deploy.libvirt.network.default.network_name }}"
-    ifup   "{{ xtoph_deploy.libvirt.network.default.network_name }}"
+    ifdown "{{ xtoph_deploy.machine_profile.network.default.bridge_netdev }}"
+    ifdown "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+    ifup   "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
 
 fi
