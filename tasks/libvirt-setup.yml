@@ -56,14 +56,14 @@
 
 
 ##
-##   Set up QCOW directories
+##   Set up QCOW directory for default storage
 ##
 
 
 
-- name: "libvirt-setup: create qcow directory"
+- name: "libvirt-setup: create default qcow directory"
   file:
-    path: "{{ xtoph_deploy.libvirt.storage.qcow_dir }}"
+    path: "{{ xtoph_platform_profiles.libvirt.platform_profile.storage.default.qcow_dir }}"
     mode: "0775"
     state: directory
 
@@ -124,7 +124,7 @@
         name: libvirtd
         state: started
 
-  when: xtoph_deploy.libvirt.nested_virt_enable == true
+  when: xtoph_platform_profiles.libvirt.platform_profile.nested_virt_enable == true
 
 
 

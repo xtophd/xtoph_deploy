@@ -87,14 +87,20 @@
 
 
 
-- name: "common-dhcp-setup : download rpms (do not install) for efi artifacts"
-  yum:
-    name: shim-x64,grub2-efi-x64
-    state: latest
-    download_dir: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
-    download_only: yes
+#- name: "common-dhcp-setup : download rpms (do not install) for efi artifacts"
+#  yum:
+#    name: shim-x64,grub2-efi-x64
+##    state: latest
+#    download_dir: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
+#    download_only: yes
 
--debug: msg="{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
+- name: "common-dhcp-setup : download rpms (do not install) for efi artifacts"
+  shell:
+    cmd: |
+      cd {{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms;  yumdownloader {{ item }}
+  with_items:
+    - "shim-x64"
+    - "grub2-efi-x64"
 
 - name: "common-dhcp-setup : unpack contents of rpms for efi artifacts"
   shell:

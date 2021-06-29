@@ -67,8 +67,8 @@
           cmd: |
             ssh-keygen -R "{{ inventory_hostname }}"
             ssh-keygen -R "{{ inventory_hostname_short }}"
-            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.network.default.fqdn }}"
-            ssh-keygen -R "{{ xtoph_deploy.network.default.ip }}"
+            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}"
+            ssh-keygen -R "{{ xtoph_deploy.machine_profile.network.default.ip }}"
         ignore_errors: yes
 
   when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
@@ -98,14 +98,14 @@
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-          regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.network.default.fqdn }}.*"
+          regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}.*"
           state:  absent
 
       - name: "common-deploy-preprocess: add entry in /etc/hosts"
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-          line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{  xtoph_deploy.network.default.fqdn }}"
+          line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{  xtoph_deploy.machine_profile.network.default.fqdn }}"
           state:  present
 
       ##

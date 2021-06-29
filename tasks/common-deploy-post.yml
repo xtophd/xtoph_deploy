@@ -38,7 +38,7 @@
       - name: "common-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
-          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.network.default.fqdn }}"
+          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}"
         shell:
           cmd: |
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts

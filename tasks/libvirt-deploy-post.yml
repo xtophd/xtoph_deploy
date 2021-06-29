@@ -18,5 +18,5 @@
 
 
         - name: "libvirt-deploy-post : platform post install tasks"
-          debug: msg="No special post install tasks for baremetal"
+          debug: msg="No special post install tasks for libvirt"
 

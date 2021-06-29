@@ -175,6 +175,9 @@
 - debug: var=xtoph_deploy
   when: xtoph_deploy.debug == true
 
+- debug: var=xtoph_platform_profiles
+  when: xtoph_deploy.debug == true
+
 
 
 ##
@@ -204,7 +207,7 @@
   include_tasks: "{{ platform_item.tasks }}"
   when: 
     - xtoph_deploy_action == "setup" 
-    - platform_item.platform in xtoph_deploy.deployhost.platform
+    - platform_item.platform in xtoph_deploy.deployhost.platform_enable
   loop_control:
     loop_var: platform_item
   with_items:

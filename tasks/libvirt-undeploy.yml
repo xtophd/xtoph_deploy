@@ -27,7 +27,7 @@
       throttle: 1
       shell:
         cmd: |
-          virsh destroy "{{ xtoph_deploy.libvirt.vm.name }}"
+          virsh destroy "{{ xtoph_deploy.platform_profile.vm.name }}"
       ignore_errors: yes
 
 
@@ -36,7 +36,7 @@
       throttle: 1
       shell:
         cmd: |
-          virsh undefine "{{ xtoph_deploy.libvirt.vm.name }}" --remove-all-storage --nvram
+          virsh undefine "{{ xtoph_deploy.platform_profile.vm.name }}" --remove-all-storage --nvram
       ignore_errors: yes
 
 
@@ -44,6 +44,6 @@
     - name: "libvirt-undeploy : undeploy iso in storage directory"
       throttle: 1
       file:
-        path: "{{ xtoph_deploy.libvirt.storage.qcow_dir }}/{{ xtoph_deploy.libvirt.vm.name }}.iso"
+        path: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         state: absent
 
