@@ -23,7 +23,7 @@
   include_vars:
     file: "../../../config/{{ item }}"
   loop:
-    - xtoph-deploy-config.yml
+    - xtoph-config.yml
     - credentials.yml
 
 - name: "main.yml : loading default parameters"
@@ -39,22 +39,22 @@
 - name: "main.yml : loading optional platform customizations"
   ignore_errors: yes
   include_vars:
-    file: "../../../config/xtoph-custom-platform.yml"
+    file: "../../../config/xtoph-config-platform.yml"
 
 - name: "main.yml : loading optional machine customizations"
   ignore_errors: yes
   include_vars:
-    file: "../../../config/xtoph-custom-machine.yml"
+    file: "../../../config/xtoph-config-machine.yml"
 
 - name: "main.yml : loading optional resource customizations"
   ignore_errors: yes
   include_vars:
-    file: "../../../config/xtoph-custom-resource.yml"
+    file: "../../../config/xtoph-config-resource.yml"
 
 - name: "main.yml : loading optional kickstart customizations"
   ignore_errors: yes
   include_vars:
-    file: "../../../config/xtoph-custom-kickstart.yml"
+    file: "../../../config/xtoph-config-kickstart.yml"
 
 
 
@@ -66,27 +66,27 @@
 
 - name: "main.yml : merging default and customer xtoph_deploy parameters  into single dictionary called 'xtoph_deploy'"
   set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine(xtoph_deploy_config, recursive=True) }}"
+    xtoph_deploy: "{{ xtoph_deploy | combine(xtoph_config, recursive=True) }}"
 
 - name: "main.yml : merging default and custom platform profiles into single dictionary called 'xtoph_platform_profiles'"
   set_fact:
-    xtoph_platform_profiles: "{{ xtoph_platform_profiles | combine(xtoph_custom_platform, recursive=True) }}"
-  when:  xtoph_custom_platform is defined
+    xtoph_platform_profiles: "{{ xtoph_platform_profiles | combine(xtoph_config_platform, recursive=True) }}"
+  when:  xtoph_config_platform is defined
 
 - name: "main.yml : merging default and custom machine profiles into single dictionary called 'xtoph_machine_profiles'"
   set_fact:
-    xtoph_machine_profiles: "{{ xtoph_machine_profiles | combine(xtoph_custom_machine, recursive=True) }}"
-  when:  xtoph_custom_machine is defined
+    xtoph_machine_profiles: "{{ xtoph_machine_profiles | combine(xtoph_config_machine, recursive=True) }}"
+  when:  xtoph_config_machine is defined
 
 - name: "main.yml : merging default and custom resource profiles into single dictionary called 'xtoph_resource_profiles'"
   set_fact:
-    xtoph_resource_profiles: "{{ xtoph_resource_profiles | combine(xtoph_custom_resource, recursive=True) }}"
-  when:  xtoph_custom_resource is defined
+    xtoph_resource_profiles: "{{ xtoph_resource_profiles | combine(xtoph_config_resource, recursive=True) }}"
+  when:  xtoph_config_resource is defined
 
 - name: "main.yml : merging default and custom kickstart profiles into single dictionary called 'xtoph_kickstart_profiles'"
   set_fact:
-    xtoph_kickstart_profiles: "{{ xtoph_kickstart_profiles | combine(xtoph_custom_kickstart, recursive=True) }}"
-  when:  xtoph_custom_kickstart is defined
+    xtoph_kickstart_profiles: "{{ xtoph_kickstart_profiles | combine(xtoph_config_kickstart, recursive=True) }}"
+  when:  xtoph_config_kickstart is defined
 
 
 

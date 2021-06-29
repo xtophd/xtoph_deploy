@@ -13,6 +13,8 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 30
+          hw_storage_profile: default
+
   
   tiny-extra:
     resource_profile:
@@ -23,15 +25,20 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 30
+          hw_storage_profile: default
         extra:
           disk1:
             size: 5
+            hw_storage_profile: default
           disk2: 
             size: 5
+            hw_storage_profile: default
           disk3: 
             size: 5 
+            hw_storage_profile: default
           disk4: 
             size: 5 
+            hw_storage_profile: default
           
   sml:
     resource_profile:
@@ -42,6 +49,7 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 120 
+          hw_storage_profile: default
   
   med:
     resource_profile:
@@ -52,6 +60,7 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 120 
+          hw_storage_profile: default
   
   lrg:
     resource_profile:
@@ -62,6 +71,7 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 200 
+          hw_storage_profile: default
   
   bastion:
     resource_profile:
@@ -72,6 +82,7 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 50 
+          hw_storage_profile: default
   
   sat6:
     resource_profile:
@@ -82,6 +93,8 @@ xtoph_resource_profiles:
       storage:
         root:
           size: 30
+          hw_storage_profile: default
         extra:
           disk1:
             size: 200
+            hw_storage_profile: default
