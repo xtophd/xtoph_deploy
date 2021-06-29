@@ -94,7 +94,7 @@
     download_dir: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
     download_only: yes
 
-
+-debug: msg="{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
 
 - name: "common-dhcp-setup : unpack contents of rpms for efi artifacts"
   shell:
