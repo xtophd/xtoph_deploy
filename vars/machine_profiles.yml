@@ -1,0 +1,220 @@
+##
+## MACHINE PROFILES
+##
+
+xtoph_machine_profiles:
+
+
+
+  ##
+  ## LIBVIRT/KVM ENTRIES
+  ##
+
+
+
+  kvm_default:
+    machine_profile:
+      description: "KVM vm using defaults"
+      platform: "libvirt"
+      kickstart:
+      storage:
+        default:
+      network:
+        default:
+    
+  kvm_vda:
+    machine_profile:
+      description: "KVM vm using sparse virtio storage"
+      platform: "libvirt"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('vda') }}"
+        netdev: "{{ h_netDEV | default('enp1s0') }}"
+      storage:
+        default:
+          bus: "virtio"
+          sparse: "true"
+      network:
+        default:
+    
+  kvm_nest_vda:
+    machine_profile:
+      description: "KVM vm with nested-virt and virtio disks"
+      platform: "libvirt"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('vda') }}"
+        netdev: "{{ h_netDEV | default('enp1s0') }}"
+      cpu:
+        type: "host-passthrough"
+      storage:
+        default:
+          bus: "virtio"
+      network:
+        default:
+    
+  kvm_sda:
+    machine_profile:
+      description: "KVM vm with virtio-scsi disks"
+      platform: "libvirt"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('enp1s0') }}"
+      storage:
+        default:
+          bus: "virtio-scsi"
+      network:
+        default:
+    
+
+
+  ##
+  ## OVIRT ENTRIES
+  ##
+
+
+  ovirt_default:
+    machine_profile:
+      description: "oVirt default vm"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      kickstart:
+      storage:
+        default:
+      network:
+        default:
+    
+  ovirt_sda:
+    machine_profile:
+      description: "oVirt vm using disk bus = virtio-scsi (sda)"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+      storage:
+        default:
+          bus: "virtio-scsi"
+      network:
+        default:
+    
+  ovirt_vda:
+    machine_profile:
+      description: "oVirt vm using disk bus = virtio (vda)"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('vda') }}"
+      storage:
+        default:
+          bus: "virtio"
+      network:
+        default:
+
+
+
+  ##
+  ## DELL ENTRIES
+  ##
+
+
+ 
+  dell_r720:
+    machine_profile:
+      platform: "baremetal"
+      description: "DELL r720 example"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      storage:
+        default:
+      network:
+        default:
+    
+  dell_r630:
+    machine_profile:
+      platform: "baremetal"
+      description: "DELL r630"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      storage:
+        default:
+      network:
+        default:
+      ipmi:
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus chassis bootdev pxe"
+
+  dell_r740:
+    machine_profile:
+      platform: "baremetal"
+      description: "DELL r740"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      storage:
+        default:
+      network:
+        default:
+      ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus sel time set now"
+          - "-I lanplus chassis bootdev pxe"
+
+
+
+  ##
+  ## HP ENTRIES   
+  ##
+
+
+    
+  hp_dl380:
+    machine_profile:
+      platform: "baremetal"
+      description: "HP DL380"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      usb_delay: "10"
+      storage:
+        default:
+      network:
+        default:
+
+
+
+  ##
+  ## GENERIC PC ENTRIES
+  ##
+
+
+
+  pc_nvme:
+    machine_profile:
+      platform: "baremetal"
+      description: "Generic PC with nvme"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('nvme0n1') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      storage:
+        default:
+      network:
+        default:
+
+  pc_sda:
+    machine_profile:
+      platform: "baremetal"
+      description: "Generic PC with (sata/sas/scsi) sda"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      storage:
+        default:
+      network:
+        default:
