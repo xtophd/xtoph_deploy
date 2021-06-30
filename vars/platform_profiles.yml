@@ -61,6 +61,18 @@ xtoph_platform_profiles:
           description: "Default network used for VMs"
           model: "virtio"
           network_name: ""
+
+          ip:                ""
+          basedomain:        ""
+          network:           ""
+          netmask:           ""
+          broadcast:         ""
+          prefix:            ""
+          gateway:           ""
+          nameserver:        ""
+          timeserver:        ""
+          fqdn:              ""
+          mac:               ""
   
       storage:
         default:
