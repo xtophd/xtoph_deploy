@@ -32,9 +32,9 @@ if ! nmcli dev show "{{ xtoph_deploy.machine_profile.network.default.network_nam
     nmcli con add type bridge \
           con-name "{{ xtoph_deploy.machine_profile.network.default.network_name }}" \
           ifname   "{{ xtoph_deploy.machine_profile.network.default.network_name }}" \
-          ip4      "{{ xtoph_deploy.deployhost.ip }}/{{ xtoph_deploy.network.default.prefix }}" \
+          ip4      "{{ xtoph_deploy.deployhost.ip }}/{{ xtoph_deploy.machine_profile.network.default.prefix }}" \
           gw4      "{{ xtoph_deploy.machine_profile.network.default.gateway }}" \
-          ipv4.dns "{{ xtoph_deploy.machine_profile.network.default..nameserver }}" \
+          ipv4.dns "{{ xtoph_deploy.machine_profile.network.default.nameserver }}" \
           autoconnect yes bridge.stp no ipv6.method ignore
     
     
