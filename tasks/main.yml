@@ -172,10 +172,8 @@
 
 
 
-- debug: var=xtoph_deploy
-  when: xtoph_deploy.debug == true
-
-- debug: var=xtoph_platform_profiles
+- name: "main.yml : debug"
+  debug: var=xtoph_deploy
   when: xtoph_deploy.debug == true
 
 

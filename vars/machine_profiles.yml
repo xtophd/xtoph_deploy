@@ -79,6 +79,7 @@ xtoph_machine_profiles:
       kickstart:
       storage:
         default:
+          bus: "virtio_scsi"
       network:
         default:
     
@@ -91,7 +92,7 @@ xtoph_machine_profiles:
         blkdev: "{{ h_blkDEV | default('sda') }}"
       storage:
         default:
-          bus: "virtio-scsi"
+          bus: "virtio_scsi"
       network:
         default:
     
