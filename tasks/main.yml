@@ -179,6 +179,20 @@
 
 
 ##
+##    ASSERTIONS    
+##
+##        Use ansible assert module to validate
+##        config files and parameters.
+##
+
+
+
+- name: "main.yml : setup common stuff"
+  include_tasks: "common-assertions.yml"
+
+
+
+##
 ##    SETUP
 ##
 ##        Run platform setup for each platform defined by 

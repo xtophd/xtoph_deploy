@@ -1,0 +1,56 @@
+
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+##
+
+
+
+
+##
+##    High level assertions (validation)
+##
+
+
+
+##
+##    All nodes should have xtoph_config.deployhost
+##    branch of the dictionary defined.  We can assert
+##    a few additional sub parameters.
+##
+
+
+
+- name: "common-assertions : xtoph_deploy.deployhost validation"
+  assert:
+    that:
+      - xtoph_deploy.deployhost is defined
+      - xtoph_deploy.deployhost.ip is defined
+    success_msg: "Assertion Passed"
+    fail_msg: "ASSERTION FAILED: xtoph_deploy.deployhost is undefined or missing essential data (CHECK YOUR CONFIGS)"
+
+
+
+##
+##    Nodes that define a platform (which should include
+##    every node EXCEPT the deployhost itself) should have
+##    a complete xtoph_deploy dictionary.  Validate the major
+##    components of the destionary.
+##
+
+
+
+- name: "common-assertions : xtoph_config highlevel validation"
+  assert:
+    that:
+      - xtoph_deploy.platform_profile is defined
+      - xtoph_deploy.machine_profile is defined
+      - xtoph_deploy.resource_profile is defined
+      - xtoph_deploy.kickstart_profile is defined
+    fail_msg: "ASSERTION FAILED xtoph_config is missing essential data (CHECK YOUR CONFIGS)"
+    success_msg: "Assertion Passed"
+  when:
+    - xtoph_deploy.selected_profile.machine != ""
+

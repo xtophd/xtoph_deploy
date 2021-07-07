@@ -1,5 +1,7 @@
 xtoph_deploy: 
 
+  spec_version: "1"
+
   hostname: "{{ inventory_hostname }}"
 
   deployhost:
