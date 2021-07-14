@@ -132,10 +132,10 @@
             file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
           
               
-          - name: "baremetal-deploy : deploy kickstart config iso temp workspace"
+          - name: "baremetal-deploy : deploy kickstart config to iso temp workspace"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.machine_profile.disk.dev }}"
+              p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -282,14 +282,24 @@
         
         
             vars:
-              t_net_dev:  "{{ xtoph_deploy.machine_profile.network.dev   }}"
-              t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
-              t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
-              t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
-              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
+#              t_net_dev:  "{{ xtoph_deploy.machine_profile.network.dev   }}"
+#              t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
+#              t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
+#              t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
+#              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
+#              t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+#              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
+#              t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+              t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
+              t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
+              t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
+              t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
+              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
               t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
               t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg"
+
+
       
             ## End-Of-Block
       
@@ -323,7 +333,7 @@
             vars:
               t_iso_label:  "{{ isoinfo_volume_id.stdout }}"
               t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-              t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.baremetal.vm.name }}.iso"
+              t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
             template:
               src: "mkiso.j2"
               dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
@@ -351,7 +361,7 @@
           - name: "baremetal-deploy : upload iso image"
             throttle: 1
             copy:
-              src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.baremetal.vm.name }}.iso"
+              src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
               dest: "{{ xtoph_deploy.deployhost.iso.dir }}"
     
           - name: "baremetal-deploy : clean-up temporary work-space"
@@ -361,8 +371,8 @@
                   rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
                 fi
     
-                if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.baremetal.vm.name }}.iso" ]] ; then
-                  rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.baremetal.vm.name }}.iso"
+                if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
+                  rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
                 fi
             when: xtoph_deploy.cleanup == true
 
@@ -386,7 +396,7 @@
           - name: "baremetal-deploy : deploy kickstart config iso to http dir"
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.machine_profile.disk.dev }}"
+              p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"

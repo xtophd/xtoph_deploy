@@ -1,5 +1,5 @@
 # {{ xtoph_deploy.hostname }} 
-# {{ xtoph_deploy.network.default.ip }}
+# {{ xtoph_deploy.machine_profile.network.default.ip }}
 
 default menu.c32
 prompt 0
@@ -10,7 +10,7 @@ label {{ xtoph_deploy.kickstart_profile.mnt }}
   menu default
   say Starting installation...
   kernel images/{{ xtoph_deploy.kickstart_profile.mnt }}/vmlinuz
-  append initrd=images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img rd.live.check quiet inst.text inst.ks={{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }} ip={{ xtoph_deploy.network.default.ip }}::{{ xtoph_deploy.network.default.gateway }}:{{ xtoph_deploy.network.default.netmask }}::{{ xtoph_deploy.machine_profile.network.dev }}:none nameserver={{ xtoph_deploy.network.default.nameserver }}
+  append initrd=images/{{ xtoph_deploy.kickstart_profile.mnt }}/initrd.img rd.live.check quiet inst.text inst.ks={{ xtoph_deploy.deployhost.kickstart.url }}/{{ g_clusterName }}-{{ inventory_hostname }}.cfg inst.repo={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }} ip={{ xtoph_deploy.machine_profile.network.default.ip }}::{{ xtoph_deploy.machine_profile.network.default.gateway }}:{{ xtoph_deploy.machine_profile.network.default.netmask }}::{{ xtoph_deploy.machine_profile.kickstart.netdev }}:none nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }}
 
 label local
   menu label Boot from ^local drive

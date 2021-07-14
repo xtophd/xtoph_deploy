@@ -104,13 +104,13 @@
             - p_addr:      "{{ h_pubIP  }}"
             - p_mac:       "{{ h_pubMAC }}"
             - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
-            - p_network:   "{{ xtoph_deploy.network.default.network }}"
-            - p_netmask:   "{{ xtoph_deploy.network.default.netmask }}"
-            - p_broadcast: "{{ xtoph_deploy.network.default.broadcast }}"
-            - p_gateway:   "{{ xtoph_deploy.network.default.gateway }}"
-            - p_dns:       "{{ xtoph_deploy.network.default.nameserver }}"
-            - p_ntp:       "{{ xtoph_deploy.network.default.timeserver }}"
-            - p_domain:    "{{ xtoph_deploy.network.default.basedomain }}"
+            - p_network:   "{{ xtoph_deploy.machine_profile.network.default.network }}"
+            - p_netmask:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
+            - p_broadcast: "{{ xtoph_deploy.machine_profile.network.default.broadcast }}"
+            - p_gateway:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
+            - p_dns:       "{{ xtoph_deploy.machine_profile.network.default.nameserver }}"
+            - p_ntp:       "{{ xtoph_deploy.machine_profile.network.default.timeserver }}"
+            - p_domain:    "{{ xtoph_deploy.machine_profile.network.default.basedomain }}"
             - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
             - p_cluster:   "{{ g_clusterName }}"
             - p_dhcpgroup: "{{ g_clusterName }}"
@@ -222,7 +222,7 @@
         #          Alternative could be a HEX version of the IP,
         #          Note that ip4_hex requires python-netaddr package
         #
-        #                  "{{ xtoph_deploy.network.default.ip | ip4_hex | upper }}"
+        #                  "{{ xtoph_deploy.machine_profile.network.default.ip | ip4_hex | upper }}"
         #
         #    REFERENCE:
         #               https://wiki.syslinux.org/wiki/index.php?title=PXELINUX
