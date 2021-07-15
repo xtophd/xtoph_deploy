@@ -5,7 +5,7 @@
 ##
 
 
-- name: "libvirt-undeploy : BEGIN"
+- name: "libvirt-deploy : BEGIN"
   delegate_to: localhost
   block:
 
@@ -577,18 +577,40 @@
           - delegated_restart_dnsmasq
 
 
+  ##
+  ##    flush_handlers does not support 'when', so we need
+  ##    to exit the block
+  ##
 
-      ##
-      ##    Because we may have just created a new network bridge
-      ##    we need flush looming handlers now
-      ##
+  ##
+  ## End - block:
+  ##
+
+  when: deploy_node == true
 
 
 
-      - name: "Flush handlers"
-        meta: flush_handlers
+##
+##    Because we may have just created a new network bridge
+##    we need flush looming handlers now
+##
 
 
+
+- name: "Flush handlers"
+  delegate_to: localhost
+  meta: flush_handlers
+
+
+
+##
+## Now resume block
+##
+
+
+
+- delegate_to: localhost
+  block:
 
       ##
       ##    Create the virtual machine
