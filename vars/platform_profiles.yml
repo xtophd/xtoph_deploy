@@ -22,7 +22,7 @@ xtoph_platform_profiles:
       network:
         default:
           description: "default network using virtio with nat"
-          network_name: "virbr_{{ g_clusterName }}"
+          network_name: "virbr_{{ xtoph_vars.clustername }}"
           fwd_type: "nat"
           model: "virtio"
           bridge_netdev: "eno1"

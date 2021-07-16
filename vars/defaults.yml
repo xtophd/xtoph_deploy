@@ -4,11 +4,13 @@ xtoph_deploy:
 
   hostname: "{{ inventory_hostname }}"
 
+  clustername: ""
+
   deployhost:
 
-    ##     platform type [ ovirt | libvirt ]
+    ##     platform type [ ovirt | libvirt | baremetal ]
 
-    platform: ""
+    platform_enable: ""
 
     ##     deployer hostname OR ip
 
@@ -67,7 +69,7 @@ xtoph_deploy:
     ##     NOTE: needs to be unique for every host
     ##
 
-    tmp_dir: "/home/tmp/{{ g_clusterName }}/{{ inventory_hostname }}"
+    tmp_dir: "/home/tmp/{{ xtoph_vars.clustername }}/{{ inventory_hostname }}"
 
     ##
     ##    Where with the kickstart configs are stored
@@ -101,6 +103,6 @@ xtoph_deploy:
     dhcp:
       enable:   true
       efi_http: true
-      tmp_dir:  "/home/tmp/{{ g_clusterName }}/dhcp"
+      tmp_dir:  "/home/tmp/{{ xtoph_vars.clustername }}/dhcp"
 
 

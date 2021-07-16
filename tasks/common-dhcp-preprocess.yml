@@ -112,8 +112,8 @@
             - p_ntp:       "{{ xtoph_deploy.machine_profile.network.default.timeserver }}"
             - p_domain:    "{{ xtoph_deploy.machine_profile.network.default.basedomain }}"
             - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
-            - p_cluster:   "{{ g_clusterName }}"
-            - p_dhcpgroup: "{{ g_clusterName }}"
+            - p_cluster:   "{{ xtoph_deploy.clustername }}"
+            - p_dhcpgroup: "{{ xtoph_deploy.clustername }}"
       
       
       

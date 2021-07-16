@@ -16,7 +16,7 @@
 
 
 ##
-##    All nodes should have xtoph_config.deployhost
+##    All nodes should have xtoph_deploy.deployhost
 ##    branch of the dictionary defined.  We can assert
 ##    a few additional sub parameters.
 ##
@@ -42,14 +42,14 @@
 
 
 
-- name: "common-assertions : xtoph_config highlevel validation"
+- name: "common-assertions : xtoph_deploy highlevel validation"
   assert:
     that:
       - xtoph_deploy.platform_profile is defined
       - xtoph_deploy.machine_profile is defined
       - xtoph_deploy.resource_profile is defined
       - xtoph_deploy.kickstart_profile is defined
-    fail_msg: "ASSERTION FAILED xtoph_config is missing essential data (CHECK YOUR CONFIGS)"
+    fail_msg: "ASSERTION FAILED xtoph_deploy is missing essential data (CHECK YOUR CONFIGS)"
     success_msg: "Assertion Passed"
   when:
     - xtoph_deploy.selected_profile.machine != ""

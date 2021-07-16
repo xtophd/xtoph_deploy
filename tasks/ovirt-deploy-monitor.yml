@@ -80,7 +80,7 @@
             when: xtoph_deploy.kickstart_profile.method != "pxe"
       
           - name: "ovirt-deploy-monitor : vm change state to RUNNING (BOOT)"
-            throttle: 1
+            # throttle: 1
             ovirt_vm:
               auth: "{{ ovirt_auth }}"
               name: "{{ xtoph_deploy.platform_profile.vm.name }}"
