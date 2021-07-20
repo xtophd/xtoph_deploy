@@ -4,7 +4,7 @@ xtoph_deploy:
 
   hostname: "{{ inventory_hostname }}"
 
-  clustername: ""
+  clustername: "{{ xtoph_vars.clustername }}"
 
   deployhost:
 
@@ -14,7 +14,7 @@ xtoph_deploy:
 
     ##     deployer hostname OR ip
 
-    ip: ""
+    ip: "{{ xtoph_vars.deployhost_ip }}"
 
     ##
     ##    firewalld_enable:  ensures firewalld is installed
