@@ -232,6 +232,19 @@
 
 
 
+        - name: "common-dhcp-preprocess : create tftpboot directory for machine pxe configs"
+          throttle: 1
+          file:
+            path:  "{{ item }}"
+            mode:  "0755"
+            owner: root
+            group: root
+            state: directory
+          with_items:
+            - "/var/lib/tftpboot/bios/pxelinux.cfg"
+
+
+
         - name: "common-dhcp-preprocess : deploy machine pxe configs for BIOS and EFI"
           vars:
             t_name: "{{ h_pubMAC | lower | replace(':','-') }}"
@@ -246,50 +259,4 @@
             - { src: 'pxelinux-default-config.j2', dst: '/var/lib/tftpboot/bios/pxelinux.cfg/default'         }
             - { src: 'grub-machine-config.j2',     dst: '/var/lib/tftpboot/efi/grub.cfg-01-{{ t_name }}'      }
             - { src: 'grub-default-config.j2',     dst: '/var/lib/tftpboot/efi/grub.cfg'                      }
-
-
-
-#        - name: "common-dhcp-preprocess : deploy machine pxelinux.cfg (BIOS)"
-#          vars:
-#            t_name: "{{ h_pubMAC | replace(':','-') }}"
-#          template:
-#            src: "pxelinux-machine-config.j2"
-#            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/01-{{ t_name }}"
-#            owner: root
-#            group: root
-#            mode: 0644
-
-
-
-#        - name: "common-dhcp-preprocess : deploy machine grub.cfg (EFI)"
-#          vars:
-#            t_name: "{{ h_pubMAC | replace(':','-') }}"
-#          template:
-#            src: "pxelinux-machine-config.j2"
-#            dest: "/var/lib/tftpboot/efi/grub.cfg/01-{{ t_name }}"
-#            owner: root
-#            group: root
-#            mode: 0644
-
-
-
-#        - name: "common-dhcp-preprocess : deploy pxelinux.cfg/default (BIOS)"
-#          run_once: true
-#          template:
-#            src: "pxelinux-default-config.j2"
-#            dest: "/var/lib/tftpboot/bios/pxelinux.cfg/default"
-#            owner: root
-#            group: root
-#            mode: 0644
-
-
-
-#        - name: "common-dhcp-preprocess : deploy pxelinux.cfg/default (EFI)"
-#          run_once: true
-#          template:
-#            src: "pxelinux-default-config.j2"
-#            dest: "/var/lib/tftpboot/efi/grub.cfg"
-#            owner: root
-#            group: root
-#            mode: 0644
 
