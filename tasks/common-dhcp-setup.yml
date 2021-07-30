@@ -62,6 +62,8 @@
 ##
 ##    Setup for BIOS based deployments
 ##
+##        For SuperMicro BIOS IPMI, I needed to add ldlinux.32 and libutil.c32
+##
 
 
 
@@ -76,6 +78,8 @@
   with_items:
     - "/usr/share/syslinux/pxelinux.0"
     - "/usr/share/syslinux/menu.c32"
+    - "/usr/share/syslinux/ldlinux.c32"
+    - "/usr/share/syslinux/libutil.c32"
     #- "/usr/share/ipxe/undionly.kpxe"
     #- "/usr/share/ipxe/ipxe.lkrn"
 

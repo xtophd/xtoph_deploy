@@ -141,6 +141,7 @@ xtoph_machine_profiles:
       network:
         default:
       ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
         get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
         power_on:     "-I lanplus chassis power on"
         power_off:    "-I lanplus chassis power off"
@@ -188,6 +189,33 @@ xtoph_machine_profiles:
       network:
         default:
 
+
+
+  ##
+  ## SUPERMICRO ENTRIES   
+  ##
+
+
+
+  supermicro_x9drd_if:
+    machine_profile:
+      platform: "baremetal"
+      description: "SuperMicro X9DRD-iF"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('enp5s0f0') }}"
+      storage:
+        default:
+      network:
+        default:
+      ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus sel time set now"
+          - "-I lanplus chassis bootdev pxe"
 
 
   ##
