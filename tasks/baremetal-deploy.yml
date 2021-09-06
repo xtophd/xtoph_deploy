@@ -282,14 +282,6 @@
         
         
             vars:
-#              t_net_dev:  "{{ xtoph_deploy.machine_profile.network.dev   }}"
-#              t_net_ip:   "{{ xtoph_deploy.network.default.ip      }}"
-#              t_net_nm:   "{{ xtoph_deploy.network.default.netmask }}"
-#              t_net_gw:   "{{ xtoph_deploy.network.default.gateway }}"
-#              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.network.default.nameserver }}"
-#              t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-#              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
-#              t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
               t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
               t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
               t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
