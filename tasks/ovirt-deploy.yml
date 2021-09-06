@@ -33,9 +33,12 @@
         hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
         ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
         insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
-        username: "{{ ovirt_username }}"
-        password: "{{ ovirt_password }}"
+        username: "{{ t_uid }}"
+        password: "{{ t_pw  }}"
         state:    present
+      vars:
+        t_uid: "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['username'] | default(ovirt_credentials['default']['username']) }}"
+        t_pw:  "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['password'] | default(ovirt_credentials['default']['password']) }}"
 
 
 
