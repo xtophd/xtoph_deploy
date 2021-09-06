@@ -1,12 +1,15 @@
-xtoph_deploy: 
 
-  spec_version: "1"
+spec_version: "1"
 
-  hostname: "{{ inventory_hostname }}"
+debug: false
 
-  clustername: "{{ xtoph_vars.clustername }}"
+cleanup: true
 
-  deployhost:
+hostname: "{{ inventory_hostname }}"
+
+clustername: "{{ xtoph_vars.clustername }}"
+
+deployhost:
 
     ##     platform type [ ovirt | libvirt | baremetal ]
 

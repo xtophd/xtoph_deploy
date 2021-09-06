@@ -2,17 +2,15 @@
 ## MACHINE PROFILES
 ##
 
-xtoph_machine_profiles:
+
+
+##
+## LIBVIRT/KVM ENTRIES
+##
 
 
 
-  ##
-  ## LIBVIRT/KVM ENTRIES
-  ##
-
-
-
-  kvm_default:
+kvm_default:
     machine_profile:
       description: "KVM vm using defaults"
       platform: "libvirt"
@@ -22,7 +20,7 @@ xtoph_machine_profiles:
       network:
         default:
     
-  kvm_vda:
+kvm_vda:
     machine_profile:
       description: "KVM vm using sparse virtio storage"
       platform: "libvirt"
@@ -36,7 +34,7 @@ xtoph_machine_profiles:
       network:
         default:
     
-  kvm_nest_vda:
+kvm_nest_vda:
     machine_profile:
       description: "KVM vm with nested-virt and virtio disks"
       platform: "libvirt"
@@ -51,7 +49,7 @@ xtoph_machine_profiles:
       network:
         default:
     
-  kvm_sda:
+kvm_sda:
     machine_profile:
       description: "KVM vm with virtio-scsi disks"
       platform: "libvirt"
@@ -66,12 +64,12 @@ xtoph_machine_profiles:
     
 
 
-  ##
-  ## OVIRT ENTRIES
-  ##
+##
+## OVIRT ENTRIES
+##
 
 
-  ovirt_default:
+ovirt_default:
     machine_profile:
       description: "oVirt default vm"
       platform: "ovirt"
@@ -83,7 +81,7 @@ xtoph_machine_profiles:
       network:
         default:
     
-  ovirt_sda:
+ovirt_sda:
     machine_profile:
       description: "oVirt vm using disk bus = virtio-scsi (sda)"
       platform: "ovirt"
@@ -96,7 +94,7 @@ xtoph_machine_profiles:
       network:
         default:
     
-  ovirt_vda:
+ovirt_vda:
     machine_profile:
       description: "oVirt vm using disk bus = virtio (vda)"
       platform: "ovirt"
@@ -111,13 +109,13 @@ xtoph_machine_profiles:
 
 
 
-  ##
-  ## DELL ENTRIES
-  ##
+##
+## DELL ENTRIES
+##
 
 
  
-  dell_r720:
+dell_r720:
     machine_profile:
       platform: "baremetal"
       description: "DELL r720 example"
@@ -129,7 +127,7 @@ xtoph_machine_profiles:
       network:
         default:
     
-  dell_r630:
+dell_r630:
     machine_profile:
       platform: "baremetal"
       description: "DELL r630"
@@ -148,7 +146,7 @@ xtoph_machine_profiles:
         config_steps:
           - "-I lanplus chassis bootdev pxe"
 
-  dell_r740:
+dell_r740:
     machine_profile:
       platform: "baremetal"
       description: "DELL r740"
@@ -170,13 +168,13 @@ xtoph_machine_profiles:
 
 
 
-  ##
-  ## HP ENTRIES   
-  ##
+##
+## HP ENTRIES   
+##
 
 
     
-  hp_dl380:
+hp_dl380:
     machine_profile:
       platform: "baremetal"
       description: "HP DL380"
@@ -191,13 +189,13 @@ xtoph_machine_profiles:
 
 
 
-  ##
-  ## SUPERMICRO ENTRIES   
-  ##
+##
+## SUPERMICRO ENTRIES   
+##
 
 
 
-  supermicro_x9drd_if:
+supermicro_x9drd_if:
     machine_profile:
       platform: "baremetal"
       description: "SuperMicro X9DRD-iF"
@@ -218,13 +216,13 @@ xtoph_machine_profiles:
           - "-I lanplus chassis bootdev pxe"
 
 
-  ##
-  ## GENERIC PC ENTRIES
-  ##
+##
+## GENERIC PC ENTRIES
+##
 
 
 
-  pc_nvme:
+pc_nvme:
     machine_profile:
       platform: "baremetal"
       description: "Generic PC with nvme"
@@ -236,7 +234,7 @@ xtoph_machine_profiles:
       network:
         default:
 
-  pc_sda:
+pc_sda:
     machine_profile:
       platform: "baremetal"
       description: "Generic PC with (sata/sas/scsi) sda"

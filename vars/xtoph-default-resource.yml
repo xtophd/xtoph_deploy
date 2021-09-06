@@ -2,9 +2,8 @@
 ## RESOURCE PROFILES
 ##
 
-xtoph_resource_profiles:
 
-  tiny:
+tiny:
     resource_profile:
       name: "tiny"
       description: "Tiny Node [2cpu,4GB,30GB disk]"
@@ -16,7 +15,7 @@ xtoph_resource_profiles:
           hw_storage_profile: default
 
   
-  tiny-extra:
+tiny-extra:
     resource_profile:
       name: "tiny-extra"
       description: "Tiny Node with Extra Disks [2cpu,4GB,30GB disk + 4x5GB disks]"
@@ -40,7 +39,7 @@ xtoph_resource_profiles:
             size: 5 
             hw_storage_profile: default
           
-  sml:
+sml:
     resource_profile:
       name: "sml"
       description: "Small Node [ex: OCP Worker]"
@@ -51,7 +50,7 @@ xtoph_resource_profiles:
           size: 120 
           hw_storage_profile: default
   
-  med:
+med:
     resource_profile:
       name: "med"
       description: "Medium Node [ex: OCP Master/Bootstrap]"
@@ -62,7 +61,7 @@ xtoph_resource_profiles:
           size: 120 
           hw_storage_profile: default
   
-  lrg:
+lrg:
     resource_profile:
       name: "lrg"
       description: "Large Node"
@@ -73,7 +72,7 @@ xtoph_resource_profiles:
           size: 200 
           hw_storage_profile: default
   
-  bastion:
+bastion:
     resource_profile:
       name: "bastion"
       description: "Bastion Utility Server"
@@ -84,7 +83,7 @@ xtoph_resource_profiles:
           size: 50 
           hw_storage_profile: default
   
-  sat6:
+sat6:
     resource_profile:
       name: "sat6"
       description: "Satellite 6 [4cpu,24GB,30GB + 200GB disk]"

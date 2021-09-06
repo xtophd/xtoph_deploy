@@ -2,15 +2,12 @@
 ## PLATFORM PROFILES
 ##
 
-xtoph_platform_profiles:
 
 
+libvirt:
 
-  libvirt:
-
-    platform_profile:
-
-      platform: "libvirt"
+      name: "libvirt"
+      type: "libvirt"
 
       nested_virt_enable: false
 
@@ -26,6 +23,18 @@ xtoph_platform_profiles:
           fwd_type: "nat"
           model: "virtio"
           bridge_netdev: "eno1"
+
+          ip:                ""
+          basedomain:        ""
+          network:           ""
+          netmask:           ""
+          broadcast:         ""
+          prefix:            ""
+          gateway:           ""
+          nameserver:        ""
+          timeserver:        ""
+          fqdn:              ""
+          mac:               ""
   
       storage:
         default:
@@ -36,11 +45,10 @@ xtoph_platform_profiles:
  
 
    
-  ovirt:
+ovirt:
 
-    platform_profile:
-
-      platform: "ovirt"
+      name: "ovirt"
+      type: "ovirt"
   
       cluster_name:  "Default"
       engine_cafile: "/etc/pki/ovirt-engine/ca.pem"
@@ -83,16 +91,27 @@ xtoph_platform_profiles:
   
 
 
-  baremetal:
+baremetal:
 
-    platform_profile:
-
-      platform: "baremetal"
+      name: "baremetal"
+      type: "baremetal"
 
       kickstart:
 
       network:
         default:
+
+          ip:                ""
+          basedomain:        ""
+          network:           ""
+          netmask:           ""
+          broadcast:         ""
+          prefix:            ""
+          gateway:           ""
+          nameserver:        ""
+          timeserver:        ""
+          fqdn:              ""
+          mac:               ""
 
       storage:
         default:
