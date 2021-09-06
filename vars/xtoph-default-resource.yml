@@ -4,7 +4,6 @@
 
 
 tiny:
-    resource_profile:
       name: "tiny"
       description: "Tiny Node [2cpu,4GB,30GB disk]"
       vcpus: 2
@@ -16,7 +15,6 @@ tiny:
 
   
 tiny-extra:
-    resource_profile:
       name: "tiny-extra"
       description: "Tiny Node with Extra Disks [2cpu,4GB,30GB disk + 4x5GB disks]"
       vcpus: 2
@@ -40,7 +38,6 @@ tiny-extra:
             hw_storage_profile: default
           
 sml:
-    resource_profile:
       name: "sml"
       description: "Small Node [ex: OCP Worker]"
       vcpus: 2
@@ -51,7 +48,6 @@ sml:
           hw_storage_profile: default
   
 med:
-    resource_profile:
       name: "med"
       description: "Medium Node [ex: OCP Master/Bootstrap]"
       vcpus:    4
@@ -62,7 +58,6 @@ med:
           hw_storage_profile: default
   
 lrg:
-    resource_profile:
       name: "lrg"
       description: "Large Node"
       vcpus:    8
@@ -73,7 +68,6 @@ lrg:
           hw_storage_profile: default
   
 bastion:
-    resource_profile:
       name: "bastion"
       description: "Bastion Utility Server"
       vcpus:    4
@@ -84,7 +78,6 @@ bastion:
           hw_storage_profile: default
   
 sat6:
-    resource_profile:
       name: "sat6"
       description: "Satellite 6 [4cpu,24GB,30GB + 200GB disk]"
       vcpus: 4

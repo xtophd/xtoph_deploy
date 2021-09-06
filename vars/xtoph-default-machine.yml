@@ -11,7 +11,6 @@
 
 
 kvm_default:
-    machine_profile:
       description: "KVM vm using defaults"
       platform: "libvirt"
       kickstart:
@@ -21,7 +20,6 @@ kvm_default:
         default:
     
 kvm_vda:
-    machine_profile:
       description: "KVM vm using sparse virtio storage"
       platform: "libvirt"
       kickstart:
@@ -35,7 +33,6 @@ kvm_vda:
         default:
     
 kvm_nest_vda:
-    machine_profile:
       description: "KVM vm with nested-virt and virtio disks"
       platform: "libvirt"
       kickstart:
@@ -50,7 +47,6 @@ kvm_nest_vda:
         default:
     
 kvm_sda:
-    machine_profile:
       description: "KVM vm with virtio-scsi disks"
       platform: "libvirt"
       kickstart:
@@ -70,7 +66,6 @@ kvm_sda:
 
 
 ovirt_default:
-    machine_profile:
       description: "oVirt default vm"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
@@ -82,7 +77,6 @@ ovirt_default:
         default:
     
 ovirt_sda:
-    machine_profile:
       description: "oVirt vm using disk bus = virtio-scsi (sda)"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
@@ -95,7 +89,6 @@ ovirt_sda:
         default:
     
 ovirt_vda:
-    machine_profile:
       description: "oVirt vm using disk bus = virtio (vda)"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
@@ -116,7 +109,6 @@ ovirt_vda:
 
  
 dell_r720:
-    machine_profile:
       platform: "baremetal"
       description: "DELL r720 example"
       kickstart:
@@ -128,7 +120,6 @@ dell_r720:
         default:
     
 dell_r630:
-    machine_profile:
       platform: "baremetal"
       description: "DELL r630"
       kickstart:
@@ -147,7 +138,6 @@ dell_r630:
           - "-I lanplus chassis bootdev pxe"
 
 dell_r740:
-    machine_profile:
       platform: "baremetal"
       description: "DELL r740"
       kickstart:
@@ -175,7 +165,6 @@ dell_r740:
 
     
 hp_dl380:
-    machine_profile:
       platform: "baremetal"
       description: "HP DL380"
       kickstart:
@@ -196,7 +185,6 @@ hp_dl380:
 
 
 supermicro_x9drd_if:
-    machine_profile:
       platform: "baremetal"
       description: "SuperMicro X9DRD-iF"
       kickstart:
@@ -223,7 +211,6 @@ supermicro_x9drd_if:
 
 
 pc_nvme:
-    machine_profile:
       platform: "baremetal"
       description: "Generic PC with nvme"
       kickstart:
