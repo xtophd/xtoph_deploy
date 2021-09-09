@@ -71,18 +71,6 @@
 
 
 
-#- name: "main.yml : loading default parameters"
-#  include_vars:
-#    file: "{{ item }}"
-#  loop:
-#    - xtoph-default.yml
-#    - xtoph-default-machine.yml
-#    - xtoph-default-resource.yml
-#    - xtoph-default-platform.yml
-#    - xtoph-default-kickstart.yml
-
-
-
 ##
 ##        Start a fresh xtoph_deploy hash based on xtoph_default
 ##
@@ -238,7 +226,7 @@
 
 
 
-- name: "main.yml : setup common stuff"
+- name: "main.yml : test common assertions (mistakes)"
   include_tasks: "common-assertions.yml"
 
 
