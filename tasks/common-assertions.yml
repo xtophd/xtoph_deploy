@@ -24,12 +24,13 @@
 
 
 - name: "common-assertions : xtoph_deploy.deployhost validation"
+  any_errors_fatal: true
   assert:
     that:
       - xtoph_deploy.deployhost is defined
       - xtoph_deploy.deployhost.ip is defined
     success_msg: "Assertion Passed"
-    fail_msg: "ASSERTION FAILED: xtoph_deploy.deployhost is undefined or missing essential data (CHECK YOUR CONFIGS)"
+    fail_msg: "CONFIG ERROR: assertion listed above means that xtoph_deploy is missing critical data (CHECK YOUR CONFIGS)"
 
 
 
@@ -42,15 +43,18 @@
 
 
 
-- name: "common-assertions : xtoph_deploy highlevel validation"
+- name: "common-assertions : xtoph_deploy highlevel validation "
+  any_errors_fatal: true
   assert:
     that:
       - xtoph_deploy.platform_profile is defined
       - xtoph_deploy.machine_profile is defined
       - xtoph_deploy.resource_profile is defined
       - xtoph_deploy.kickstart_profile is defined
-    fail_msg: "ASSERTION FAILED xtoph_deploy is missing essential data (CHECK YOUR CONFIGS)"
+    fail_msg: "CONFIG ERROR: assertion listed above means that xtoph_deploy is missing critical data (CHECK YOUR CONFIGS)"
     success_msg: "Assertion Passed"
   when:
     - xtoph_deploy.selected_profile.machine != ""
+
+
 
