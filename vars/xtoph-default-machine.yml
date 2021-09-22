@@ -18,6 +18,8 @@ kvm_default:
         default:
       network:
         default:
+          ip:  "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
     
 kvm_vda:
       description: "KVM vm using sparse virtio storage"
@@ -31,6 +33,8 @@ kvm_vda:
           sparse: "true"
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
     
 kvm_nest_vda:
       description: "KVM vm with nested-virt and virtio disks"
@@ -45,6 +49,8 @@ kvm_nest_vda:
           bus: "virtio"
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
     
 kvm_sda:
       description: "KVM vm with virtio-scsi disks"
@@ -57,6 +63,8 @@ kvm_sda:
           bus: "virtio-scsi"
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
     
 
 
@@ -75,6 +83,8 @@ ovirt_default:
           bus: "virtio_scsi"
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
     
 ovirt_sda:
       description: "oVirt vm using disk bus = virtio-scsi (sda)"
@@ -87,6 +97,7 @@ ovirt_sda:
           bus: "virtio_scsi"
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
     
 ovirt_vda:
       description: "oVirt vm using disk bus = virtio (vda)"
@@ -99,6 +110,8 @@ ovirt_vda:
           bus: "virtio"
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
 
 
 
@@ -118,6 +131,8 @@ dell_r720:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
     
 dell_r630:
       platform: "baremetal"
@@ -129,6 +144,8 @@ dell_r630:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
       ipmi:
         fqdn:         "{{ ipmi_fqdn | default('') }}"
         get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
@@ -147,6 +164,8 @@ dell_r740:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
       ipmi:
         fqdn:         "{{ ipmi_fqdn | default('') }}"
         get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
@@ -175,6 +194,8 @@ hp_dl380:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
 
 
 
@@ -194,6 +215,8 @@ supermicro_x9drd_if:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
       ipmi:
         fqdn:         "{{ ipmi_fqdn | default('') }}"
         get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
@@ -220,6 +243,8 @@ pc_nvme:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
 
 pc_sda:
     machine_profile:
@@ -232,3 +257,5 @@ pc_sda:
         default:
       network:
         default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"

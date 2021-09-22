@@ -7,8 +7,6 @@
 ##    and install software/services to support the deployments
 ##
 
-
-
 ##
 ##    install packages that vary
 ##    between versions of RHEL
@@ -63,7 +61,7 @@
 
 - name: "libvirt-setup: create default qcow directory"
   file:
-    path: "{{ xtoph_platform_profiles.libvirt.platform_profile.storage.default.qcow_dir }}"
+    path: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}"
     mode: "0775"
     state: directory
 
@@ -124,7 +122,65 @@
         name: libvirtd
         state: started
 
-  when: xtoph_platform_profiles.libvirt.platform_profile.nested_virt_enable == true
+  when: xtoph_deploy.platform_profile.nested_virt_enable == true
+
+
+
+##
+##    Install and enable cockpit services/ports
+##
+
+
+
+- block:
+
+      - name: "libvirt-setup : install cockpit packages"
+        yum: name=cockpit,cockpit-machines state=installed
+        notify: restart_cockpit
+
+      - name: "libvirt-setup :  enable cockpit system services"
+        service: name="{{ item }}" state=started enabled=yes masked=no
+        with_items:
+          - "cockpit"
+          - "cockpit.socket"
+
+      - name: "libvirt-setup : create cockpit systemd drop-in directory"
+        file:
+          path: "/etc/systemd/system/cockpit.socket.d/"
+          mode: "0755"
+          owner: "root"
+          group: "root"
+          state: directory
+
+      - name: "libvirt-setup : deploy cockpit custom configuration"
+        vars:
+          - p_port: "{{ xtoph_deploy.deployhost.cockpit_port }}"
+        template:
+          src:  "cockpit-listen-conf.j2"
+          dest: "/etc/systemd/system/cockpit.socket.d/listen.conf"
+          owner: root
+          group: root
+          mode: 0644
+        register: cockpit_result
+        when: xtoph_deploy.deployhost.cockpit_port != ""
+        notify: restart_cockpit
+
+      - name: "libvirt-setup :  add cockpit firewalld services"
+        firewalld:
+          service: "cockpit"
+          immediate: yes
+          permanent: yes
+          state: enabled
+
+      - name: "libvirt-setup :  add cockpit custom firewalld ports"
+        firewalld:
+          port: "{{ kvm_cfg.cockpit_port }}/tcp"
+          immediate: yes
+          permanent: yes
+          state: enabled
+        when: xtoph_deploy.deployhost.cockpit_port != ""
+
+  when: xtoph_deploy.deployhost.cockpit_enable
 
 
 

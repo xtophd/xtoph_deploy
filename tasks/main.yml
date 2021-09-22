@@ -239,40 +239,52 @@
 ##
 ##        NOTE: xtoph_deploy.deployhost.platform can be a single
 ##              item or a list.  I use a jinja built-in template
-##              filter determine if the key exists is "in" the list
-##
-##              the platform_item declares the 'platform' and the 
-##              'playbook' to include if matched
+##              filter determine if the key exists "in" the list
 ##
 
 
 
-- name: "main.yml : setup common stuff"
-  include_tasks: "common-setup.yml"
+- name: "main.yml : setup deployhost (controller)"
+  include_tasks: "deployer-setup.yml"
   when: 
     - xtoph_deploy_action == "setup" 
 
+# Deprecated: 20210921 - ovirt and baremetal were incorporated into deployhost-setup.yml and 
+#                        libvirt was broken out as separate action (config-libvirt)
+#
+#- name: "main.yml : setup platform specifics"
+#  include_tasks: "{{ platform_item.tasks }}"
+#  when: 
+#    - xtoph_deploy_action == "setup" 
+#    - platform_item.platform in xtoph_deploy.deployhost.platform_enable
+#  loop_control:
+#    loop_var: platform_item
+#  with_items:
+#    - { platform: 'libvirt',   tasks: 'libvirt-setup.yml'   } 
+#    - { platform: 'ovirt',     tasks: 'ovirt-setup.yml'     } 
+#    - { platform: 'baremetal', tasks: 'baremetal-setup.yml' } 
 
-
-- name: "main.yml : setup platform specifics"
-  include_tasks: "{{ platform_item.tasks }}"
-  when: 
-    - xtoph_deploy_action == "setup" 
-    - platform_item.platform in xtoph_deploy.deployhost.platform_enable
-  loop_control:
-    loop_var: platform_item
-  with_items:
-    - { platform: 'libvirt',   tasks: 'libvirt-setup.yml'   } 
-    - { platform: 'ovirt',     tasks: 'ovirt-setup.yml'     } 
-    - { platform: 'baremetal', tasks: 'baremetal-setup.yml' } 
-
-
-
-- name: "main.yml : setup dhcp/pxe"
-  include_tasks: "common-dhcp-setup.yml"
+- name: "main.yml : setup deployhost with dhcp/pxe"
+  include_tasks: "deployer-setup-dhcp.yml"
   when:
     - xtoph_deploy_action == "setup" 
     - xtoph_deploy.deployhost.dhcp.enable
+
+##
+##    SETUP-LIBVIRT
+##
+##
+##    hosts: for this role application should only include 
+##    libvirt platform hosts.  The included tasks are executed
+##    on the remote platform node(s).
+##
+
+
+
+- name: "main.yml : setup libvirt platform hosts"
+  include_tasks: "libvirt-setup.yml"
+  when: 
+    - xtoph_deploy_action == "setup-libvirt" 
 
 
 

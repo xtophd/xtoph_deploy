@@ -9,10 +9,14 @@
   delegate_to: localhost
   block:
 
+
+
       ##
       ##    NOTE: All tasks here are blocked and delegated to execute
-      ##          on the deployhost/localhost 
+      ##          on the localhost (deployhost/controller).  Some tasks
+      ##          will be explicitly delegated to the libvirt platform(s)
       ##
+
 
 
       ##
@@ -22,6 +26,7 @@
     
     
       - name: "libvirt-deploy : determine state of vm"
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
         shell:
           cmd: "virsh domstate '{{ xtoph_deploy.platform_profile.vm.name }}'"
         register: vminfo_result
@@ -60,9 +65,6 @@
         debug:
           msg: "deploy_node = {{ deploy_node }}"
         when: xtoph_deploy.debug == true
-
-
-
 
 
 
@@ -369,6 +371,7 @@
     
           - name: "libvirt-deploy : upload iso image"
             throttle: 1
+            delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
             copy:
               src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
               dest: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}"
@@ -394,7 +397,7 @@
       ##    Create the kickstart config for PXE/NETWORK supported installs
       ##
 
-
+  
 
       - block:
 
@@ -558,22 +561,49 @@
 
 
 
+#      - name: "libvirt-deploy : create bridge network"
+#        throttle: 1
+#        shell:
+#          cmd: |
+#            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+#        when: xtoph_deploy.platform_profile.network.default.fwd_type == "bridge"
+#
+#      - name: "libvirt-deploy : create libvirt network"
+#        throttle: 1
+#        shell:
+#          cmd: |
+#            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+#        register: mknet_results
+#        changed_when: "'CHANGED' in mknet_results.stdout"
+#        notify:
+#          - delegated_restart_httpd
+#          - delegated_restart_dnsmasq
+
+      - name: "libvirt-deploy : copy xml network config to platform host"
+        throttle: 1
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+        copy:
+          dest: "/var/tmp/"
+          src:  "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/{{ item }}"
+        loop:
+          - "libvirt-network.xml" 
+
       - name: "libvirt-deploy : create bridge network"
         throttle: 1
-        shell:
-          cmd: |
-            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+        script:
+          cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
         when: xtoph_deploy.platform_profile.network.default.fwd_type == "bridge"
 
       - name: "libvirt-deploy : create libvirt network"
         throttle: 1
-        shell:
-          cmd: |
-            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+        script:
+          cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
         register: mknet_results
         changed_when: "'CHANGED' in mknet_results.stdout"
         notify:
-          - delegated_restart_httpd
+#          - delegated_restart_httpd
           - delegated_restart_dnsmasq
 
 
@@ -619,11 +649,12 @@
 
       - name: "libvirt-deploy : create virtual machine"
         throttle: 1
-        shell:
-          cmd: |
-            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+        script:
+          cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"
 
       - name: "libvirt-deploy-monitor : wait for virtual machine running"
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
         shell:
           cmd: |
             virsh domstate "{{ xtoph_deploy.platform_profile.vm.name }}" | grep -q "running"
@@ -638,5 +669,6 @@
   ##
 
   when: deploy_node == true
+
 
 

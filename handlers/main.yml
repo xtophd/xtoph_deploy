@@ -20,14 +20,26 @@
 
 
 
+##
+##    Below are a pair of handlers used during the setup
+##    of a libvirt platform host.  Thus, they are delegated
+##    to execute on the host itself.
+##
+##    NOTE: need to review if httpd is even needed on
+##          the platform host.  Could be a left over
+##          when deployhost == libvirt-platform-host
+##
+
+
+
 - name:    "xtoph_deploy (delegated handler) : restart dnsmasq"
   listen:  "delegated_restart_dnsmasq"
   service: name="dnsmasq" state=restarted
-  delegate_to: localhost
+  delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
   when: xtoph_deploy.deployhost.dnsmasq_enable == true
 
 - name:    "xtoph_deploy (delegated handler) : restart httpd"
   listen:  "delegated_restart_httpd"
   service: name="httpd" state=restarted
-  delegate_to: localhost
+  delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
 

@@ -12,7 +12,7 @@
 
     ##
     ##    NOTE: All tasks here are delegated to execute
-    ##          on the deployhost/localhost
+    ##          on the localhost (deployhost/controller)
     ##
 
 
@@ -25,6 +25,7 @@
 
     - name: "libvirt-undeploy : stop virtual machine"
       throttle: 1
+      delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
       shell:
         cmd: |
           virsh destroy "{{ xtoph_deploy.platform_profile.vm.name }}"
@@ -34,6 +35,7 @@
 
     - name: "libvirt-undeploy : delete virtual machine"
       throttle: 1
+      delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
       shell:
         cmd: |
           virsh undefine "{{ xtoph_deploy.platform_profile.vm.name }}" --remove-all-storage --nvram
@@ -43,6 +45,7 @@
 
     - name: "libvirt-undeploy : undeploy iso in storage directory"
       throttle: 1
+      delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
       file:
         path: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         state: absent

@@ -13,17 +13,17 @@
 
 
 
-- name: "common-setup : create ssh directory"
+- name: "deployer-setup : create ssh directory"
   file:
     path: /root/.ssh
     mode: "0700"
     state: directory
 
-- name: "common-setup : test deployhost ssh key"
+- name: "deployer-setup : test deployhost ssh key"
   stat: path="/root/.ssh/id_rsa.pub"
   register: test_ssh_key
 
-- name: "common-setup : create deployhost ssh key"
+- name: "deployer-setup : create deployhost ssh key"
   command: "ssh-keygen -t rsa -b 2048 -N '' -f /root/.ssh/id_rsa"
   when: test_ssh_key.stat.exists == false
 
@@ -35,7 +35,7 @@
 
 
 
-- name: "common-setup : install supporting packages"
+- name: "deployer-setup : install supporting packages"
   yum: name=genisoimage,xorriso,syslinux,git,tree,wget,yum-utils,net-tools,traceroute,nmap state=installed
 
 
@@ -46,7 +46,7 @@
 
 
 
-- name: "common-setup : create iso directory"
+- name: "deployer-setup : create iso directory"
   file:
     path: "{{ xtoph_deploy.deployhost.iso.dir }}"
     mode: "0755"
@@ -62,7 +62,7 @@
 
 
 
-- name: "common-setup : enable system services"
+- name: "deployer-setup : enable system services"
   service: name="{{ item }}" state=restarted enabled=yes masked=no
   with_items:
     - "NetworkManager"
@@ -76,10 +76,10 @@
 
 - block:
 
-      - name: "common-setup : install firewalld packages"
+      - name: "deployer-setup : install firewalld packages"
         yum: name=firewalld state=installed
 
-      - name: "common-setup : enable firewalld system service"
+      - name: "deployer-setup : enable firewalld system service"
         service: name="firewalld" state=restarted enabled=yes masked=no
 
   when: xtoph_deploy.deployhost.firewalld_enable
@@ -94,10 +94,10 @@
 
 - block:
 
-      - name: "common-setup : install http package"
+      - name: "deployer-setup : install http package"
         yum: name=httpd state=installed
 
-      - name: "common-setup: deploy httpd configuration"
+      - name: "deployer-setup : deploy httpd configuration"
         vars:
           - p_port: "{{ xtoph_deploy.deployhost.http_port }}"
         template:
@@ -107,13 +107,13 @@
           group: root
           mode: 0644
 
-      - name: "common-setup: selinux restorecon on /var/www/html"
+      - name: "deployer-setup : selinux restorecon on /var/www/html"
         shell: restorecon -R /var/www/html
 
-      - name: "common-setup : enable http system service"
+      - name: "deployer-setup : enable http system service"
         service: name="httpd" state=restarted enabled=yes masked=no
 
-      - name: "common-setup : open common firewalld ports for http"
+      - name: "deployer-setup : open common firewalld ports for http"
         firewalld:
           service: "{{ item }}"
           immediate: yes
@@ -125,7 +125,7 @@
         when: 
           - xtoph_deploy.deployhost.firewalld_enable
 
-      - name: "libvirt-setup : open custom firewalld ports for http"
+      - name: "deployer-setup : open custom firewalld ports for http"
         firewalld:
           port: "{{ item }}"
           immediate: yes
@@ -149,27 +149,27 @@
 
 - block:
 
-      - name: "common-setup : install dnsmasq package"
+      - name: "deployer-setup : install dnsmasq package"
         yum: name=dnsmasq state=installed
 
-      - name: "common-setup : adjust /etc/dnsmasq.conf with except-interface"
+      - name: "deployer-setup : adjust /etc/dnsmasq.conf with except-interface"
         lineinfile:
           dest: "/etc/dnsmasq.conf"
           insertafter: "^#except-interface=.*$"
           line: "except-interface=virbr0"
           state: present
 
-      - name: "common-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
+      - name: "deployer-setup : adjust /etc/dnsmasq.conf with bind-interfaces"
         lineinfile:
           dest: "/etc/dnsmasq.conf"
           insertafter: "^#bind-interfaces.*$"
           line: "bind-interfaces"
           state: present
 
-      - name: "common-setup :  enable dnsmasq system services"
+      - name: "deployer-setup : enable dnsmasq system services"
         service: name="dnsmasq" state=restarted enabled=yes masked=no
 
-      - name: "common-setup :  add dns firewalld services"
+      - name: "deployer-setup : add dns firewalld services"
         firewalld:
           service:   "dns"
           immediate: yes
@@ -190,17 +190,17 @@
 
 - block:
 
-      - name: "common-setup : install cockpit packages"
+      - name: "deployer-setup : install cockpit packages"
         yum: name=cockpit,cockpit-machines state=installed
         notify: restart_cockpit
 
-      - name: "common-setup :  enable cockpit system services"
+      - name: "deployer-setup : enable cockpit system services"
         service: name="{{ item }}" state=started enabled=yes masked=no
         with_items:
           - "cockpit"
           - "cockpit.socket"
 
-      - name: "common-setup : create cockpit systemd drop-in directory"
+      - name: "deployer-setup : create cockpit systemd drop-in directory"
         file:
           path: "/etc/systemd/system/cockpit.socket.d/"
           mode: "0755"
@@ -208,7 +208,7 @@
           group: "root"
           state: directory
 
-      - name: "common-setup : deploy cockpit custom configuration"
+      - name: "deployer-setup : deploy cockpit custom configuration"
         vars:
           - p_port: "{{ xtoph_deploy.deployhost.cockpit_port }}"
         template:
@@ -221,14 +221,14 @@
         when: xtoph_deploy.deployhost.cockpit_port != ""
         notify: restart_cockpit
 
-      - name: "common-setup :  add cockpit firewalld services"
+      - name: "deployer-setup : add cockpit firewalld services"
         firewalld:
           service: "cockpit"
           immediate: yes
           permanent: yes
           state: enabled
 
-      - name: "common-setup :  add cockpit custom firewalld ports"
+      - name: "deployer-setup : add cockpit custom firewalld ports"
         firewalld:
           port: "{{ kvm_cfg.cockpit_port }}/tcp"
           immediate: yes
@@ -251,4 +251,46 @@
 ##     - shell:
 ##         cmd: |
 ##           semanage port -a -t http_port_t -p tcp {{ xtoph_deploy.deployhost.http_port }}
+
+
+
+
+##
+##    Install platform components for ovirt
+##
+
+
+
+- block:
+
+      - name: "deployer-setup : install oVirt supporting packages (sdk/api)"
+        yum: name=python-ovirt-engine-sdk4 state=installed
+
+  when: 
+    - "'ovirt' in xtoph_deploy.deployhost.platform_enable"
+
+
+
+##
+##    Install platform components for baremetal
+##
+
+
+
+- block:
+
+      - name: "deployer-setup : install baremetal supporting packages (ipmitool)"
+        yum: name=ipmitool state=installed
+
+  when: "'baremetal' in xtoph_deploy.deployhost.platform_enable"
+
+
+
+##
+##    Install platform components for libvirt
+##
+
+  # THERE IS NOTHING TO INSTALL ON THE DEPLOYER TO ENABLE SUPPORT FOR LIBVIRT
+
+
 

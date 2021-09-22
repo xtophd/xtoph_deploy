@@ -6,8 +6,12 @@
 
 libvirt:
 
-      name: "libvirt"
-      type: "libvirt"
+      name:        "libvirt"
+      type:        "libvirt"
+      description: "Default (empty) libvirt platform profile"
+
+      host_fqdn:   ""
+      host_ip:     ""
 
       nested_virt_enable: false
 
@@ -24,7 +28,11 @@ libvirt:
           model: "virtio"
           bridge_netdev: "eno1"
 
-          ip:                ""
+          ## 20210922: deprecated, platform_profile should not include 
+          ##           machine specific info. it's redundant
+          #ip:                ""
+          #mac:               ""
+
           basedomain:        ""
           network:           ""
           netmask:           ""
@@ -34,7 +42,6 @@ libvirt:
           nameserver:        ""
           timeserver:        ""
           fqdn:              ""
-          mac:               ""
   
       storage:
         default:
@@ -47,8 +54,9 @@ libvirt:
    
 ovirt:
 
-      name: "ovirt"
-      type: "ovirt"
+      name:          "ovirt"
+      type:          "ovirt"
+      description:   "Default (empty) ovirt platform profile"
   
       cluster_name:  "Default"
       engine_cafile: "/etc/pki/ovirt-engine/ca.pem"
@@ -70,7 +78,11 @@ ovirt:
           model: "virtio"
           network_name: ""
 
-          ip:                ""
+          ## 20210922: deprecated, platform_profile should not include 
+          ##           machine specific info. it's redundant
+          #ip:                ""
+          #mac:               ""
+
           basedomain:        ""
           network:           ""
           netmask:           ""
@@ -80,7 +92,6 @@ ovirt:
           nameserver:        ""
           timeserver:        ""
           fqdn:              ""
-          mac:               ""
   
       storage:
         default:
@@ -93,15 +104,20 @@ ovirt:
 
 baremetal:
 
-      name: "baremetal"
-      type: "baremetal"
+      name:          "baremetal"
+      type:          "baremetal"
+      description:   "Default (empty) baremetal platform profile"
 
       kickstart:
 
       network:
         default:
 
-          ip:                ""
+          ## 20210922: deprecated, platform_profile should not include 
+          ##           machine specific info. it's redundant
+          #ip:                ""
+          #mac:               ""
+
           basedomain:        ""
           network:           ""
           netmask:           ""
@@ -111,7 +127,6 @@ baremetal:
           nameserver:        ""
           timeserver:        ""
           fqdn:              ""
-          mac:               ""
 
       storage:
         default:

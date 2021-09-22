@@ -24,7 +24,7 @@ if ! virsh net-info "{{ xtoph_deploy.machine_profile.network.default.network_nam
     ##    Create & Start the libvirt network
     ##
     
-    virsh net-define "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
+    virsh net-define "/var/tmp/libvirt-network.xml"
  
     
     virsh net-start "{{ xtoph_deploy.machine_profile.network.default.network_name }}"

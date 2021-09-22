@@ -7,7 +7,7 @@
 
 
 
-- name: "common-dhcp-setup : package installation (RHEL7)"
+- name: "deployer-setup-dhcp : package installation (RHEL7)"
   yum: name=dhcp state=installed
   when:
     - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
@@ -15,7 +15,7 @@
 
 
 
-- name: "common-dhcp-setup : package installation (RHEL8)"
+- name: "deployer-setup-dhcp : package installation (RHEL8)"
   yum: name=dhcp-server state=installed
   when:
     - ansible_distribution == "RedHat"
@@ -23,12 +23,12 @@
 
 
 
-- name: "common-dhcp-setup : package installation"
+- name: "deployer-setup-dhcp : package installation"
   yum: name=tftp-server,ipxe-bootimgs,syslinux-tftpboot,yum-utils state=installed
 
 
 
-- name: "common-dhcp-setup : create tftpboot directories"
+- name: "deployer-setup-dhcp : create tftpboot directories"
   file:
     path: "{{ item }}"
     mode: "0755"
@@ -39,14 +39,14 @@
 
 
 
-- name: "common-dhcp-setup : clean-up temp workspaces"
+- name: "deployer-setup-dhcp : clean-up temp workspaces"
   shell:
     cmd: |
       if [[ -d "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.dhcp.tmp_dir }} ; fi
 
 
 
-- name: "common-dhcp-setup : create new temp workspaces"
+- name: "deployer-setup-dhcp : create new temp workspaces"
   file:
     path="{{ item }}"
     mode="0755"
@@ -62,12 +62,13 @@
 ##
 ##    Setup for BIOS based deployments
 ##
-##        For SuperMicro BIOS IPMI, I needed to add ldlinux.32 and libutil.c32
+##        For SuperMicro BIOS IPMI, I needed to 
+##        add ldlinux.32 and libutil.c32 on RHEL 8
 ##
 
 
 
-- name: "common-dhcp-setup : copy bios files to tftpboot/pxelinux"
+- name: "deployer-setup-dhcp : copy bios files to tftpboot/pxelinux"
   copy:
     src:   "{{ item }}"
     dest:  "/var/lib/tftpboot/bios"
@@ -78,27 +79,38 @@
   with_items:
     - "/usr/share/syslinux/pxelinux.0"
     - "/usr/share/syslinux/menu.c32"
+
+
+
+- name: "deployer-setup-dhcp : copy extra bios files to support SuperMicro on RHEL8"
+  copy:
+    src:   "{{ item }}"
+    dest:  "/var/lib/tftpboot/bios"
+    mode:  "0644"
+    owner: root
+    group: root
+    remote_src: yes
+  with_items:
     - "/usr/share/syslinux/ldlinux.c32"
     - "/usr/share/syslinux/libutil.c32"
-    #- "/usr/share/ipxe/undionly.kpxe"
-    #- "/usr/share/ipxe/ipxe.lkrn"
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version == "8"
 
 
 
 ##
 ##    Setup for UEFI based deployments
 ##
+##        NOTE: could not use ansible yum module
+##              becuase it skips the download if
+##              the rpm is already installed.  Used
+##              shell built-in with yumdownloader
+##
 
 
 
-#- name: "common-dhcp-setup : download rpms (do not install) for efi artifacts"
-#  yum:
-#    name: shim-x64,grub2-efi-x64
-##    state: latest
-#    download_dir: "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms"
-#    download_only: yes
-
-- name: "common-dhcp-setup : download rpms (do not install) for efi artifacts"
+- name: "deployer-setup-dhcp : download rpms (do not install) for efi artifacts"
   shell:
     cmd: |
       cd {{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms;  yumdownloader {{ item }}
@@ -106,7 +118,9 @@
     - "shim-x64"
     - "grub2-efi-x64"
 
-- name: "common-dhcp-setup : unpack contents of rpms for efi artifacts"
+
+
+- name: "deployer-setup-dhcp : unpack contents of rpms for efi artifacts"
   shell:
     cmd: |
       cd {{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi; rpm2cpio {{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/rpms/{{ item }}*.rpm | cpio -dimv
@@ -116,7 +130,7 @@
 
 
 
-- name: "common-dhcp-setup : copy efi artifacts to tftpboot/efi (Red Hat)"
+- name: "deployer-setup-dhcp : copy efi artifacts to tftpboot/efi (Red Hat)"
   copy:
     src:   "{{ item }}"
     dest:  "/var/lib/tftpboot/efi"
@@ -132,7 +146,7 @@
 
 
 
-- name: "common-dhcp-setup : copy efi files to tftpboot (CentOS)"
+- name: "deployer-setup-dhcp : copy efi files to tftpboot (CentOS)"
   copy:
     src:   "{{ item }}"
     dest:  "/var/lib/tftpboot/efi"
@@ -145,19 +159,6 @@
     - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/efi/boot/efi/EFI/centos/grubx64.efi"
   when:
     - ansible_distribution == "CentOS"
-
-
-# DEPRECATED: 6/4/2021
-#- name: "common-dhcp-setup : deploy grub.cfg in tftpboot directory"
-#  vars:
-#    - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
-#    - p_http_port: "{{ xtoph_deploy.deployhost.http_port }}"
-#  template:
-#    src:   "pxe-grub-config.j2"
-#    dest:  "/var/lib/tftpboot/efi/grub.cfg"
-#    mode:  "0644"
-#    owner: root
-#    group: root
 
 
 
