@@ -4,51 +4,102 @@
 
 
 
-libvirt:
+libvirt_nat:
 
-      name:        "libvirt"
-      type:        "libvirt"
-      description: "Default (empty) libvirt platform profile"
+    type:        "libvirt"
+    host_fqdn:   ""
+    host_ip:     ""
+    description: "Default (empty) libvirt_nat profile"
 
-      host_fqdn:   ""
-      host_ip:     ""
+    vm:
+        name: ""
 
-      nested_virt_enable: false
+    ##
+    ##    nested_virt_enable:   add flags to the OS kernel
+    ##                          to allow passtrough virt
+    ##
 
-      kickstart:
+    nested_virt_enable: true
+
+    kickstart:
         description: "hints to where installers can find devices"
-        netdev:  "{{ h_netDEV | default('eno1') }}"
-        blkdev:  "{{ h_blkDEV | default('vda') }}"
+        netdev:  ""
+        blkdev:  ""
 
-      network:
+    network:
         default:
-          description: "default network using virtio with nat"
-          network_name: "virbr_{{ xtoph_vars.clustername }}"
-          fwd_type: "nat"
-          model: "virtio"
-          bridge_netdev: "eno1"
 
-          ## 20210922: deprecated, platform_profile should not include 
-          ##           machine specific info. it's redundant
-          #ip:                ""
-          #mac:               ""
+            description:     "standard libvirt nat network parameters"
+            network_name:    ""
+            fwd_type:        "nat"
+            bridge_netdev:   ""
+            model:           "virtio"
 
-          basedomain:        ""
-          network:           ""
-          netmask:           ""
-          broadcast:         ""
-          prefix:            ""
-          gateway:           ""
-          nameserver:        ""
-          timeserver:        ""
-          fqdn:              ""
-  
-      storage:
+            basedomain:      ""
+            network:         ""
+            netmask:         ""
+            broadcast:       ""
+            prefix:          ""
+            gateway:         ""
+            nameserver:      ""
+            timeserver:      ""
+            fqdn:            ""
+
+    storage:
         default:
-          description: "default storage using sparse virtio (vda)"
-          bus: "virtio"
-          qcow_dir: "/home/virt-images"
-          sparse: "true"
+
+            description: "standard libvirt sparse storage parameters"
+            qcow_dir: "/home/virt-images"
+            bus: "virtio"
+            qcow_dir: "/home/virt-images"
+            sparse: "true"
+
+
+#libvirt_nat:
+#
+#      name:        "libvirt"
+#      type:        "libvirt"
+#      description: "Default (empty) libvirt platform profile"
+#
+#      host_fqdn:   ""
+#      host_ip:     ""
+#
+#      nested_virt_enable: false
+#
+#      kickstart:
+#        description: "hints to where installers can find devices"
+#        netdev:  "{{ h_netDEV | default('eno1') }}"
+#        blkdev:  "{{ h_blkDEV | default('vda') }}"
+#
+#      network:
+#        default:
+#          description: "default network using virtio with nat"
+#          network_name: "virbr_{{ xtoph_vars.clustername }}"
+#          fwd_type: "nat"
+#          model: "virtio"
+#          bridge_netdev: "eno1"
+#
+#          ## 20210922: deprecated, platform_profile should not include 
+#          ##           machine specific info. it's redundant
+#          #ip:                ""
+#          #mac:               ""
+#
+#          basedomain:        ""
+#          network:           ""
+#          netmask:           ""
+#          broadcast:         ""
+#          prefix:            ""
+#          gateway:           ""
+#          nameserver:        ""
+#          timeserver:        ""
+#          fqdn:              ""
+#  
+#      storage:
+#        default:
+#          description: "default storage using sparse virtio (vda)"
+#          bus: "virtio"
+#          qcow_dir: "/home/virt-images"
+#          sparse: "true"
  
 
    
