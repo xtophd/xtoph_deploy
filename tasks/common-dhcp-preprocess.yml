@@ -101,9 +101,11 @@
           vars:
             - p_item:      "{{ item }}"
             - p_name:      "{{ inventory_hostname_short }}"
-            - p_addr:      "{{ h_pubIP  }}"
-            - p_mac:       "{{ h_pubMAC }}"
+#            - p_addr:      "{{ h_pubIP  }}"
+#            - p_mac:       "{{ h_pubMAC }}"
             - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
+            - p_ip:        "{{ xtoph_deploy.machine_profile.network.default.ip }}"
+            - p_mac:       "{{ xtoph_deploy.machine_profile.network.default.mac }}"
             - p_network:   "{{ xtoph_deploy.machine_profile.network.default.network }}"
             - p_netmask:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
             - p_broadcast: "{{ xtoph_deploy.machine_profile.network.default.broadcast }}"
@@ -247,7 +249,8 @@
 
         - name: "common-dhcp-preprocess : deploy machine pxe configs for BIOS and EFI"
           vars:
-            t_name: "{{ h_pubMAC | lower | replace(':','-') }}"
+#            t_name: "{{ h_pubMAC | lower | replace(':','-') }}"
+            t_name: "{{ xtoph_deploy.machine_profile.network.default.mac | lower | replace(':','-') }}"
           template:
             src:  "{{ item.src  }}"
             dest: "{{ item.dst }}"
