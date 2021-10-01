@@ -12,7 +12,7 @@
 
 
 - name: "baremetal-setup : install baremetal supporting packages"
-  yum: name=ipmitool state=installed
+  yum: name=ipmitool,curl state=installed
 
 
 
