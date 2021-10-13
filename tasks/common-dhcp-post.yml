@@ -24,7 +24,8 @@
 
       - name: "common-dhcp-preprocess : cleanup machine pxe configs for BIOS and EFI"
         vars:
-          t_name: "{{ h_pubMAC | replace(':','-') }}"
+#          t_name: "{{ h_pubMAC | replace(':','-') }}"
+          t_name: "{{ xtoph_deploy.machine_profile.network.default.mac | replace(':','-') }}"
         file:
           path:  "{{ item  }}"
           state: absent

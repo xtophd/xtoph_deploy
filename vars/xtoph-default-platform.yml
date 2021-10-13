@@ -54,53 +54,6 @@ libvirt_nat:
             sparse: "true"
 
 
-#libvirt_nat:
-#
-#      name:        "libvirt"
-#      type:        "libvirt"
-#      description: "Default (empty) libvirt platform profile"
-#
-#      host_fqdn:   ""
-#      host_ip:     ""
-#
-#      nested_virt_enable: false
-#
-#      kickstart:
-#        description: "hints to where installers can find devices"
-#        netdev:  "{{ h_netDEV | default('eno1') }}"
-#        blkdev:  "{{ h_blkDEV | default('vda') }}"
-#
-#      network:
-#        default:
-#          description: "default network using virtio with nat"
-#          network_name: "virbr_{{ xtoph_vars.clustername }}"
-#          fwd_type: "nat"
-#          model: "virtio"
-#          bridge_netdev: "eno1"
-#
-#          ## 20210922: deprecated, platform_profile should not include 
-#          ##           machine specific info. it's redundant
-#          #ip:                ""
-#          #mac:               ""
-#
-#          basedomain:        ""
-#          network:           ""
-#          netmask:           ""
-#          broadcast:         ""
-#          prefix:            ""
-#          gateway:           ""
-#          nameserver:        ""
-#          timeserver:        ""
-#          fqdn:              ""
-#  
-#      storage:
-#        default:
-#          description: "default storage using sparse virtio (vda)"
-#          bus: "virtio"
-#          qcow_dir: "/home/virt-images"
-#          sparse: "true"
- 
-
    
 ovirt:
 
@@ -127,11 +80,6 @@ ovirt:
           description: "Default network used for VMs"
           model: "virtio"
           network_name: ""
-
-          ## 20210922: deprecated, platform_profile should not include 
-          ##           machine specific info. it's redundant
-          #ip:                ""
-          #mac:               ""
 
           basedomain:        ""
           network:           ""
@@ -163,11 +111,6 @@ baremetal:
       network:
         default:
 
-          ## 20210922: deprecated, platform_profile should not include 
-          ##           machine specific info. it's redundant
-          #ip:                ""
-          #mac:               ""
-
           basedomain:        ""
           network:           ""
           netmask:           ""
@@ -180,3 +123,5 @@ baremetal:
 
       storage:
         default:
+          description:       "default baremetal storage parameters"
+          noop:              "creating this noop is an ugly hack because jinja filter lookup expects a list and baremetal has no additional values right now"

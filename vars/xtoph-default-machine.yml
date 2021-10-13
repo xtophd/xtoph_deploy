@@ -226,6 +226,43 @@ supermicro_x9drd_if:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
 
+##
+## SUSHI ENTRIES - sushi is a redfish emulator that
+##                 runs on top of libvirt/kvm.  Good
+##                 for testing.
+##
+
+sushi_vm:
+      platform: "baremetal"
+      description: "VM Controller by Sushi Redfish Emulator"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('enp1s0') }}"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      redfish:
+        fqdn:              "{{ redfish_fqdn | default('') }}"
+        get_power:         "noop"
+        get_media:         "-H 'Accept: application/json' -k -X GET https://$bmc/redfish/v1/Managers/Self/VirtualMedia/1 | python3 -m json.tool | egrep 'MediaStatus|Image'"
+        set_power_on:      "noop"
+        set_power_off:     "noop"
+        set_media_insert:  "-H 'Content-Type: application/json' -H 'Accept: application/json' -d '{Image: http://10.10.3.20:8080/assets/rhcos-4.8.2-x86_64-live.x86_64.iso}'  -X POST https://$bmc/redfish/v1/Managers/Self/VirtualMedia/1/Actions/VirtualMedia.InsertMedia"
+        set_media_eject:   "-H 'Content-Type: application/json' -H 'Accept: application/json' -d '{}' -X POST https://$bmc/redfish/v1/Managers/Self/VirtualMedia/1/Actions/VirtualMedia.EjectMedia"
+        set_media_boot:    "-H 'Content-Type: application/json' -H 'Accept: application/json' -d '{Boot:{ BootSourceOverrideEnabled: Once, BootSourceOverrideTarget: Cd, BootSourceOverrideMode: UEFI}}' -X PATCH https://$bmc/redfish/v1/Systems/Self"
+
+        custom_pre_tasks:
+          - "noop"
+          - "noop"
+
+        custom_post_tasks:
+          - "noop"
+          - "noop"
+
+
 
 ##
 ## GENERIC PC ENTRIES
