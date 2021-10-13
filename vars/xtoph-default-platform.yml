@@ -51,7 +51,6 @@ libvirt_nat:
             description: "standard libvirt sparse storage parameters"
             qcow_dir: "/home/virt-images"
             bus: "virtio"
-            qcow_dir: "/home/virt-images"
             sparse: "true"
 
 
