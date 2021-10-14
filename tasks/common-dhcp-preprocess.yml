@@ -27,10 +27,19 @@
       
         - name: "common-dhcp-preprocess : populate service facts"
           service_facts:
-      
+
+
+
+        - name: "common-dhcp-preprocess : delete old temp workspace"
+          run_once: true
+          shell:
+            cmd: |
+              if [[ -d "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}" ]] ; then rm -rf {{ xtoph_deploy.deployhost.dhcp.tmp_dir }} ; fi
+
       
       
         - name: "common-dhcp-preprocess : create temp workspaces"
+          run_once: true
           file:
             path="{{ item }}"
             mode="0755"
