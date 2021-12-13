@@ -431,10 +431,11 @@
 
 
       - name: "libvirt-deploy : network validate fwd_type"
-        fail: msg="currently only support network.fwd_type = [ nat | bridge ]"
+        fail: msg="currently only support network.fwd_type = [ nat | bridge | macvtap ]"
         when:
           - xtoph_deploy.platform_profile.network.default.fwd_type != "nat"
           - xtoph_deploy.platform_profile.network.default.fwd_type != "bridge"
+          - xtoph_deploy.platform_profile.network.default.fwd_type != "macvtap"
 
 
 
@@ -444,7 +445,7 @@
 
 
 
-      - name: "libvirt-deploy : xml to define libvirt-network as 'nat'"
+      - name: "libvirt-deploy : xml to define libvirt-network using 'nat'"
         template:
           src: "libvirt-nat-xml.j2"
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
@@ -453,7 +454,7 @@
           mode: 0644
         when: xtoph_deploy.machine_profile.network.default.fwd_type == "nat"
 
-      - name: "libvirt-deploy : xml to define libvirt-network as 'bridge'"
+      - name: "libvirt-deploy : xml to define libvirt-network using 'bridge'"
         template:
           src: "libvirt-bridge-xml.j2"
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
@@ -461,6 +462,15 @@
           group: root
           mode: 0644
         when: xtoph_deploy.machine_profile.network.default.fwd_type == "bridge"
+
+      - name: "libvirt-deploy : xml to define libvirt-network using 'macvtap'"
+        template:
+          src: "libvirt-macvtap-xml.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
+          owner: root
+          group: root
+          mode: 0644
+        when: xtoph_deploy.machine_profile.network.default.fwd_type == "macvtap"
 
 
      
@@ -474,6 +484,16 @@
       ##
 
 
+
+      - name: "libvirt-deploy : script to create macvtap network"
+        vars:
+        template:
+          src: "mknet-macvtap.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-macvtap.sh"
+          owner: root
+          group: root
+          mode: 0755
+        when: xtoph_deploy.platform_profile.network.default.fwd_type == "macvtap"
 
       - name: "libvirt-deploy : script to create bridge network"
         vars:

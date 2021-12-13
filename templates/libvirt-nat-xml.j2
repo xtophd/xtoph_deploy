@@ -1,6 +1,6 @@
 <network>
   <name>{{ xtoph_deploy.machine_profile.network.default.network_name }}</name>
-  <forward mode='{{ xtoph_deploy.machine_profile.network.default.fwd_type }}' />
+  <forward mode='nat' />
   <bridge name='{{ xtoph_deploy.machine_profile.network.default.network_name }}' stp='on' delay='0' />
   <ip address='{{ xtoph_deploy.machine_profile.network.default.gateway }}' netmask='{{ xtoph_deploy.machine_profile.network.default.netmask }}' />
   <dns enable='no' />
