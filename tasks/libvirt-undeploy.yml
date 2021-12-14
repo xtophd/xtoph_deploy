@@ -82,7 +82,7 @@
       changed_when: "'CHANGED' in rmnet_results.stdout"
       notify:
         - delegated_restart_dnsmasq
-      when: xtoph_deploy.platform_profile.network.default.undeploy
+      when: xtoph_deploy.platform_profile.network.default.undeploy | default(false)
 
 
 
