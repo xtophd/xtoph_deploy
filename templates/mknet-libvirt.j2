@@ -30,6 +30,10 @@ if ! virsh net-info "{{ xtoph_deploy.machine_profile.network.default.network_nam
 
     virsh net-autostart "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
 
-    echo "libvirt network CHANGED for ansible's benefit"
+    echo "libvirt network CHANGED : network ${NETWORK_NAME} defined"
+
+else
+
+    echo "libvirt network unmodified : network ${NETWORK_NAME} already exists"
     
 fi

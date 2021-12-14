@@ -64,4 +64,10 @@ if ! nmcli dev show "{{ xtoph_deploy.machine_profile.network.default.network_nam
     ifdown "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
     ifup   "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
 
+     echo "network CHANGED : bridge {{ xtoph_deploy.machine_profile.network.default.network_name }} created"
+
+else
+
+    echo "network unmodified : bridge {{ xtoph_deploy.machine_profile.network.default.network_name }} already exists"
+
 fi

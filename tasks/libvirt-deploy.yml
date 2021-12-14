@@ -583,6 +583,7 @@
         delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
         script:
           cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+        register: mknet_results
         changed_when: "'CHANGED' in mknet_results.stdout"
         notify:
           - delegated_restart_dnsmasq
