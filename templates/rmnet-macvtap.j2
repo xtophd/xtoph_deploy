@@ -19,21 +19,15 @@
 
 
 if virsh net-info "{{ xtoph_deploy.machine_profile.network.default.network_name }}"; then
-
+ 
     ##
-    ##    Destroy and Undefine the libvirt network only if no nodes are members
+    ##    Destroy and Undefine the libvirt network
     ##
-    ##    NOTE: I don't know how to test if a network has any members, so for
-    ##          now this script is only provided for manual use
-    ##
-
+    
     virsh net-destroy  "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
 
     virsh net-undefine "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
 
     echo "libvirt network CHANGED for ansible's benefit"
-
+    
 fi
-
-
-
