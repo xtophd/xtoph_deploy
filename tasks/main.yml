@@ -297,7 +297,13 @@
 
 
 
-- name: "main.yml : undeploy machines"
+- name: "main.yml : common undeploy tasks"
+  include_tasks: "common-undeploy.yml"
+  when: 
+    - xtoph_deploy_action == "undeploy" 
+
+
+- name: "main.yml : platform specific undeploy tasks"
   include_tasks: "{{ platform_item.tasks }}"
   when: 
     - xtoph_deploy_action == "undeploy" 

@@ -1,0 +1,33 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    Ensure temp workspaces exist (maybe they got cleaned up
+      ##    
+
+      - name: "common-undeploy : create temp workspace"
+        file:
+          path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
+          mode="0755"
+          state=directory
+        loop:
+          - iso
+          - artifacts
+
+      ##
+      ##    Save a copy of the xtoph_deploy dictionary
+      ##
+
+      - name: "common-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+        copy:
+          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+          content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
