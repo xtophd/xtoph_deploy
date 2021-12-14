@@ -1,4 +1,4 @@
-# Auth#ors: 
+## Authors: 
 ##   Christoph Doerbeck
 ##
 ## Summary:
@@ -448,7 +448,7 @@
       - name: "libvirt-deploy : xml to define libvirt-network using 'nat'"
         template:
           src: "libvirt-nat-xml.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/{{ xtoph_deploy.machine_profile.network.default.network_name }}-network.xml"
           owner: root
           group: root
           mode: 0644
@@ -457,7 +457,7 @@
       - name: "libvirt-deploy : xml to define libvirt-network using 'bridge'"
         template:
           src: "libvirt-bridge-xml.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/{{ xtoph_deploy.machine_profile.network.default.network_name }}-network.xml"
           owner: root
           group: root
           mode: 0644
@@ -466,7 +466,7 @@
       - name: "libvirt-deploy : xml to define libvirt-network using 'macvtap'"
         template:
           src: "libvirt-macvtap-xml.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/libvirt-network.xml"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/{{ xtoph_deploy.machine_profile.network.default.network_name }}-network.xml"
           owner: root
           group: root
           mode: 0644
@@ -485,26 +485,6 @@
 
 
 
-      - name: "libvirt-deploy : script to create macvtap network"
-        vars:
-        template:
-          src: "mknet-macvtap.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-macvtap.sh"
-          owner: root
-          group: root
-          mode: 0755
-        when: xtoph_deploy.platform_profile.network.default.fwd_type == "macvtap"
-
-      - name: "libvirt-deploy : script to create bridge network"
-        vars:
-        template:
-          src: "mknet-bridge.j2"
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
-          owner: root
-          group: root
-          mode: 0755
-        when: xtoph_deploy.platform_profile.network.default.fwd_type == "bridge"
-
       - name: "libvirt-deploy : script to create libvirt network"
         vars:
         template:
@@ -513,7 +493,7 @@
           owner: root
           group: root
           mode: 0755
-   
+
       - name: "libvirt-deploy : script to remove libvirt network"
         vars:
         template:
@@ -523,6 +503,16 @@
           group: root
           mode: 0755
    
+      - name: "libvirt-deploy : script to create extra bridge network"
+        vars:
+        template:
+          src: "mknet-bridge.j2"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+          owner: root
+          group: root
+          mode: 0755
+        when: xtoph_deploy.platform_profile.network.default.fwd_type == "bridge"
+
 
  
       ##
@@ -581,38 +571,21 @@
 
 
 
-#      - name: "libvirt-deploy : create bridge network"
-#        throttle: 1
-#        shell:
-#          cmd: |
-#            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
-#        when: xtoph_deploy.platform_profile.network.default.fwd_type == "bridge"
-#
-#      - name: "libvirt-deploy : create libvirt network"
-#        throttle: 1
-#        shell:
-#          cmd: |
-#            bash "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-libvirt.sh"
-#        register: mknet_results
-#        changed_when: "'CHANGED' in mknet_results.stdout"
-#        notify:
-#          - delegated_restart_httpd
-#          - delegated_restart_dnsmasq
-
       - name: "libvirt-deploy : copy xml network config to platform host"
         throttle: 1
         delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
         copy:
           dest: "/var/tmp/"
-          src:  "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/{{ item }}"
-        loop:
-          - "libvirt-network.xml" 
+          src:  "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/{{ xtoph_deploy.machine_profile.network.default.network_name }}-network.xml"
 
-      - name: "libvirt-deploy : create bridge network"
+      - name: "libvirt-deploy : create extra bridge network"
         throttle: 1
         delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
         script:
           cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mknet-bridge.sh"
+        changed_when: "'CHANGED' in mknet_results.stdout"
+        notify:
+          - delegated_restart_dnsmasq
         when: xtoph_deploy.platform_profile.network.default.fwd_type == "bridge"
 
       - name: "libvirt-deploy : create libvirt network"
@@ -623,8 +596,9 @@
         register: mknet_results
         changed_when: "'CHANGED' in mknet_results.stdout"
         notify:
-#          - delegated_restart_httpd
           - delegated_restart_dnsmasq
+
+
 
 
   ##

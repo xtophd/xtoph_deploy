@@ -3,8 +3,9 @@
 ##
 ##    This script is intended to be used with
 ##    the xtoph_deploy ansible role.  It combines
-##    all steps to REMOVE a libvirt network for
-##    for use with VMs running in kvm.
+##    all steps to REMOVE a libvirt network if
+##    it can be determined that no VMs (active or
+##    inactive) are configured to use it.
 ##
 ##    The intent is to provide one command for
 ##    an ansible shell-task which can be throttled.
@@ -12,28 +13,47 @@
 
 
 
-##
-##    Test for libvirt network
-##
+NETWORK_NAME="{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+XMLLINT_XPATH="/domain/devices/interface[@type=\"network\"]/source[@network=\"${NETWORK_NAME}\"]"
+PORT_COUNT=0
 
-
-
-if virsh net-info "{{ xtoph_deploy.machine_profile.network.default.network_name }}"; then
+if virsh net-info ${NETWORK_NAME} &> /dev/null ; then
 
     ##
-    ##    Destroy and Undefine the libvirt network only if no nodes are members
+    ##    Not ideal, but other commands like net-port-list
+    ##    only report active domains.  So for now just scan all
+    ##    domains via dumpxml.
     ##
-    ##    NOTE: I don't know how to test if a network has any members, so for
-    ##          now this script is only provided for manual use
+
+    for i in `virsh list --all --name` ; do
+
+        if virsh dumpxml $i | xmllint --xpath ${XMLLINT_XPATH} - &> /dev/null ; then
+
+            echo "libvirt network ${NETWORK_NAME} is still used by domain $i"
+
+            (( ++PORT_COUNT ))
+
+            break
+        fi
+    done
+
+
+    ##
+    ##    Destroy and Undefine the libvirt network only if count == 0
     ##
 
-    virsh net-destroy  "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+    if [[ ${PORT_COUNT} -eq 0 ]] ; then
 
-    virsh net-undefine "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+        echo "libvirt network ${NETWORK_NAME} is unused"
 
-    echo "libvirt network CHANGED for ansible's benefit"
+        virsh net-destroy ${NETWORK_NAME}
+
+        virsh net-undefine ${NETWORK_NAME}
+
+        ##    Our ansible task is watching for the word "CHANGED"
+ 
+        echo "libvirt network CHANGED : network ${NETWORK_NAME} undefined"
+
+    fi
 
 fi
-
-
-

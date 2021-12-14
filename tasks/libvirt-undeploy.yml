@@ -50,3 +50,40 @@
         path: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         state: absent
 
+
+
+    ##
+    ##    Attempt to clean up the libvirt network/interfaces
+    ##
+    ##    NOTE:  Only macvtap is 1-to-1 with a vm.  Deleting
+    ##           a nat or normal bridge network could have
+    ##           consequences with other vm, so we don't touch
+    ##           those networks.  Maybe in the future, the 
+    ##           script can be extended to determine if this
+    ##           is the last host, and only then delete it.
+    ##
+
+
+
+    - name: "libvirt-undeploy : deploy script to cleanup/remove libvirt network"
+      template:
+        src: "rmnet-libvirt.j2"
+        dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/rmnet-libvirt.sh"
+        owner: root
+        group: root
+        mode: 0755
+    
+    - name: "libvirt-undeploy : execute script to remove libvirt network"
+      throttle: 1
+      delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+      script:
+        cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/rmnet-libvirt.sh"
+      register: rmnet_results
+      changed_when: "'CHANGED' in rmnet_results.stdout"
+      notify:
+        - delegated_restart_dnsmasq
+      when: xtoph_deploy.platform_profile.network.default.undeploy
+
+
+
+

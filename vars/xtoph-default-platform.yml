@@ -34,6 +34,7 @@ libvirt_nat:
             fwd_type:        "nat"
             bridge_netdev:   ""
             model:           "virtio"
+            undeploy:        False
 
             basedomain:      ""
             network:         ""
