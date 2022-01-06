@@ -599,6 +599,12 @@
         notify:
           - delegated_restart_dnsmasq
 
+      - name: "libvirt-deploy-monitor : cleanup xml network config on platform host"
+        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+        file:
+          path:  "/var/tmp/{{ xtoph_deploy.machine_profile.network.default.network_name }}-network.xml"
+          state: absent
+        when: xtoph_deploy.cleanup == true
 
 
 
