@@ -3,7 +3,7 @@
 ##
 ##    This script is intended to be used with
 ##    the xtoph_deploy ansible role.  It checks
-##    is a libvirt network exists.
+##    if a libvirt network exists.
 ##
 ##    Prints string 'yes' or 'no' to STDIO
 ##
