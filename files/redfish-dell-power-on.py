@@ -6,11 +6,11 @@
 #
 #      curl --insecure                          \
 #           -s                                  \
-#           -u <username>:<password>            \
+#           -u $bmc_uid:$bmc_pw                 \
 #           -X POST                             \
 #           -H "Content-Type: application/json" \
 #           -d '{"ResetType": "On"}'            \
-#           https://<bmc-ip>/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset
+#           https://$bmc_ip/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset
 #
 
 import argparse

@@ -495,7 +495,7 @@
 
             - name: "baremetal-deploy : (redfish) media-bootonce"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_bootonce }}
+                  {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 

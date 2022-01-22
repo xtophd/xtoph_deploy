@@ -177,14 +177,15 @@ dell_r740:
           - "-I lanplus chassis bootdev pxe"
 
       redfish:
-        fqdn:           "{{ redfish_fqdn | default('') }}"
-        power_status:   "redfish-dell-power-status.py"
-        power_on:       "redfish-dell-power-on.py"
-        power_off:      "redfish-dell-power-off.py"
-        media_status:   "redfish-dell-virtualmedia-status.py"
-        media_eject:    "redfish-dell-virtualmedia-eject.py"
-        media_insert:   "redfish-dell-virtualmedia-insert.py"
-        media_bootonce: "redfish-dell-virtualmedia-bootonce.py"
+        fqdn:            "{{ redfish_fqdn | default('') }}"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-virtualmedia-status.py"
+        media_eject:     "redfish-dell-virtualmedia-eject.py"
+        media_insert:    "redfish-dell-virtualmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-virtualmedia.py"
+        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
 
 
 
