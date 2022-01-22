@@ -23,9 +23,9 @@ NETWORK_NAME="$1"
 
 
 if virsh net-info "${NETWORK_NAME}" >/dev/null; then
-    echo "yes"
+    echo -n "yes"
 else
-    echo "no"
+    echo -n "no"
 fi
 
 

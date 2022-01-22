@@ -57,4 +57,21 @@
     - xtoph_deploy.selected_profile.machine != ""
 
 
+##
+##    Nodes that define a machine_profile are only
+##    allowed to declare an ipmi OR redfish bmc, not
+##    both
+##
+
+
+- name: "common-assertions : assert that machine_profile does NOT enable both 'ipmi' AND 'redfish'"
+  any_errors_fatal: true
+  assert:
+    that:
+      - not (xtoph_deploy.machine_profile.redfish.fqdn|length > 0 and xtoph_deploy.machine_profile.ipmi.fqdn|length > 0)
+    fail_msg: "CONFIG ERROR: a machine_profile is only allowed redfish OR ipmi, not both (CHECK YOUR CONFIGS)"
+    success_msg: "Assertion Passed"
+  when:
+    - xtoph_deploy.selected_profile.machine != ""
+
 

@@ -10,13 +10,74 @@
 ##    Following block of tasks here are delegated to execute
 ##    on the deployhost/localhost
 ##
+##
+##    NOTE: when using iDRAC/iLO with virtual media, we
+##          can eject the media in two places:
+##
+##            during baremetal-deploy-monitor when (if) we
+##            are waiting for a shutdown
+##
+##            during baremetal-deploy-post (if) we
+##            are waiting for a shh alive
+##
+##          common-deploy-post has another wait_for_ssh
+##          but that preludes the final phase of deployment
+##          tasks that are common to all platforms
+##
 
 
 
 - delegate_to: localhost
   block:
 
+      - name: "baremetal-deploy-monitor : (redfish) wait for power-status == off"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.power_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: targetinfo_result
+        until: targetinfo_result.stdout == "off"
+        retries: 600
+        delay: 5
+        vars:
 
-        - name: "baremetal-deploy-monitor : platform monitoring tasks"
-          debug: msg="No special monitoring tasks for baremetal"
+      - name: "baremetal-deploy-monitor : (redfish) media-status"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.media_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: redfish_result
+        when:
+          - xtoph_deploy.kickstart_profile.method != "pxe" 
+
+      - name: "baremetal-deploy-monitor : (redfish) media-eject"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.media_eject }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+        when:
+          - xtoph_deploy.kickstart_profile.method != "pxe"
+          - redfish_result.stdout == "inserted"
+
+      - name: "baremetal-deploy : (redfish) power-on"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.power_on }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+
+  vars:
+    t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
+    t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
+    t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+  when:
+    - xtoph_deploy.kickstart_profile.wait_for_shutdown 
+    - xtoph_deploy.machine_profile.redfish.fqdn is defined
+    - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+    - deploy_node
 

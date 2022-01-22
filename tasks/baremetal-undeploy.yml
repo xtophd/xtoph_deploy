@@ -22,7 +22,7 @@
 
     - block:
 
-        - name: "baremetal-undeploy : ipmi set power off"
+        - name: "baremetal-undeploy : (ipmi) set power off"
           throttle: 1
           shell:
             cmd: |
@@ -36,4 +36,33 @@
         - xtoph_deploy.kickstart_profile is defined and
           xtoph_deploy.kickstart_profile.method == "pxe" and
           ipmi_fqdn is defined
+
+
+
+    ##
+    ##    Execute baremetal redfish calls to power off system 
+    ##    and eject virtual media
+    ##
+
+
+
+    - block:
+
+        - name: "baremetal-undeploy : (redfish) set machine power off"
+          script: redfish-setpower-off.sh {{ redfish_fqdn }} {{ t_uid }} {{ t_pw }}
+          ignore_errors: true
+
+        - name: "baremetal-deploy : (redfish) virtual media eject"
+          script:  redfish-virtualmedia-eject.sh {{ redfish_fqdn }} {{ t_uid }} {{ t_pw }}
+          ignore_errors: true
+
+      vars:
+        t_uid: "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
+        t_pw:  "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+
+      when:
+        - xtoph_deploy.kickstart_profile is defined and
+          xtoph_deploy.kickstart_profile.method != "pxe" and
+          redfish_fqdn is defined
+
 

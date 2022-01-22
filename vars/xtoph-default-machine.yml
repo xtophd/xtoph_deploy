@@ -160,6 +160,7 @@ dell_r740:
       kickstart:
         blkdev: "{{ h_blkDEV | default('sda') }}"
         netdev: "{{ h_netDEV | default('eno0') }}"
+      usb_storage_delay: "10"
       storage:
         default:
       network:
@@ -175,6 +176,16 @@ dell_r740:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
 
+      redfish:
+        fqdn:           "{{ redfish_fqdn | default('') }}"
+        power_status:   "redfish-dell-power-status.py"
+        power_on:       "redfish-dell-power-on.py"
+        power_off:      "redfish-dell-power-off.py"
+        media_status:   "redfish-dell-virtualmedia-status.py"
+        media_eject:    "redfish-dell-virtualmedia-eject.py"
+        media_insert:   "redfish-dell-virtualmedia-insert.py"
+        media_bootonce: "redfish-dell-virtualmedia-bootonce.py"
+
 
 
 ##
@@ -189,7 +200,7 @@ hp_dl380:
       kickstart:
         blkdev: "{{ h_blkDEV | default('sda') }}"
         netdev: "{{ h_netDEV | default('eno0') }}"
-      usb_delay: "10"
+      usb_storage_delay: "10"
       storage:
         default:
       network:
