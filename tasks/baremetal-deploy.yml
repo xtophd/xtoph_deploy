@@ -492,13 +492,26 @@
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
                   -m {{ t_media }}
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
 
-            - name: "baremetal-deploy : (redfish) media-bootonce"
+            - name: "baremetal-deploy : (redfish) bootonce-media"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (redfish) bootonce-pxe"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+              when:
+                - xtoph_deploy.kickstart_profile.method == "pxe"
 
             - name: "baremetal-deploy : (redfish) power-on"
               script: >
