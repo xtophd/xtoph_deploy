@@ -181,10 +181,10 @@ dell_r740:
         power_status:    "redfish-dell-power-status.py"
         power_on:        "redfish-dell-power-on.py"
         power_off:       "redfish-dell-power-off.py"
-        media_status:    "redfish-dell-virtualmedia-status.py"
-        media_eject:     "redfish-dell-virtualmedia-eject.py"
-        media_insert:    "redfish-dell-virtualmedia-insert.py"
-        bootonce_media:  "redfish-dell-bootonce-virtualmedia.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
 
 

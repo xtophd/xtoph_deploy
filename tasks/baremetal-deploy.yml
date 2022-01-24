@@ -4,43 +4,72 @@
 ## Summary:
 ##
 
+##
+##    NOTE: deploy_node only affects ipmi/redfish automation
+##
+
 - name: "baremetal-deploy : BEGIN"
   delegate_to: localhost
   block:
 
       ##
-      ##    NOTE: All tasks here are blocked and delegated to execute
-      ##          on the deployhost/localhost 
+      ##    All tasks here are blocked and delegated 
+      ##    to execute on the deployhost
       ##
-      ##    NOTE: As a safety measure, only automatically deploy 
-      ##          baremetal host if power is off
+      ##    Execute "ipmi" calls to ready system for deployment
       ##
-      ##          Create the media and other services regardless to
-      ##          support manually controled systems without ipmi/redfish
-      ## 
-
-      ## 
-      ##    NOTE: username and password should be in
-      ##          the encrypted credentials.yml file
+      ##    WHEN:
+      ##      if IPMI interface is defined & method == pxe
       ##
-
-
-
-      - set_fact:
-          deploy_node: false
+      ##    NOTE:
+      ##     
+      ##      xtoph_deploy only supports pxe for ipmi interfaces    
+      ##
+      ##      As a safety measure, only enable automated deployment 
+      ##      of a host if (and ONLY if) power is ALREADY off
+      ##
 
       - name: "baremetal-deploy : (ipmi) power-status"
         shell:
           cmd: |
-            ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
-        vars:
-          t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
-          t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
+            ipmitool -U {{ t_user }} -P {{ t_pass }} -H {{ t_bmc }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
         register: ipmi_result
         ignore_errors: true
-        when: 
-          - xtoph_deploy.kickstart_profile.method == "pxe" 
-          - ipmi_fqdn is defined
+
+      - set_fact:
+          deploy_node: true
+        when: ipmi_result.rc == 0
+
+  vars:
+    t_bmc:    "{{ xtoph_deploy.machine_profile.ipmi.fqdn }}"
+    t_user:   "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
+    t_pass:   "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
+  when:
+    - xtoph_deploy.machine_profile.ipmi.fqdn is defined
+    - xtoph_deploy.machine_profile.ipmi.fqdn|length > 0
+    - xtoph_deploy.kickstart_profile.method == "pxe" 
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    All tasks here are blocked and delegated 
+      ##    to execute on the deployhost
+      ##
+      ##    Execute "redfish" calls to ready system for deployment
+      ##
+      ##    WHEN:
+      ##      if IPMI interface is defined & method == pxe
+      ##
+      ##    NOTE:
+      ##
+      ##      xtoph_deploy supports pxe and virtual-mdeia for redfish interfaces    
+      ##
+      ##      As a safety measure, only enable automated deployment 
+      ##      of a host if (and ONLY if) power is ALREADY off
+      ##
 
       - name: "baremetal-deploy : (redfish) power-status"
         script: >
@@ -49,37 +78,67 @@
             -p {{ t_pass }} 
             -i {{ t_bmc }} 
             --chomp
-        vars:
-          t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
-          t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
-          t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
         register: redfish_result
-        when:
-          - xtoph_deploy.machine_profile.redfish.fqdn is defined
-          - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
 
       - set_fact:
           deploy_node: true
+        when: redfish_result.stdout == "off"
+
+      - name: "baremetal-deploy-monitor : (redfish) media-status"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.media_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: redfish_result
         when:
-          - xtoph_deploy.kickstart_profile is defined 
-          - ( ipmi_fqdn is defined and ipmi_result == 0 ) or 
-            ( redfish_fqdn is defined and redfish_result.stdout == "off" )
+          - deploy_node
+          - xtoph_deploy.kickstart_profile.method != "pxe"
 
+      - name: "baremetal-deploy-monitor : (redfish) media-eject"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.media_eject }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+        when:
+          - deploy_node
+          - xtoph_deploy.kickstart_profile.method != "pxe"
+          - redfish_result.stdout == "inserted"
 
-      - debug: var=redfish_result
-      - debug: var=xtoph_deploy.machine_profile.redfish.fqdn
-      - debug: var=deploy_node
+      - name: "baremetal-deploy-monitor : (redfish) wait for media-status = ejected"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.media_status }}
+            -u {{ t_user }} 
+            -p {{ t_pass }} 
+            -i {{ t_bmc }} 
+            --chomp
+        register: local_result
+        until: local_result.stdout == "ejected"
+        retries: 600
+        delay: 5
+        when:
+          - deploy_node
+          - xtoph_deploy.kickstart_profile.method != "pxe"
+          - redfish_result.stdout == "inserted"
+
+  vars:
+    t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
+    t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
+    t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+  when:
+    - xtoph_deploy.machine_profile.redfish.fqdn is defined
+    - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+
 
     
 - delegate_to: localhost
   block:
 
-
-
       ##
       ##    All tasks here are blocked and 
       ##    delegated to execute on the deployhost
-      ##
       ##
       ##    WHEN:
       ##      always
@@ -99,6 +158,16 @@
       ##      available)
       ##
       ##
+
+
+      ##
+      ##      If power state was determined above, then deploy_node
+      ##      was set accordingly.  If not, set it to false.
+      ##
+
+      - set_fact:
+          deploy_node: false
+        when: deploy_node is undefined
 
 
 
@@ -463,27 +532,6 @@
 
 
       - block:
-
-            - name: "baremetal-deploy-monitor : (redfish) media-status"
-              script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_status }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
-                  --chomp
-              register: redfish_result
-              when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
-
-            - name: "baremetal-deploy-monitor : (redfish) media-eject"
-              script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_eject }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
-              when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
-                - redfish_result.stdout == "inserted"
 
             - name: "baremetal-deploy : (redfish) media-insert"
               script: >
