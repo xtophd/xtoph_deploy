@@ -51,10 +51,11 @@ bmc_password = args["p"]
 
 
 ## 
-##  Test login credentials
+##    Test login credentials
 ## 
 
-response = requests.get('https://%s/redfish/v1/Managers/iDRAC.Embedded.1' % bmc_ip, auth=(bmc_username, bmc_password), verify=False)
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1' % bmc_ip
+response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 
 if response.status_code == 401:
     print("WARNING: check credentials")
@@ -66,17 +67,13 @@ else:
 
 
 ## 
-##  Set Virtual Media Boot-Once
+##    Set Virtual Media Boot-Once
 ## 
 
 
-url     = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration' % bmc_ip
-headers = {'content-type': 'application/json'}
-payload = {"ShareParameters": {"Target":"ALL"},"ImportBuffer": "<SystemConfiguration><Component FQDD=\"iDRAC.Embedded.1\"><Attribute Name=\"ServerBoot.1#BootOnce\">Enabled</Attribute><Attribute Name=\"ServerBoot.1#FirstBootDevice\">VCD-DVD</Attribute></Component></SystemConfiguration>"}
-
-print (url)
-print (headers)
-print (json.dumps(payload))
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration' % bmc_ip
+headers  = {'content-type': 'application/json'}
+payload  = {"ShareParameters": {"Target":"ALL"},"ImportBuffer": "<SystemConfiguration><Component FQDD=\"iDRAC.Embedded.1\"><Attribute Name=\"ServerBoot.1#BootOnce\">Enabled</Attribute><Attribute Name=\"ServerBoot.1#FirstBootDevice\">VCD-DVD</Attribute></Component></SystemConfiguration>"}
 
 response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
 

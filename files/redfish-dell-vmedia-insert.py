@@ -50,10 +50,11 @@ image_url    = args["m"]
 
 
 ## 
-##  Test login credentials
+##    Test login credentials
 ## 
 
-response = requests.get('https://%s/redfish/v1/Managers/iDRAC.Embedded.1' % bmc_ip, auth=(bmc_username, bmc_password), verify=False)
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1' % bmc_ip
+response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 
 if response.status_code == 401:
     print("WARNING: check credentials")
@@ -63,15 +64,14 @@ else:
 
 
 
-
 ## 
-##  Insert Virtual Media
+##    Insert Virtual Media
 ## 
 
 
-url     = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia' % bmc_ip
-headers = {'content-type': 'application/json'}
-payload = {'Image': image_url }
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia' % bmc_ip
+headers  = {'content-type': 'application/json'}
+payload  = {'Image': image_url }
 
 response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
 
