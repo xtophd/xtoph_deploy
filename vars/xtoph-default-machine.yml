@@ -140,26 +140,7 @@ dell_r630:
       kickstart:
         blkdev: "{{ h_blkDEV | default('sda') }}"
         netdev: "{{ h_netDEV | default('eno0') }}"
-      storage:
-        default:
-      network:
-        default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
-      ipmi:
-        fqdn:         "{{ ipmi_fqdn | default('') }}"
-        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-        power_on:     "-I lanplus chassis power on"
-        power_off:    "-I lanplus chassis power off"
-        config_steps:
-          - "-I lanplus chassis bootdev pxe"
-
-dell_r740:
-      platform: "baremetal"
-      description: "DELL r740"
-      kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('eno0') }}"
+      usb_storage_delay: "10"
       storage:
         default:
       network:
@@ -174,6 +155,49 @@ dell_r740:
         config_steps:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
+      redfish:
+        fqdn:            "{{ redfish_fqdn | default('') }}"
+        power_status:    "racadm-power-status.sh"
+        power_on:        "racadm-power-on.sh"
+        power_off:       "racadm-power-off.sh"
+        media_status:    "racadm-vmedia-status.sh"
+        media_eject:     "racadm-vmedia-eject.sh"
+        media_insert:    "racadm-vmedia-insert.sh"
+        bootonce_media:  "racadm-bootonce-vmedia.sh"
+        bootonce_pxe:    "racadm-bootonce-pxe.sh"
+
+
+dell_r740:
+      platform: "baremetal"
+      description: "DELL r740"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno0') }}"
+      usb_storage_delay: "10"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus sel time set now"
+          - "-I lanplus chassis bootdev pxe"
+      redfish:
+        fqdn:            "{{ redfish_fqdn | default('') }}"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
 
 
 
@@ -189,7 +213,7 @@ hp_dl380:
       kickstart:
         blkdev: "{{ h_blkDEV | default('sda') }}"
         netdev: "{{ h_netDEV | default('eno0') }}"
-      usb_delay: "10"
+      usb_storage_delay: "10"
       storage:
         default:
       network:

@@ -3,10 +3,10 @@
 virt-install --name "{{ xtoph_deploy.platform_profile.vm.name }}" \
     --ram "{{ xtoph_deploy.resource_profile.memsize }}" \
     --check disk_size=off \
-    --network "network={{ xtoph_deploy.machine_profile.network.default.network_name }},mac={{ h_pubMAC }},model={{ xtoph_deploy.machine_profile.network.default.model }}" \
     --graphics vnc \
     --vcpus {{ xtoph_deploy.resource_profile.vcpus }} \
     --cpu {{ xtoph_deploy.machine_profile.cpu.type | default ('host-model') }} \
     --boot hd,network,menu=yes \
-    --disk "{{ xtoph_deploy.machine_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.qcow2,bus={{ xtoph_deploy.machine_profile.storage.default.bus }},sparse={{ xtoph_deploy.machine_profile.storage.default.sparse }},size={{ xtoph_deploy.resource_profile.storage.root.size }}" \
+    --disk "{{ xtoph_deploy.machine_profile.storage[t_disk_profile].qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.qcow2,bus={{ xtoph_deploy.machine_profile.storage[t_disk_profile].bus }},sparse={{ xtoph_deploy.machine_profile.storage[t_disk_profile].sparse }},size={{ xtoph_deploy.resource_profile.storage.root.size }}" \
+    --network "network={{ xtoph_deploy.machine_profile.network[t_nic_profile].network_name }},mac={{ h_pubMAC }},model={{ xtoph_deploy.machine_profile.network[t_nic_profile].model }}" \
     --noreboot \

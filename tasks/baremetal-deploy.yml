@@ -4,60 +4,102 @@
 ## Summary:
 ##
 
+##
+##    NOTE: deploy_node only affects ipmi/redfish automation
+##
+
 - name: "baremetal-deploy : BEGIN"
   delegate_to: localhost
   block:
 
       ##
-      ##    NOTE: All tasks here are blocked and delegated to execute
-      ##          on the deployhost/localhost 
+      ##    All tasks here are blocked and delegated 
+      ##    to execute on the deployhost
+      ##
+      ##    Execute "ipmi" calls to ready system for deployment
+      ##
+      ##    WHEN:
+      ##      if IPMI interface is defined & method == pxe
+      ##
+      ##    NOTE:
+      ##     
+      ##      xtoph_deploy only supports pxe for ipmi interfaces    
+      ##
+      ##      As a safety measure, only enable automated deployment 
+      ##      of a host if (and ONLY if) power is ALREADY off
       ##
 
-      ##
-      ##    Log in to the IPMI service to determine state if power is off
-      ## 
-      ##    NOTE: username and password should be in
-      ##          the encrypted credentials.yml file
-      ##
-
-
-
-      - set_fact:
-          deploy_node: false
-
-      - name: "baremetal-deploy : ipmi verify machine power is off"
+      - name: "baremetal-deploy : (ipmi) power-status"
         shell:
           cmd: |
-            ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
-        vars:
-          t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
-          t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
-        register: vminfo_result
+            ipmitool -U {{ t_user }} -P {{ t_pass }} -H {{ t_bmc }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
+        register: ipmi_result
         ignore_errors: true
-        when: 
-          - xtoph_deploy.kickstart_profile is defined and
-            xtoph_deploy.kickstart_profile.method == "pxe" and
-            ipmi_fqdn is defined
 
       - set_fact:
           deploy_node: true
-        when:
-          - xtoph_deploy.kickstart_profile is defined and
-            xtoph_deploy.kickstart_profile.method == "pxe" and
-            ipmi_fqdn is defined and
-            vminfo_result.rc == 0
+        when: ipmi_result.rc == 0
+
+  vars:
+    t_bmc:    "{{ xtoph_deploy.machine_profile.ipmi.fqdn }}"
+    t_user:   "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
+    t_pass:   "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
+  when:
+    - xtoph_deploy.machine_profile.ipmi.fqdn is defined
+    - xtoph_deploy.machine_profile.ipmi.fqdn|length > 0
+    - xtoph_deploy.kickstart_profile.method == "pxe" 
+
+
+
+- delegate_to: localhost
+  block:
+
+      ##
+      ##    All tasks here are blocked and delegated 
+      ##    to execute on the deployhost
+      ##
+      ##    Execute "redfish" calls to ready system for deployment
+      ##
+      ##    WHEN:
+      ##      if BMC interface is defined
+      ##
+      ##    NOTE:
+      ##
+      ##      xtoph_deploy supports pxe and virtual-media for redfish interfaces    
+      ##
+      ##      As a safety measure, only enable automated deployment 
+      ##      of a host if (and ONLY if) power is ALREADY off
+      ##
+
+      - name: "baremetal-deploy : (BMC) power-status"
+        script: >
+            {{ xtoph_deploy.machine_profile.redfish.power_status }}
+            -u {{ t_user }} 
+            -p {{ t_pass }} 
+            -i {{ t_bmc }} 
+            --chomp
+        register: redfish_result
+
+      - set_fact:
+          deploy_node: true
+        when: redfish_result.stdout == "off"
+
+  vars:
+    t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
+    t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
+    t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+  when:
+    - xtoph_deploy.machine_profile.redfish.fqdn is defined
+    - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
 
 
     
 - delegate_to: localhost
   block:
 
-
-
       ##
       ##    All tasks here are blocked and 
       ##    delegated to execute on the deployhost
-      ##
       ##
       ##    WHEN:
       ##      always
@@ -77,6 +119,16 @@
       ##      available)
       ##
       ##
+
+
+      ##
+      ##      If power state was determined above, then deploy_node
+      ##      was set accordingly.  If not, set it to false.
+      ##
+
+      - set_fact:
+          deploy_node: false
+        when: deploy_node is undefined
 
 
 
@@ -232,8 +284,8 @@
                   replace: >
                       \1append\2
                       inst.text
+                      usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_hd }}
-                      ksdevice={{ t_net_dev }} 
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
                 when: xtoph_deploy.kickstart_profile.method == "cdrom"
@@ -245,8 +297,8 @@
                   replace: >
                       \1linuxefi\2 
                       inst.text
+                      usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_hd }}
-                      ksdevice={{ t_net_dev }} 
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }} 
                 when: xtoph_deploy.kickstart_profile.method == "cdrom"
@@ -258,9 +310,9 @@
                   replace: >
                       \1append\2
                       inst.text
+                      usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_url }}
                       inst.repo={{ t_ks_repo }}
-                      ksdevice={{ t_net_dev }} 
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
                 when: xtoph_deploy.kickstart_profile.method == "network"
@@ -272,9 +324,9 @@
                   replace: >
                       \1linuxefi\2 
                       inst.text
+                      usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_url }}
                       inst.repo={{ t_ks_repo }}
-                      ksdevice={{ t_net_dev }} 
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }} 
                 when: xtoph_deploy.kickstart_profile.method == "network"
@@ -282,14 +334,15 @@
         
         
             vars:
-              t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
-              t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
-              t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
-              t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
-              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
-              t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
-              t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              t_net_dev:   "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
+              t_net_ip:    "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
+              t_net_nm:    "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
+              t_net_gw:    "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
+              t_net_dns:   "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
+              t_ks_repo:   "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+              t_ks_hd:     "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
+              t_ks_url:    "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              t_usb_delay: "{{ xtoph_deploy.machine_profile.usb_storage_delay | default('0') }}"
 
 
       
@@ -348,13 +401,15 @@
           ##          set 'throttle: 1'
           ##
     
-       
+
+          - name: "baremetal-deploy : create generated iso dir '{{ xtoph_deploy.deployhost.generated_iso.dir }}'"
+            file: path="{{ xtoph_deploy.deployhost.generated_iso.dir }}" mode="0755" state=directory
      
           - name: "baremetal-deploy : upload iso image"
             throttle: 1
             copy:
               src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-              dest: "{{ xtoph_deploy.deployhost.iso.dir }}"
+              dest: "{{ xtoph_deploy.deployhost.generated_iso.dir }}"
     
           - name: "baremetal-deploy : clean-up temporary work-space"
             shell:
@@ -381,26 +436,24 @@
 
       - block:
 
-          - name: "baremetal-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
+            - name: "baremetal-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
+              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
 
 
-          - name: "baremetal-deploy : deploy kickstart config iso to http dir"
-            vars:
-              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
-            template:
-              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ item }}"
-              owner: root
-              group: root
-              mode: 0444
-            loop:
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+            - name: "baremetal-deploy : deploy kickstart config to http dir"
+              vars:
+                p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
+                p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+              template:
+                src:   "{{ xtoph_deploy.kickstart_profile.template }}"
+                dest:  "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+                owner: root
+                group: root
+                mode: 0444
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.template is defined and
-              xtoph_deploy.kickstart_profile.method == "pxe" 
+              xtoph_deploy.kickstart_profile.method != "cdrom" 
 
 
 
@@ -412,24 +465,132 @@
 
       - block:
 
-          - name: "baremetal-deploy : ipmi config steps"
-            shell:
-              cmd: |
-                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
-            loop:
-              "{{ xtoph_deploy.machine_profile.ipmi.config_steps }}"
+            - name: "baremetal-deploy : (ipmi) config steps"
+              shell:
+                cmd: |
+                  ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
+              loop:
+                "{{ xtoph_deploy.machine_profile.ipmi.config_steps }}"
     
-          - name: "baremetal-deploy : ipmi set power on"
-            shell:
-              cmd: |
-                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_on }}
+            - name: "baremetal-deploy : (ipmi) execute power-on"
+              shell:
+                cmd: |
+                  ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_on }}
 
         vars:
           t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
           t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
         when: 
-          - xtoph_deploy.machine_profile.ipmi is defined and
-            deploy_node == true
+          - ipmi_fqdn is defined
+          - deploy_node == true
+
+
+
+      ##
+      ##    Execute baremetal BMC calls to automate installation
+      ##
+
+
+
+      - block:
+            - name: "baremetal-deploy : (BMC) debug"
+              debug:
+                 msg: 
+                   - "BMC Address         : {{ t_bmc }}"
+                   - "BMC Power Status    : {{ xtoph_deploy.machine_profile.redfish.power_status }}"
+                   - "BMC Power On        : {{ xtoph_deploy.machine_profile.redfish.power_on }}"
+                   - "BMC Power Off       : {{ xtoph_deploy.machine_profile.redfish.power_off }}"
+                   - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.redfish.media_status }}"
+                   - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.redfish.media_insert }}"
+                   - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.redfish.media_eject }}"
+                   - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}"
+                   - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}"
+                   - "BMC VMedia URL Path : {{ t_media }}"
+                   - "BMC VMedia NFS Path : {{ t_nfs }}"
+              when:
+                - xtoph_deploy.debug == true
+
+            - name: "baremetal-deploy : (BMC) media-eject"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.media_eject }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.media_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: local_result
+              until: local_result.stdout == "ejected"
+              retries: 600
+              delay: 5
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) media-insert"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.media_insert }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+                  -m {{ t_media }}
+                  -n {{ t_nfs }}
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) bootonce-media"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) bootonce-pxe"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+              when:
+                - xtoph_deploy.kickstart_profile.method == "pxe"
+
+            - name: "baremetal-deploy : (BMC) power-on"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.power_on }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+
+            - name: "baremetal-deploy : (BMC) wait for power-status == on"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.power_status }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+                  --chomp
+              register: targetinfo_result
+              until: targetinfo_result.stdout == "on"
+              retries: 600
+              delay: 5
+
+        vars:
+          t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
+          t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
+          t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+          t_media:  "{{ xtoph_config.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          t_nfs:    "{{ xtoph_config.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+        when:
+          - xtoph_deploy.machine_profile.redfish.fqdn is defined
+          - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+          - deploy_node == true
 
 
 

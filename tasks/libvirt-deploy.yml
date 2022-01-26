@@ -522,16 +522,31 @@
 
 
       - name: "libvirt-deploy : virt-install base fragment"
+        vars:
+          t_nic_profile:  "{{ xtoph_deploy.resource_profile.network.extra[t_nicname].hw_network_profile | default('default') }}"
+          t_disk_profile: "{{ xtoph_deploy.resource_profile.storage.extra[t_diskname].hw_storage_profile | default('default') }}"
         template:
           src:  virt-install-base.j2
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/10-base"
 
+      - name: "libvirt-deploy : virt-install network fragments"
+        vars:
+          t_nic_profile: "{{ xtoph_deploy.resource_profile.network.extra[t_nicname].hw_network_profile | default('default') }}"
+        template:
+          src: virt-install-nic.j2
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/20-extra-nic-{{ t_nicname }}"
+        loop: "{{ xtoph_deploy.resource_profile.network.extra | flatten(1) }}"
+        loop_control:
+          loop_var: t_nicname
+        when: xtoph_deploy.resource_profile.network.extra is defined
+
       - name: "libvirt-deploy : virt-install extra disk fragments"
         vars:
-          t_disksize: "{{ xtoph_deploy['resource_profile']['storage']['extra'][t_diskname].size }}"
+          t_disksize:     "{{ xtoph_deploy.resource_profile.storage.extra[t_diskname].size }}"
+          t_disk_profile: "{{ xtoph_deploy.resource_profile.storage.extra[t_diskname].hw_storage_profile | default('default') }}"
         template:
           src: virt-install-disk.j2
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/30-extra-{{ t_diskname }}"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/30-extra-disk-{{ t_diskname }}"
         loop: "{{ xtoph_deploy.resource_profile.storage.extra | flatten(1) }}"
         loop_control:
           loop_var: t_diskname
@@ -540,20 +555,20 @@
       - name: "libvirt-deploy: virt-install pxe fragment"
         template:
           src:  virt-install-pxe.j2
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/35-pxe"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/40-pxe"
         when: xtoph_deploy.kickstart_profile.method == "pxe"
 
       - name: "libvirt-deploy: virt-install cdrom fragment"
         template:
           src:  virt-install-cdrom.j2
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/40-cdrom"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/50-cdrom"
         when: xtoph_deploy.kickstart_profile.method == "cdrom" or
               xtoph_deploy.kickstart_profile.method == "network"
 
       - name: "libvirt-deploy: virt-install finish fragment"
         template:
           src:  virt-install-finish.j2
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/50-finish"
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/60-finish"
 
       - name: "libvirt-deploy : virt-install assemble fragments"
         assemble:

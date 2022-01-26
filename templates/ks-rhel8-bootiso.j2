@@ -10,7 +10,6 @@ lang en_US
 keyboard us
 timezone America/New_York --isUtc
 rootpw $1$XJbwDNTe$Wqttcf7vWP5n.nPo2J9mk. --iscrypted
-reboot
 text
 bootloader --location=mbr --append="nofb quiet splash=quiet"
 url --url={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}
@@ -79,11 +78,12 @@ head -n1 /dev/urandom | md5sum | awk {'print $1'} | passwd --stdin root
 
 ########################################
 ##
-## How to end installation (shutdown, reboot, halt)
+## How to end installation
 ##
 
 {% if (xtoph_deploy.kickstart_profile.wait_for_shutdown) %}
-shutdown 
+poweroff
 {% else %}
 reboot
 {% endif %}
+

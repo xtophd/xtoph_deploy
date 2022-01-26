@@ -9,31 +9,65 @@
 
 
 
-    ##
-    ##    NOTE: All tasks here are delegated to execute
-    ##          on the deployhost/localhost
-    ##
+      ##
+      ##    NOTE: All tasks here are delegated to execute
+      ##          on the deployhost/localhost
+      ##
 
 
 
-    ##
-    ##    Execute baremetal ipmi calls to power off system
-    ##
+      ##
+      ##    Execute baremetal ipmi calls to power off system
+      ##
+  
+      - block:
+  
+          - name: "baremetal-undeploy : (ipmi) set power off"
+            throttle: 1
+            shell:
+              cmd: |
+                ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_off }}
+            ignore_errors: yes
+  
+        vars:
+          t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
+          t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
+        when:
+          - xtoph_deploy.machine_profile.ipmi.fqdn is defined
+          - xtoph_deploy.machine_profile.ipmi.fqdn|length > 0
+          - xtoph_deploy.kickstart_profile.method == "pxe"
 
-    - block:
 
-        - name: "baremetal-undeploy : ipmi set power off"
-          throttle: 1
-          shell:
-            cmd: |
-              ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_off }}
-          ignore_errors: yes
 
-      vars:
-        t_uid: "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
-        t_pw:  "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
-      when:
-        - xtoph_deploy.kickstart_profile is defined and
-          xtoph_deploy.kickstart_profile.method == "pxe" and
-          ipmi_fqdn is defined
+      ##
+      ##    Execute baremetal BMC calls to power off system 
+      ##    and eject virtual media
+      ##
+  
+      - block:
+
+            - name: "baremetal-undeploy : (BMC) power-status"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.power_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: redfish_result
+
+            - name: "baremetal-undeploy : (BMC) power-off"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.power_off }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+              when: redfish_result.stdout == "on" 
+  
+        vars:
+          t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
+          t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
+          t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+        when:
+          - xtoph_deploy.machine_profile.redfish.fqdn is defined
+          - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
 

@@ -75,7 +75,7 @@ deployhost:
     tmp_dir: "/home/tmp/{{ xtoph_vars.clustername }}/{{ inventory_hostname }}"
 
     ##
-    ##    Where with the kickstart configs are stored
+    ##    Where will the kickstart configs be stored
     ##    What is the URL to access the kickstarts
     ##
 
@@ -93,11 +93,22 @@ deployhost:
       url: ""
 
     ##
-    ##    Where are the ISOs stored
+    ##    Where are the base/source ISOs stored
     ##
 
     iso:
       dir: "/home/iso"
+
+    ##
+    ##    Where will generated ISOs be stored
+    ##    What is the URL to access the generated ISOs
+    ##    What is the NFS path to access the generated ISOs
+    ##
+
+    generated_iso:
+      dir: "/var/www/html/iso"
+      url: "http://{{ xtoph_vars.deployhost_ip }}:8008/iso"
+      nfs: "{{ xtoph_vars.deployhost_ip }}:/var/www/html/iso"
 
     ##
     ##    Enable the creation of the ephemeral dhcp service
