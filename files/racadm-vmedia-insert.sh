@@ -8,7 +8,9 @@
 ##      -i <ip|host fqdn> .. ip address or fqdn
 ##      -u <username>     .. username
 ##      -p <password>     .. password
-##      -x                .. chomp ouptut (no CR/LF)
+##      -m <http url>     .. URL to virtual media
+##      -n <nfs path>     .. NFS to virtual media
+##
 ##
 ##    Prints string 'on' or 'off' to STDIO
 ##
@@ -20,7 +22,7 @@
 ##    Parse the commandline options
 ##
 
-options=$( getopt -o "u:p:i:m:" -l "chomp" -- "$@")
+options=$( getopt -o "u:p:i:m:n:" -l "chomp" -- "$@")
 
 eval set -- "$options"
 
@@ -30,6 +32,7 @@ while true; do
         '-p' ) bmc_password="$2" ; shift 2 ;;
         '-i' ) bmc_ip="$2"       ; shift 2 ;;
         '-m' ) bmc_media="$2"    ; shift 2 ;;
+        '-n' ) bmc_nfs="$2"      ; shift 2 ;;
 
         '--chomp' ) chomp_output="yes" ; shift ;;
 
@@ -48,7 +51,7 @@ done
 ##    NOTE: the 'sed' command only returns the portion after ':'
 ##
 
-bmc_cmd="remoteimage -c -l $bmc_media"
+bmc_cmd="remoteimage -c -l $bmc_nfs"
 
 RESPONSE=`racadm -u $bmc_username \
                  -p $bmc_password \

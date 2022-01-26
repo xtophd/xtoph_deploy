@@ -61,17 +61,17 @@
       ##    Execute "redfish" calls to ready system for deployment
       ##
       ##    WHEN:
-      ##      if IPMI interface is defined & method == pxe
+      ##      if BMC interface is defined
       ##
       ##    NOTE:
       ##
-      ##      xtoph_deploy supports pxe and virtual-mdeia for redfish interfaces    
+      ##      xtoph_deploy supports pxe and virtual-media for redfish interfaces    
       ##
       ##      As a safety measure, only enable automated deployment 
       ##      of a host if (and ONLY if) power is ALREADY off
       ##
 
-      - name: "baremetal-deploy : (redfish) power-status"
+      - name: "baremetal-deploy : (BMC) power-status"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.power_status }}
             -u {{ t_user }} 
@@ -83,45 +83,6 @@
       - set_fact:
           deploy_node: true
         when: redfish_result.stdout == "off"
-
-      - name: "baremetal-deploy-monitor : (redfish) media-status"
-        script: >
-            {{ xtoph_deploy.machine_profile.redfish.media_status }}
-            -u {{ t_user }}
-            -p {{ t_pass }}
-            -i {{ t_bmc }}
-            --chomp
-        register: redfish_result
-        when:
-          - deploy_node
-          - xtoph_deploy.kickstart_profile.method != "pxe"
-
-      - name: "baremetal-deploy-monitor : (redfish) media-eject"
-        script: >
-            {{ xtoph_deploy.machine_profile.redfish.media_eject }}
-            -u {{ t_user }}
-            -p {{ t_pass }}
-            -i {{ t_bmc }}
-        when:
-          - deploy_node
-          - xtoph_deploy.kickstart_profile.method != "pxe"
-          - redfish_result.stdout == "inserted"
-
-      - name: "baremetal-deploy-monitor : (redfish) wait for media-status = ejected"
-        script: >
-            {{ xtoph_deploy.machine_profile.redfish.media_status }}
-            -u {{ t_user }} 
-            -p {{ t_pass }} 
-            -i {{ t_bmc }} 
-            --chomp
-        register: local_result
-        until: local_result.stdout == "ejected"
-        retries: 600
-        delay: 5
-        when:
-          - deploy_node
-          - xtoph_deploy.kickstart_profile.method != "pxe"
-          - redfish_result.stdout == "inserted"
 
   vars:
     t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
@@ -526,24 +487,64 @@
 
 
       ##
-      ##    Execute baremetal redfish calls to automate installation
+      ##    Execute baremetal BMC calls to automate installation
       ##
 
 
 
       - block:
+            - name: "baremetal-deploy : (BMC) debug"
+              debug:
+                 msg: 
+                   - "BMC Address         : {{ t_bmc }}"
+                   - "BMC Power Status    : {{ xtoph_deploy.machine_profile.redfish.power_status }}"
+                   - "BMC Power On        : {{ xtoph_deploy.machine_profile.redfish.power_on }}"
+                   - "BMC Power Off       : {{ xtoph_deploy.machine_profile.redfish.power_off }}"
+                   - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.redfish.media_status }}"
+                   - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.redfish.media_insert }}"
+                   - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.redfish.media_eject }}"
+                   - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}"
+                   - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}"
+                   - "BMC VMedia URL Path : {{ t_media }}"
+                   - "BMC VMedia NFS Path : {{ t_nfs }}"
+              when:
+                - xtoph_deploy.debug == true
 
-            - name: "baremetal-deploy : (redfish) media-insert"
+            - name: "baremetal-deploy : (BMC) media-eject"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.media_eject }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.media_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: local_result
+              until: local_result.stdout == "ejected"
+              retries: 600
+              delay: 5
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) media-insert"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.media_insert }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
                   -m {{ t_media }}
+                  -n {{ t_nfs }}
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
-            - name: "baremetal-deploy : (redfish) bootonce-media"
+            - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}
                   -u {{ t_user }} 
@@ -552,7 +553,7 @@
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
-            - name: "baremetal-deploy : (redfish) bootonce-pxe"
+            - name: "baremetal-deploy : (BMC) bootonce-pxe"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}
                   -u {{ t_user }} 
@@ -561,14 +562,14 @@
               when:
                 - xtoph_deploy.kickstart_profile.method == "pxe"
 
-            - name: "baremetal-deploy : (redfish) power-on"
+            - name: "baremetal-deploy : (BMC) power-on"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.power_on }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
 
-            - name: "baremetal-deploy-monitor : (redfish) wait for power-status == on"
+            - name: "baremetal-deploy : (BMC) wait for power-status == on"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.power_status }}
                   -u {{ t_user }} 
@@ -585,6 +586,7 @@
           t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
           t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
           t_media:  "{{ xtoph_config.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          t_nfs:    "{{ xtoph_config.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         when:
           - xtoph_deploy.machine_profile.redfish.fqdn is defined
           - xtoph_deploy.machine_profile.redfish.fqdn|length > 0

@@ -39,6 +39,7 @@ parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
 parser.add_argument('-p', help='password', required=True)
 parser.add_argument('-m', help='media image url', required=True)
+parser.add_argument('-n', help='media image nfs path', required=True)
 
 args = vars(parser.parse_args())
 
@@ -46,6 +47,7 @@ bmc_ip       = args["i"]
 bmc_username = args["u"]
 bmc_password = args["p"]
 image_url    = args["m"]
+image_nfs    = args["m"]
 
 
 

@@ -102,11 +102,13 @@ deployhost:
     ##
     ##    Where will generated ISOs be stored
     ##    What is the URL to access the generated ISOs
+    ##    What is the NFS path to access the generated ISOs
     ##
 
     generated_iso:
       dir: "/var/www/html/iso"
       url: "http://{{ xtoph_vars.deployhost_ip }}:8008/iso"
+      nfs: "{{ xtoph_vars.deployhost_ip }}:/var/www/html/iso"
 
     ##
     ##    Enable the creation of the ephemeral dhcp service

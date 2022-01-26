@@ -40,13 +40,13 @@
 
 
       ##
-      ##    Execute baremetal redfish calls to power off system 
+      ##    Execute baremetal BMC calls to power off system 
       ##    and eject virtual media
       ##
   
       - block:
 
-            - name: "baremetal-deploy : (redfish) power-status"
+            - name: "baremetal-undeploy : (BMC) power-status"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.power_status }}
                   -u {{ t_user }}
@@ -55,34 +55,13 @@
                   --chomp
               register: redfish_result
 
-            - name: "baremetal-deploy : (redfish) power-off"
+            - name: "baremetal-undeploy : (BMC) power-off"
               script: >
                   {{ xtoph_deploy.machine_profile.redfish.power_off }}
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
               when: redfish_result.stdout == "on" 
-  
-            - name: "baremetal-deploy-monitor : (redfish) media-status"
-              script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_status }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
-                  --chomp
-              register: redfish_result
-              when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
-  
-            - name: "baremetal-deploy-monitor : (redfish) media-eject"
-              script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_eject }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
-              when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
-                - redfish_result.stdout == "inserted"
   
         vars:
           t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
