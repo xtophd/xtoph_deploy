@@ -83,9 +83,3 @@
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
   when: xtoph_deploy.kickstart_profile.repos is defined
 
-
-
-- name: "common-deploy-post : configure system hostname"
-  hostname:
-    name:        "{{ inventory_hostname }}"
-

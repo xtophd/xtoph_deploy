@@ -40,63 +40,6 @@ done
 
 
 ##
-##    Clear the serverboot.bootonce flag
-##
-##      NOTE: ServerBoot.BootOnce and VirtualMedia.BootOnce are
-##            two different things
-##
-
-bmc_cmd="set iDRAC.ServerBoot.BootOnce Disabled"
-
-RESPONSE=`racadm -u $bmc_username \
-                 -p $bmc_password \
-                 -r $bmc_ip       \
-                    $bmc_cmd`
-
-##    Status message to stdout
-
-rc=$?
-
-if [[ ${rc} == 0 ]] ; then
-    echo "SUCCESS: cleared serverboot.bootonce flag"
-else
-    echo "FAIL: clear bootonce returned {$rc}"
-    echo "$RESPONSE"
-    exit $rc
-fi
-
-
-
-##
-##    Clear the virtualmedia.bootonce flag
-##
-##      NOTE: ServerBoot.BootOnce and VirtualMedia.BootOnce are
-##            two different things
-##
-
-bmc_cmd="set iDRAC.VirtualMedia.BootOnce Disabled"
-
-
-RESPONSE=`racadm -u $bmc_username \
-                 -p $bmc_password \
-                 -r $bmc_ip       \
-                    $bmc_cmd`
-
-##    Status message to stdout
-
-rc=$?
-
-if [[ ${rc} == 0 ]] ; then
-    echo "SUCCESS: cleared virtualmedia.bootonce flag"
-else
-    echo "FATAL: clear virtualmedia.bootonce returned {$rc}"
-    echo "$RESPONSE"
-    exit $rc
-fi
-
-
-
-##
 ##    Disconnect the virtual media
 ##
 

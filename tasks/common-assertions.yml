@@ -68,10 +68,12 @@
   any_errors_fatal: true
   assert:
     that:
-      - not (xtoph_deploy.machine_profile.redfish.fqdn|length > 0 and xtoph_deploy.machine_profile.ipmi.fqdn|length > 0)
+      - (xtoph_deploy.machine_profile.redfish.fqdn|length == 0 ) or 
+        (xtoph_deploy.machine_profile.ipmi.fqdn|length == 0 )
     fail_msg: "CONFIG ERROR: a machine_profile is only allowed redfish OR ipmi, not both (CHECK YOUR CONFIGS)"
     success_msg: "Assertion Passed"
   when:
     - xtoph_deploy.selected_profile.machine != ""
+    - xtoph_deploy.machine_profile.platform == "baremetal"
 
 

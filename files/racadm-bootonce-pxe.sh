@@ -40,12 +40,39 @@ done
 
 
 ##
-##    Use racadm to fetch or set state
-##
-##    NOTE: the 'sed' command only returns the portion after ':'
+##    Set boot-once
 ##
 
 bmc_cmd="config -g cfgServerInfo -o cfgServerBootOnce 1"
+
+RESPONSE=`racadm -u $bmc_username \
+                 -p $bmc_password \
+                 -r $bmc_ip       \
+                    $bmc_cmd`
+
+
+
+##
+##    Status message
+##
+
+rc=$?
+
+if [[ ${rc} == 0 ]] ; then
+    echo "SUCCESS: boot-once enabled"
+else
+    echo "FATAL: set boot-once result code ${rc}"
+    echo "$RESPONSE"
+    exit $rc
+fi
+
+
+
+##
+##    Set target to PXE
+##
+
+bmc_cmd="config -g cfgServerInfo -o cfgServerFirstBootDevice PXE"
 
 RESPONSE=`racadm -u $bmc_username \
                  -p $bmc_password \
@@ -61,10 +88,9 @@ RESPONSE=`racadm -u $bmc_username \
 rc=$?
 
 if [[ ${rc} == 0 ]] ; then
-    echo "SUCCESS: result code ${rc} returned"
-    exit $rc
+    echo "SUCCESS: target set to PXE"
 else
-    echo "FAIL: result code ${rc} returned"
+    echo "FAIL: set target PXE result code ${rc}"
     echo "$RESPONSE"
     exit $rc
 fi

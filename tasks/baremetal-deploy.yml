@@ -29,7 +29,7 @@
       ##      of a host if (and ONLY if) power is ALREADY off
       ##
 
-      - name: "baremetal-deploy : (ipmi) power-status"
+      - name: "baremetal-deploy : (IPMI) power-status"
         shell:
           cmd: |
             ipmitool -U {{ t_user }} -P {{ t_pass }} -H {{ t_bmc }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
@@ -70,6 +70,17 @@
       ##      As a safety measure, only enable automated deployment 
       ##      of a host if (and ONLY if) power is ALREADY off
       ##
+
+
+      - name: "baremetal-deploy : (BMC) debug"
+        debug:
+           msg:
+             - "BMC Address         : {{ t_bmc }}"
+             - "BMC Power Status    : {{ xtoph_deploy.machine_profile.redfish.power_status }}"
+             - "BMC Power On        : {{ xtoph_deploy.machine_profile.redfish.power_on }}"
+             - "BMC Power Off       : {{ xtoph_deploy.machine_profile.redfish.power_off }}"
+        when:
+          - xtoph_deploy.debug == true
 
       - name: "baremetal-deploy : (BMC) power-status"
         script: >
@@ -130,7 +141,8 @@
           deploy_node: false
         when: deploy_node is undefined
 
-
+      - debug: var=deploy_node
+        when: xtoph_deploy.debug == true
 
       - block:
 
@@ -509,6 +521,14 @@
                    - "BMC VMedia NFS Path : {{ t_nfs }}"
               when:
                 - xtoph_deploy.debug == true
+
+            - name: "baremetal-deploy : (BMC) bootonce-clear"
+              script: >
+                  {{ xtoph_deploy.machine_profile.redfish.bootonce_clear }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+              when:
 
             - name: "baremetal-deploy : (BMC) media-eject"
               script: >

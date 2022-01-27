@@ -39,7 +39,7 @@
           state: started
           timeout: 900
 
-      - name: "baremetal-deploy-post : (redfish) media-status"
+      - name: "baremetal-deploy-post : (BMC) media-status"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.media_status }}
             -u {{ t_user }}
@@ -50,7 +50,7 @@
         when:
           - xtoph_deploy.kickstart_profile.method != "pxe"
 
-      - name: "baremetal-deploy-post : (redfish) media-eject"
+      - name: "baremetal-deploy-post : (BMC) media-eject"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.media_eject }}
             -u {{ t_user }}

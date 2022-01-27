@@ -165,6 +165,7 @@ dell_r630:
         media_insert:    "racadm-vmedia-insert.sh"
         bootonce_media:  "racadm-bootonce-vmedia.sh"
         bootonce_pxe:    "racadm-bootonce-pxe.sh"
+        bootonce_clear:  "racadm-bootonce-clear.sh"
 
 
 dell_r740:
@@ -198,6 +199,7 @@ dell_r740:
         media_insert:    "redfish-dell-vmedia-insert.py"
         bootonce_media:  "redfish-dell-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
+        bootonce_clear:  "racadm-bootonce-clear.sh"
 
 
 

@@ -30,7 +30,7 @@
 - delegate_to: localhost
   block:
 
-      - name: "baremetal-deploy-monitor : (redfish) wait for power-status == off"
+      - name: "baremetal-deploy-monitor : (BMC) wait for power-status == off"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.power_status }}
             -u {{ t_user }}
@@ -43,7 +43,7 @@
         delay: 5
         vars:
 
-      - name: "baremetal-deploy-monitor : (redfish) media-status"
+      - name: "baremetal-deploy-monitor : (BMC) media-status"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.media_status }}
             -u {{ t_user }}
@@ -54,7 +54,7 @@
         when:
           - xtoph_deploy.kickstart_profile.method != "pxe" 
 
-      - name: "baremetal-deploy-monitor : (redfish) media-eject"
+      - name: "baremetal-deploy-monitor : (BMC) media-eject"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.media_eject }}
             -u {{ t_user }}
@@ -64,7 +64,7 @@
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - redfish_result.stdout == "inserted"
 
-      - name: "baremetal-deploy : (redfish) power-on"
+      - name: "baremetal-deploy-monitor : (BMC) power-on"
         script: >
             {{ xtoph_deploy.machine_profile.redfish.power_on }}
             -u {{ t_user }}
