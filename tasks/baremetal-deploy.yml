@@ -5,7 +5,7 @@
 ##
 
 ##
-##    NOTE: deploy_node only affects ipmi/redfish automation
+##    NOTE: deploy_node only affects ipmi/bmc automation
 ##
 
 - name: "baremetal-deploy : BEGIN"
@@ -58,14 +58,12 @@
       ##    All tasks here are blocked and delegated 
       ##    to execute on the deployhost
       ##
-      ##    Execute "redfish" calls to ready system for deployment
+      ##    Execute "bmc" calls to ready system for deployment
       ##
       ##    WHEN:
-      ##      if BMC interface is defined
+      ##      if BMC interface (fqdn) is defined
       ##
       ##    NOTE:
-      ##
-      ##      xtoph_deploy supports pxe and virtual-media for redfish interfaces    
       ##
       ##      As a safety measure, only enable automated deployment 
       ##      of a host if (and ONLY if) power is ALREADY off
@@ -76,32 +74,32 @@
         debug:
            msg:
              - "BMC Address         : {{ t_bmc }}"
-             - "BMC Power Status    : {{ xtoph_deploy.machine_profile.redfish.power_status }}"
-             - "BMC Power On        : {{ xtoph_deploy.machine_profile.redfish.power_on }}"
-             - "BMC Power Off       : {{ xtoph_deploy.machine_profile.redfish.power_off }}"
+             - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
+             - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
+             - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
         when:
           - xtoph_deploy.debug == true
 
       - name: "baremetal-deploy : (BMC) power-status"
         script: >
-            {{ xtoph_deploy.machine_profile.redfish.power_status }}
+            {{ xtoph_deploy.machine_profile.bmc.power_status }}
             -u {{ t_user }} 
             -p {{ t_pass }} 
             -i {{ t_bmc }} 
             --chomp
-        register: redfish_result
+        register: bmc_result
 
       - set_fact:
           deploy_node: true
-        when: redfish_result.stdout == "off"
+        when: bmc_result.stdout == "off"
 
   vars:
-    t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
-    t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
-    t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+    t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
+    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
   when:
-    - xtoph_deploy.machine_profile.redfish.fqdn is defined
-    - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+    - xtoph_deploy.machine_profile.bmc.fqdn is defined
+    - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
 
 
     
@@ -509,14 +507,14 @@
               debug:
                  msg: 
                    - "BMC Address         : {{ t_bmc }}"
-                   - "BMC Power Status    : {{ xtoph_deploy.machine_profile.redfish.power_status }}"
-                   - "BMC Power On        : {{ xtoph_deploy.machine_profile.redfish.power_on }}"
-                   - "BMC Power Off       : {{ xtoph_deploy.machine_profile.redfish.power_off }}"
-                   - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.redfish.media_status }}"
-                   - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.redfish.media_insert }}"
-                   - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.redfish.media_eject }}"
-                   - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}"
-                   - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}"
+                   - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
+                   - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
+                   - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
+                   - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.bmc.media_status }}"
+                   - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.bmc.media_insert }}"
+                   - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
+                   - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}"
+                   - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
                    - "BMC VMedia URL Path : {{ t_media }}"
                    - "BMC VMedia NFS Path : {{ t_nfs }}"
               when:
@@ -524,7 +522,7 @@
 
             - name: "baremetal-deploy : (BMC) bootonce-clear"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.bootonce_clear }}
+                  {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
@@ -532,7 +530,7 @@
 
             - name: "baremetal-deploy : (BMC) media-eject"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_eject }}
+                  {{ xtoph_deploy.machine_profile.bmc.media_eject }}
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
@@ -541,7 +539,7 @@
 
             - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_status }}
+                  {{ xtoph_deploy.machine_profile.bmc.media_status }}
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
@@ -555,7 +553,7 @@
 
             - name: "baremetal-deploy : (BMC) media-insert"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.media_insert }}
+                  {{ xtoph_deploy.machine_profile.bmc.media_insert }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
@@ -566,7 +564,7 @@
 
             - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.bootonce_media }}
+                  {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
@@ -575,7 +573,7 @@
 
             - name: "baremetal-deploy : (BMC) bootonce-pxe"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.bootonce_pxe }}
+                  {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
@@ -584,14 +582,14 @@
 
             - name: "baremetal-deploy : (BMC) power-on"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.power_on }}
+                  {{ xtoph_deploy.machine_profile.bmc.power_on }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
 
             - name: "baremetal-deploy : (BMC) wait for power-status == on"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.power_status }}
+                  {{ xtoph_deploy.machine_profile.bmc.power_status }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
@@ -602,14 +600,14 @@
               delay: 5
 
         vars:
-          t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
-          t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
-          t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+          t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+          t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
+          t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
           t_media:  "{{ xtoph_config.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
           t_nfs:    "{{ xtoph_config.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         when:
-          - xtoph_deploy.machine_profile.redfish.fqdn is defined
-          - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+          - xtoph_deploy.machine_profile.bmc.fqdn is defined
+          - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
           - deploy_node == true
 
 

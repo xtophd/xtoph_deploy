@@ -32,7 +32,7 @@
 
       - name: "baremetal-deploy-monitor : (BMC) wait for power-status == off"
         script: >
-            {{ xtoph_deploy.machine_profile.redfish.power_status }}
+            {{ xtoph_deploy.machine_profile.bmc.power_status }}
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
@@ -45,39 +45,39 @@
 
       - name: "baremetal-deploy-monitor : (BMC) media-status"
         script: >
-            {{ xtoph_deploy.machine_profile.redfish.media_status }}
+            {{ xtoph_deploy.machine_profile.bmc.media_status }}
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
             --chomp
-        register: redfish_result
+        register: bmc_result
         when:
           - xtoph_deploy.kickstart_profile.method != "pxe" 
 
       - name: "baremetal-deploy-monitor : (BMC) media-eject"
         script: >
-            {{ xtoph_deploy.machine_profile.redfish.media_eject }}
+            {{ xtoph_deploy.machine_profile.bmc.media_eject }}
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
         when:
           - xtoph_deploy.kickstart_profile.method != "pxe"
-          - redfish_result.stdout == "inserted"
+          - bmc_result.stdout == "inserted"
 
       - name: "baremetal-deploy-monitor : (BMC) power-on"
         script: >
-            {{ xtoph_deploy.machine_profile.redfish.power_on }}
+            {{ xtoph_deploy.machine_profile.bmc.power_on }}
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
 
   vars:
-    t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
-    t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
-    t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+    t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
+    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
   when:
     - xtoph_deploy.kickstart_profile.wait_for_shutdown 
-    - xtoph_deploy.machine_profile.redfish.fqdn is defined
-    - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+    - xtoph_deploy.machine_profile.bmc.fqdn is defined
+    - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
     - deploy_node
 

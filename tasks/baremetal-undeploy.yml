@@ -48,26 +48,26 @@
 
             - name: "baremetal-undeploy : (BMC) power-status"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.power_status }}
+                  {{ xtoph_deploy.machine_profile.bmc.power_status }}
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
                   --chomp
-              register: redfish_result
+              register: bmc_result
 
             - name: "baremetal-undeploy : (BMC) power-off"
               script: >
-                  {{ xtoph_deploy.machine_profile.redfish.power_off }}
+                  {{ xtoph_deploy.machine_profile.bmc.power_off }}
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
-              when: redfish_result.stdout == "on" 
+              when: bmc_result.stdout == "on" 
   
         vars:
-          t_bmc:    "{{ xtoph_deploy.machine_profile.redfish.fqdn }}"
-          t_user:   "{{ redfish_credentials[redfish_fqdn]['username'] | default(redfish_credentials['default']['username']) }}"
-          t_pass:   "{{ redfish_credentials[redfish_fqdn]['password'] | default(redfish_credentials['default']['password']) }}"
+          t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+          t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
+          t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
         when:
-          - xtoph_deploy.machine_profile.redfish.fqdn is defined
-          - xtoph_deploy.machine_profile.redfish.fqdn|length > 0
+          - xtoph_deploy.machine_profile.bmc.fqdn is defined
+          - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
 
