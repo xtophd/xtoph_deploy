@@ -33,7 +33,7 @@ warnings.filterwarnings("ignore")
 ##    Load commandline arguments
 ##
 
-parser = argparse.ArgumentParser(description="redfish utility for dell: eject virtual media")
+parser = argparse.ArgumentParser(description="redfish utility for dell: set boot-once to PXE")
 
 parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)

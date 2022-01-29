@@ -517,6 +517,7 @@
                    - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
                    - "BMC VMedia URL Path : {{ t_media }}"
                    - "BMC VMedia NFS Path : {{ t_nfs }}"
+                   - "BMC Custom Setup    : {{ xtoph_deploy.machine_profile.bmc.custom_setup }}"
               when:
                 - xtoph_deploy.debug == true
 
@@ -550,6 +551,13 @@
               delay: 5
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "baremetal-deploy : (BMC) custom-setup"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.custom_setup }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
 
             - name: "baremetal-deploy : (BMC) media-insert"
               script: >

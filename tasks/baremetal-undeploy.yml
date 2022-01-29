@@ -46,6 +46,16 @@
   
       - block:
 
+            - name: "baremetal-deploy : (BMC) debug"
+              debug:
+                 msg:
+                   - "BMC Address         : {{ t_bmc }}"
+                   - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
+                   - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
+                   - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
+              when:
+                - xtoph_deploy.debug == true
+
             - name: "baremetal-undeploy : (BMC) power-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_status }}
