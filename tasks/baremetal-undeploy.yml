@@ -72,6 +72,28 @@
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
               when: bmc_result.stdout == "on" 
+
+            - name: "baremetal-deploy-post : (BMC) media-status"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.media_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: bmc_result
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+      
+            - name: "baremetal-deploy-post : (BMC) media-eject"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.media_eject }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+                - bmc_result.stdout == "inserted"
+
   
         vars:
           t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"

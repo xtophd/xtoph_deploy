@@ -517,7 +517,7 @@
                    - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
                    - "BMC VMedia URL Path : {{ t_media }}"
                    - "BMC VMedia NFS Path : {{ t_nfs }}"
-                   - "BMC Custom Setup    : {{ xtoph_deploy.machine_profile.bmc.custom_setup }}"
+                   - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
               when:
                 - xtoph_deploy.debug == true
 
@@ -529,6 +529,17 @@
                   -i {{ t_bmc }} 
               when:
 
+            - name: "baremetal-deploy-post : (BMC) media-status"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.media_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: bmc_result
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+
             - name: "baremetal-deploy : (BMC) media-eject"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_eject }}
@@ -537,6 +548,7 @@
                   -i {{ t_bmc }}
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
+                - bmc_result.stdout == "inserted"
 
             - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
               script: >
@@ -551,10 +563,11 @@
               delay: 5
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
+                - bmc_result.stdout == "inserted"
 
-            - name: "baremetal-deploy : (BMC) custom-setup"
+            - name: "baremetal-deploy : (BMC) custom-actions"
               script: >
-                  {{ xtoph_deploy.machine_profile.bmc.custom_setup }}
+                  {{ xtoph_deploy.machine_profile.bmc.custom_actions }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
