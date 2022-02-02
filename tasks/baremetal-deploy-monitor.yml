@@ -38,7 +38,6 @@
              - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
              - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
              - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.bmc.media_status }}"
-             - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.bmc.media_insert }}"
              - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
         when:
           - xtoph_deploy.debug == true

@@ -415,6 +415,9 @@
           - name: "baremetal-deploy : create generated iso dir '{{ xtoph_deploy.deployhost.generated_iso.dir }}'"
             file: path="{{ xtoph_deploy.deployhost.generated_iso.dir }}" mode="0755" state=directory
      
+          - name: "baremetal-deploy : cleanup previously generated iso image"
+            file: path="{{ xtoph_deploy.deployhost.generated_iso.dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" state=absent
+     
           - name: "baremetal-deploy : upload iso image"
             throttle: 1
             copy:
@@ -449,6 +452,8 @@
             - name: "baremetal-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
               file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
 
+            - name: "baremetal-deploy : cleanup any previous kickstart config"
+              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg" state=absent
 
             - name: "baremetal-deploy : deploy kickstart config to http dir"
               vars:
