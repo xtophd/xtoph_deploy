@@ -1,13 +1,6 @@
 #!/usr/bin/python
 #
-# redfish-dell-virtualmedia-status.py
-#
-#   The curl equivalent:
-#
-#      curl --insecure               \
-#           -s                       \
-#           -u <username>:<password> \
-#           https://<bmc_ip>/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD | jq -r '.Inserted'
+# redfish-dell-login-status.py
 #
 
 import argparse
@@ -30,7 +23,7 @@ warnings.filterwarnings("ignore")
 ##    Load commandline arguments
 ##
 
-parser = argparse.ArgumentParser(description="redfish utility for dell: get virtualmedia state and return 'inserted' or 'ejected'")
+parser = argparse.ArgumentParser(description="redfish utility for dell: test login credentials and output 'true' or 'false'")
 
 parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
@@ -46,20 +39,18 @@ bmc_password = args["p"]
 
 
 ## 
-##    Get virtualmedia status
-##
-##    NOTE: the value we want is a boolean, so simple evaluation works
-##
+##    Test login credentials
+## 
 
-url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD' % bmc_ip
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1' % bmc_ip
 response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 
-data = response.json()
-
-if ( data['Inserted'] ):
-    result = "inserted"
+if response.status_code == 401:
+    print("FATAL: check credentials")
+    result="false"
 else:
-    result = "ejected"
+    print("SUCCESS: credentials good")
+    result="true"
 
 
 

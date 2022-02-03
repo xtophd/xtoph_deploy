@@ -144,6 +144,7 @@ dell_r630:
           - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "racadm-login-status.sh"
         power_status:    "racadm-power-status.sh"
         power_on:        "racadm-power-on.sh"
         power_off:       "racadm-power-off.sh"
@@ -179,6 +180,7 @@ dell_r740:
           - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
         power_status:    "redfish-dell-power-status.py"
         power_on:        "redfish-dell-power-on.py"
         power_off:       "redfish-dell-power-off.py"

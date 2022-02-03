@@ -49,6 +49,7 @@
               debug:
                  msg:
                    - "BMC Address         : {{ t_bmc }}"
+                   - "BMC Login Status    : {{ xtoph_deploy.machine_profile.bmc.login_status }}"
                    - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
                    - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
                    - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
@@ -56,6 +57,14 @@
                    - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
               when:
                 - xtoph_deploy.debug == true
+
+            - name: "baremetal-deploy : (BMC) login-status"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.login_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
 
             - name: "baremetal-undeploy : (BMC) power-status"
               script: >

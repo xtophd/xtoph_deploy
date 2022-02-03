@@ -47,21 +47,6 @@ bmc_password = args["p"]
 
 
 
-## 
-##    Test login credentials
-## 
-
-url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1' % bmc_ip
-response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
-
-if response.status_code == 401:
-    print("WARNING: check credentials")
-    sys.exit(1)
-else:
-    pass
-
-
-
 ##
 ##    Determine what mode we're in (UEFI vs Legacy/BIOS)
 ## 
