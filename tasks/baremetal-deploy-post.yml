@@ -28,6 +28,7 @@
 
 
 - delegate_to: localhost
+  throttle: 1
   block:
 
       - name: "baremetal-deploy-post : wait for ssh alive"
@@ -59,6 +60,22 @@
         when:
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - bmc_result.stdout == "inserted"
+
+      - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
+        script: >
+            {{ xtoph_deploy.machine_profile.bmc.media_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: local_result
+        until: local_result.stdout == "ejected"
+        retries: 600
+        delay: 5
+        when:
+          - bmc_result.stdout == "inserted"
+
+
 
   vars:
     t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"

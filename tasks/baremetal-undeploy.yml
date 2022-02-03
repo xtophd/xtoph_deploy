@@ -23,7 +23,6 @@
       - block:
   
           - name: "baremetal-undeploy : (ipmi) set power off"
-            throttle: 1
             shell:
               cmd: |
                 ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_off }}
@@ -46,7 +45,7 @@
   
       - block:
 
-            - name: "baremetal-deploy : (BMC) debug"
+            - name: "baremetal-undeploy : (BMC) debug"
               debug:
                  msg:
                    - "BMC Address         : {{ t_bmc }}"
@@ -75,7 +74,21 @@
                   -i {{ t_bmc }}
               when: bmc_result.stdout == "on" 
 
-            - name: "baremetal-deploy-post : (BMC) media-status"
+            - name: "baremetal-undeploy : (BMC) wait for power-status = off"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.power_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: local_result
+              until: local_result.stdout == "off"
+              retries: 600
+              delay: 5
+              when:
+                - bmc_result.stdout == "on" 
+
+            - name: "baremetal-undeploy : (BMC) media-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_status }}
                   -u {{ t_user }}
@@ -86,7 +99,7 @@
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
       
-            - name: "baremetal-deploy-post : (BMC) media-eject"
+            - name: "baremetal-undeploy : (BMC) media-eject"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_eject }}
                   -u {{ t_user }}
@@ -94,6 +107,20 @@
                   -i {{ t_bmc }}
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
+                - bmc_result.stdout == "inserted"
+
+            - name: "baremetal-undeploy : (BMC) wait for media-status = ejected"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.media_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: local_result
+              until: local_result.stdout == "ejected"
+              retries: 600
+              delay: 5
+              when:
                 - bmc_result.stdout == "inserted"
 
   

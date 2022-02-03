@@ -77,12 +77,24 @@
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - bmc_result.stdout == "inserted"
 
-      - name: "baremetal-deploy-monitor : (BMC) power-on"
+      - name: "baremetal-deploy : (BMC) power-on"
         script: >
             {{ xtoph_deploy.machine_profile.bmc.power_on }}
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
+
+      - name: "baremetal-deploy : (BMC) wait for power-status == on"
+        script: >
+            {{ xtoph_deploy.machine_profile.bmc.power_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: targetinfo_result
+        until: targetinfo_result.stdout == "on"
+        retries: 600
+        delay: 5
 
   vars:
     t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"

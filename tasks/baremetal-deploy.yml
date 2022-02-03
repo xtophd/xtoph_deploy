@@ -478,7 +478,8 @@
 
 
 
-      - block:
+      - throttle: 1
+        block:
 
             - name: "baremetal-deploy : (ipmi) config steps"
               shell:
@@ -508,6 +509,7 @@
 
 
       - block:
+
             - name: "baremetal-deploy : (BMC) debug"
               debug:
                  msg: 
@@ -520,6 +522,7 @@
                    - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
                    - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}"
                    - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
+                   - "BMC Bootonce Clear  : {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}"
                    - "BMC VMedia URL Path : {{ t_media }}"
                    - "BMC VMedia NFS Path : {{ t_nfs }}"
                    - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
@@ -588,6 +591,18 @@
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
+            - name: "baremetal-deploy : (BMC) wait for media-status == inserted"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.media_status }}
+                  -u {{ t_user }} 
+                  -p {{ t_pass }} 
+                  -i {{ t_bmc }} 
+                  --chomp
+              register: targetinfo_result
+              until: targetinfo_result.stdout == "inserted"
+              retries: 600
+              delay: 5
+
             - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}
@@ -606,12 +621,34 @@
               when:
                 - xtoph_deploy.kickstart_profile.method == "pxe"
 
+            ##
+            ##    NOTE: setting bootonce via redfish on dell causes a
+            ##          a power-on, thus the actual power-on could 
+            ##          result in non-zero return (power already on).  
+            ##          so we pause for a few seconds, test power, 
+            ##          and then continue
+            ##
+
+            - name: "baremetal-deploy : (BMC) pause to allow bootonce set-up to complete"
+              pause:
+                seconds: 3
+
+            - name: "baremetal-deploy : (BMC) power-status"
+              script: >
+                  {{ xtoph_deploy.machine_profile.bmc.power_status }}
+                  -u {{ t_user }}
+                  -p {{ t_pass }}
+                  -i {{ t_bmc }}
+                  --chomp
+              register: bmc_result
+
             - name: "baremetal-deploy : (BMC) power-on"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_on }}
                   -u {{ t_user }} 
                   -p {{ t_pass }} 
                   -i {{ t_bmc }} 
+              when: bmc_result.stdout == "off"
 
             - name: "baremetal-deploy : (BMC) wait for power-status == on"
               script: >
