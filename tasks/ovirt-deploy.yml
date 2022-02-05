@@ -289,7 +289,7 @@
                         inst.text
                         inst.ks={{ t_ks_hd }}
                         ksdevice={{ t_net_dev }}
-                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "cdrom"
       
@@ -302,7 +302,7 @@
                         inst.text
                         inst.ks={{ t_ks_hd }}
                         ksdevice={{ t_net_dev }}
-                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "cdrom"
 
@@ -316,7 +316,7 @@
                         inst.ks={{ t_ks_hd }}
                         inst.repo={{ t_ks_repo }}
                         ksdevice={{ t_net_dev }}
-                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "network"
       
@@ -330,7 +330,7 @@
                         inst.ks={{ t_ks_hd }}
                         inst.repo={{ t_ks_repo }}
                         ksdevice={{ t_net_dev }}
-                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                        ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "network"
       

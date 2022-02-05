@@ -11,7 +11,6 @@ keyboard us
 timezone America/New_York --isUtc
 rootpw $1$XJbwDNTe$Wqttcf7vWP5n.nPo2J9mk. --iscrypted
 text
-network --hostname={{ xtoph_deploy.hostname }}
 bootloader --location=mbr --append="nofb quiet splash=quiet"
 url --url={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}
 
@@ -74,6 +73,9 @@ cloud-init
 
 ##-- Randomize root password
 head -n1 /dev/urandom | md5sum | awk {'print $1'} | passwd --stdin root
+
+##-- Preserve kernel kickstart args
+cat /proc/cmdline >> /root/anaconda-cmdline.txt
 
 %end
 

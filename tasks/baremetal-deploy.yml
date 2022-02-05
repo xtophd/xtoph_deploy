@@ -305,7 +305,7 @@
                       inst.text
                       usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_hd }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
                 when: xtoph_deploy.kickstart_profile.method == "cdrom"
      
@@ -318,7 +318,7 @@
                       inst.text
                       usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_hd }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }} 
                 when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
@@ -332,7 +332,7 @@
                       usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_url }}
                       inst.repo={{ t_ks_repo }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
                 when: xtoph_deploy.kickstart_profile.method == "network"
     
@@ -346,7 +346,7 @@
                       usb-storage.delay_use={{ t_usb_delay }}
                       inst.ks={{ t_ks_url }}
                       inst.repo={{ t_ks_repo }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}::{{ t_net_dev }}:none
+                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }} 
                 when: xtoph_deploy.kickstart_profile.method == "network"
     
