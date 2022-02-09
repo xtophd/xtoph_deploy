@@ -611,6 +611,8 @@
               until: targetinfo_result.stdout == "inserted"
               retries: 600
               delay: 5
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
 
             - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
