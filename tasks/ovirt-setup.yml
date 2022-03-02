@@ -12,9 +12,23 @@
 ##
 
 
+## TO BE DEPRECATED: 20220301
+## These steps were incorporated into deployer-setup.yml long ago
+##
+#
+#- name: "ovirt-setup : install oVirt SDK supporting packages (RHEL7)"
+#  yum: name=python-ovirt-engine-sdk4 state=installed
+#  when:
+#    - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
+#    - ansible_distribution_major_version == "7"
+#
+#
+#- name: "ovirt-setup : install oVirt SDK supporting packages (RHEL8)"
+#  yum: name=python3-ovirt-engine-sdk4 state=installed
+#  when:
+#    - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
+#    - ansible_distribution_major_version == "8"
 
-- name: "ovirt-setup : install oVirt supporting packages (sdk/api)"
-  yum: name=python-ovirt-engine-sdk4 state=installed
 
 
 

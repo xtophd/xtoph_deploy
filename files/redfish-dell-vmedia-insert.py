@@ -47,7 +47,7 @@ bmc_ip       = args["i"]
 bmc_username = args["u"]
 bmc_password = args["p"]
 image_url    = args["m"]
-image_nfs    = args["m"]
+image_nfs    = args["n"]
 
 
 

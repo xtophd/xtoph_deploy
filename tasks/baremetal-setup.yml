@@ -10,9 +10,11 @@
 ##
 
 
-
-- name: "baremetal-setup : install baremetal supporting packages"
-  yum: name=ipmitool,curl state=installed
+## TO BE DEPRECATED: 20220301
+## These steps were incorporated into deployer-setup.yml long ago
+##
+#- name: "baremetal-setup : install baremetal supporting packages"
+#  yum: name=ipmitool,curl state=installed
 
 
 

@@ -48,7 +48,7 @@ bmc_password = args["p"]
 
 
 ## 
-##    Set power state
+##    Eject Virtual Media
 ## 
 
 url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia' % bmc_ip
