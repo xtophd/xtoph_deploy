@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # macgen.py script to generate a MAC address for virtual machines
 #
 #  Another method using python-virtinst (if installed)

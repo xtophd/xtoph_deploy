@@ -521,20 +521,20 @@
 
             - name: "baremetal-deploy : (BMC) debug"
               debug:
-                 msg: 
-                   - "BMC Address         : {{ t_bmc }}"
-                   - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
-                   - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
-                   - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
-                   - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.bmc.media_status }}"
-                   - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.bmc.media_insert }}"
-                   - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
-                   - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}"
-                   - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
-                   - "BMC Bootonce Clear  : {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}"
-                   - "BMC VMedia URL Path : {{ t_media }}"
-                   - "BMC VMedia NFS Path : {{ t_nfs }}"
-                   - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
+                msg: 
+                  - "BMC Address         : {{ t_bmc }}"
+                  - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
+                  - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
+                  - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
+                  - "BMC VMedia Status   : {{ xtoph_deploy.machine_profile.bmc.media_status }}"
+                  - "BMC VMedia Insert   : {{ xtoph_deploy.machine_profile.bmc.media_insert }}"
+                  - "BMC VMedia Eject    : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
+                  - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}"
+                  - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
+                  - "BMC Bootonce Clear  : {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}"
+                  - "BMC VMedia URL Path : {{ t_media }}"
+                  - "BMC VMedia NFS Path : {{ t_nfs }}"
+                  - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
               when:
                 - xtoph_deploy.debug == true
 
@@ -677,8 +677,8 @@
           t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
           t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
           t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
-          t_media:  "{{ xtoph_config.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-          t_nfs:    "{{ xtoph_config.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          t_media:  "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          t_nfs:    "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         when:
           - xtoph_deploy.machine_profile.bmc.fqdn is defined
           - xtoph_deploy.machine_profile.bmc.fqdn|length > 0

@@ -198,6 +198,44 @@ dell_r740:
 ## HP ENTRIES   
 ##
 
+hp_dl360_g8:
+      platform: "baremetal"
+      description: "HP DL360 Generation 8 (Intel E5, DDR3)"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('sda') }}"
+        netdev: "{{ h_netDEV | default('eno1') }}"
+      usb_storage_delay: "10"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus sel time set now"
+          - "-I lanplus chassis bootdev pxe"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-hp-login-status.py"
+        power_status:    "redfish-hp-power-status.py"
+        power_on:        "redfish-hp-power-on.py"
+        power_off:       "redfish-hp-power-off.py"
+        media_status:    "redfish-hp-vmedia-status.py"
+        media_eject:     "redfish-hp-vmedia-eject.py"
+        media_insert:    "redfish-hp-vmedia-insert.py"
+        bootonce_media:  "redfish-hp-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
+        bootonce_clear:  "redfish-hp-bootonce-clear.py"
+        custom_actions:  "redfish-hp-custom-actions.py"
+
+
+
+
 
     
 hp_dl380:

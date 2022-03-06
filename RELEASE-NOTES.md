@@ -3,18 +3,11 @@ This document in intended to provide some overview of major release changes/upda
 
 
 
-== (xtoph_deploy Dropping RHEL 7 (Python2) as a deployhost platform (2022/03/05)
+== (xtoph_deploy Dropping Python2 as a for files and scripts (2022/03/05)
 
 Due to the expanding capabilities of the redfish shim scripts and the lack of support
 in python2 to print without a linefeed (chomp), I'm being forced to dump python2 which
-means RHEL 7 / CentOS 7 are no longer being tested as a xtoph_deploy platform.
-
-You can still deploy RHEL 7, just not host the xtoph_deploy on it.
-
-I may revert to using shell + curl as the redfish shim solution, but for now I'm sticking
-with python3.
-
-
+means RHEL 7 / CentOS 7 will need to install python3.
 
 == (xtoph_deploy) Multi KVM/Libvirt Platfrom Support (2021/09/23)
 

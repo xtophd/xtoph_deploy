@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # redfish-hp-virtualmedia-insert.py
 #
@@ -21,14 +21,6 @@
 #           -d '{"Image": "http://10.49.30.20:8000/sjdmc-sjcontrol3.iso"}'  
 #           -X POST 
 #           https://$bmc/redfish/v1/Managers/1/VirtualMedia/2/Actions/VirtualMedia.InsertMedia
-#
-
-
-
-#
-# THIS SCRIPT IS UNTESTED/UNCONFIRMED
-# THIS SCRIPT IS UNTESTED/UNCONFIRMED
-# THIS SCRIPT IS UNTESTED/UNCONFIRMED
 #
 
 
@@ -76,7 +68,7 @@ image_nfs    = args["n"]
 ## 
 
 
-url      = 'https://%s/redfish/v1/Managers/1/VirtualMedia/2/Actions/VirtualMedia.InsertMedia' % bmc_ip
+url      = 'https://%s/redfish/v1/Managers/1/VirtualMedia/2/Actions/Oem/Hp/HpiLOVirtualMedia.InsertVirtualMedia/' % bmc_ip
 headers  = {'content-type': 'application/json'}
 payload  = {'Image': image_url }
 
@@ -84,7 +76,7 @@ response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(b
 
 result_code = response.status_code
 
-if result_code == 204:
+if result_code == 200:
     print("SUCCESS: result code %s returned" % result_code)
 else:
     print("FAIL: result code %s returned" % result_code)

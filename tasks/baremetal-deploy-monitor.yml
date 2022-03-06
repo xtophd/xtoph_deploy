@@ -30,7 +30,7 @@
 - delegate_to: localhost
   block:
 
-      - name: "baremetal-deploy : (BMC) debug"
+      - name: "baremetal-deploy-monitor : (BMC) debug"
         debug:
            msg:
              - "BMC Address         : {{ t_bmc }}"
