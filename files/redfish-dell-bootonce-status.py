@@ -62,11 +62,13 @@ response = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
 
 data = response.json()
 
-override_mode   = data['Boot']['BootSourceOverrideMode']
-override_target = data['Boot']['BootSourceOverrideTarget']
+override_mode     = data['Boot']['BootSourceOverrideMode']
+override_target   = data['Boot']['BootSourceOverrideTarget']
+override_enabled  = data['Boot']['BootSourceOverrideEnabled']
 
 print("Current Override Mode: %s" % override_mode)
 print("Current Override Target: %s" % override_target)
+print("Current Override Enabled: %s" % override_enabled)
 
 print("")
 

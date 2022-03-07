@@ -2,6 +2,10 @@
 #
 # redfish-dell-pxe-bootonce.py
 #
+#   Usage:
+#
+#      python3 redfish-dell-bootonce-pxe.py -u $BMC_USER -p $BMC_PASS -i $BMC_IP
+#
 #   The curl equivalent:
 #
 #      Discover one time bootable devices
@@ -159,10 +163,10 @@ url      = 'https://%s/redfish/v1/Systems/System.Embedded.1' % bmc_ip
 headers  = {'content-type': 'application/json'}
 
 if override_mode == "UEFI":
-    print("Setting UEFI boot-once target")
+    print("Setting UEFI boot-once target: %s" % pxe_uefi)
     payload  = {'Boot':{'BootSourceOverrideTarget':'Pxe', 'UefiTargetBootSourceOverride': pxe_uefi}}
 else:
-    print("Setting BIOS boot-once target")
+    print("Setting BIOS boot-once target: Pxe")
     payload  = {'Boot':{'BootSourceOverrideTarget':'Pxe'}}
 
 response = requests.patch(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
