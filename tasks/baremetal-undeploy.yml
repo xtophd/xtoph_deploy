@@ -58,7 +58,7 @@
               when:
                 - xtoph_deploy.debug == true
 
-            - name: "baremetal-deploy : (BMC) login-status"
+            - name: "baremetal-undeploy : (BMC) login-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.login_status }}
                   -u {{ t_user }}
@@ -130,6 +130,7 @@
               retries: 600
               delay: 5
               when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
                 - bmc_result.stdout == "inserted"
 
   

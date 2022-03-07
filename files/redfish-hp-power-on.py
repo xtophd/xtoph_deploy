@@ -45,14 +45,9 @@ bmc_password = args["p"]
 ##    Set power state
 ## 
 
-
 url     = 'https://%s/redfish/v1/Systems/1/Actions/ComputerSystem.Reset/' % bmc_ip
 payload = {'ResetType': 'On'}
 headers = {'Content-Type': 'application/json'}
-
-print (url)
-print (payload)
-print (headers)
 
 response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
 
@@ -62,6 +57,6 @@ if result_code == 200:
     print("SUCCESS: result code %s returned" % result_code)
 else:
     print("FAIL: result code %s returned" % result_code)
-    ##print(response.json())
+    print(response.json())
     sys.exit(1)
 

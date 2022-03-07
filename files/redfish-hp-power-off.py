@@ -51,9 +51,9 @@ bmc_password = args["p"]
 ##    Set power state
 ## 
 
-url      = 'https://%s/redfish/v1/Systems/Systems/Actions/ComputerSystem.Reset' % bmc_ip
-payload  = {'ResetType': 'ForceOff'}
-headers  = {'content-type': 'application/json'}
+url     = 'https://%s/redfish/v1/Systems/1/Actions/ComputerSystem.Reset/' % bmc_ip
+payload = {'ResetType': 'ForceOff'}
+headers = {'Content-Type': 'application/json'} 
 
 response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
 
