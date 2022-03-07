@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 #
-# redfish-dell-virtualmedia-bootonce.py
+# redfish-dell-bootonce-vmedia.py
+#
+#   Usage:
+#
+#      python3 redfish-dell-bootonce-vmedia.py -u $BMC_USER -p $BMC_PASS -i $BMC_IP
 #
 #   The curl equivalent:
 #
@@ -30,8 +34,6 @@ import textwrap
 
 warnings.filterwarnings("ignore")
 
-
-
 ##
 ##    Load commandline arguments
 ##
@@ -48,12 +50,26 @@ bmc_ip       = args["i"]
 bmc_username = args["u"]
 bmc_password = args["p"]
 
+##
+##    Determine what mode we're in (UEFI vs Legacy/BIOS)
+##
 
+url      = 'https://%s/redfish/v1/Systems/System.Embedded.1/' % bmc_ip
+response = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
+
+data = response.json()
+
+override_mode   = data['Boot']['BootSourceOverrideMode']
+override_target = data['Boot']['BootSourceOverrideTarget']
+
+print("Current Override Mode: %s" % override_mode)
+print("Current Override Target: %s" % override_target)
+
+print("")
 
 ## 
-##    Set Virtual Media Boot-Once
+##    Set Boot-Once to virtual CD
 ## 
-
 
 url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration' % bmc_ip
 headers  = {'content-type': 'application/json'}
@@ -69,4 +85,3 @@ else:
     print("FAIL: result code %s returned" % result_code)
     print(response.json())
     sys.exit(1)
-

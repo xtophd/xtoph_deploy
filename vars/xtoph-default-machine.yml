@@ -157,9 +157,45 @@ dell_r630:
         custom_actions:  "racadm-custom-actions.sh"
 
 
+#dell_r740:
+#      platform: "baremetal"
+#      description: "DELL r740"
+#      kickstart:
+#        blkdev: "{{ h_blkDEV | default('sda') }}"
+#        netdev: "{{ h_netDEV | default('eno0') }}"
+#      usb_storage_delay: "10"
+#      storage:
+#        default:
+#      network:
+#        default:
+#          ip: "{{ h_pubIP | default('') }}"
+#          mac: "{{ h_pubMAC| default('') }}"
+#      ipmi:
+#        fqdn:         "{{ ipmi_fqdn | default('') }}"
+#        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+#        power_on:     "-I lanplus chassis power on"
+#        power_off:    "-I lanplus chassis power off"
+#        config_steps:
+#          - "-I lanplus sel time set now"
+#          - "-I lanplus chassis bootdev pxe"
+#      bmc:
+#        fqdn:            "{{ bmc_fqdn | default('') }}"
+#        login_status:    "redfish-dell-login-status.py"
+#        power_status:    "redfish-dell-power-status.py"
+#        power_on:        "redfish-dell-power-on.py"
+#        power_off:       "redfish-dell-power-off.py"
+#        media_status:    "redfish-dell-vmedia-status.py"
+#        media_eject:     "redfish-dell-vmedia-eject.py"
+#        media_insert:    "redfish-dell-vmedia-insert.py"
+#        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+#        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
+#        bootonce_clear:  "racadm-bootonce-clear.sh"
+#        custom_actions:  "redfish-dell-custom-actions.py"
+
+
 dell_r740:
       platform: "baremetal"
-      description: "DELL r740"
+      description: "DELL r740 with redfish support"
       kickstart:
         blkdev: "{{ h_blkDEV | default('sda') }}"
         netdev: "{{ h_netDEV | default('eno0') }}"
@@ -179,7 +215,7 @@ dell_r740:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
       bmc:
-        fqdn:            "{{ bmc_fqdn | default('') }}"
+        fqdn:            "{{ redfish_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
         power_status:    "redfish-dell-power-status.py"
         power_on:        "redfish-dell-power-on.py"
@@ -189,7 +225,7 @@ dell_r740:
         media_insert:    "redfish-dell-vmedia-insert.py"
         bootonce_media:  "redfish-dell-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
-        bootonce_clear:  "racadm-bootonce-clear.sh"
+        bootonce_clear:  "redfish-dell-bootonce-clear.py"
         custom_actions:  "redfish-dell-custom-actions.py"
 
 

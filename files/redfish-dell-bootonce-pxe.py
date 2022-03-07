@@ -16,9 +16,6 @@
 #
 #          curl  --insecure -s -u $uname:$password 'https://192.168.110.111/redfish/v1/Systems/System.Embedded.1/' | jq '.Boot'
 #
-#
-#
-#
 
 import argparse
 import json
@@ -128,33 +125,6 @@ if override_mode == "UEFI":
 
 
 
-##
-##    Clear BootOnce Override
-##
-
-
-url      = 'https://%s/redfish/v1/Systems/System.Embedded.1' % bmc_ip
-headers  = {'content-type': 'application/json'}
-
-if override_mode == "UEFI":
-    payload  = {'Boot':{'BootSourceOverrideTarget':'None', 'UefiTargetBootSourceOverride': 'None', 'BootSourceOverrideEnabled':'Once'}}
-else:
-    payload  = {'Boot':{'BootSourceOverrideTarget':'None', 'BootSourceOverrideEnabled':'Once'}}
-
-response = requests.patch(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
-
-result_code = response.status_code
-
-if result_code != 200:
-    print("FATAL: clear boot-once result code %s returned" % result_code)
-    print(response.json())
-    sys.exit(1)
-else:
-    print("SUCCESS: boot-once cleared \"Pxe\"")
-    pass
-
-
-
 ## 
 ##    Set PXE Device BootOnce
 ## 
@@ -179,19 +149,4 @@ if result_code != 200:
     sys.exit(1)
 else:
     print("SUCCESS: boot-once set to %s \"Pxe\"" % override_mode)
-
-
-
-##
-##    Print current boot-once override device
-## 
-#
-#url      = 'https://%s/redfish/v1/Systems/System.Embedded.1/' % bmc_ip
-#response = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
-#
-#data = response.json()
-#
-#print("Current boot-once target: %s" % data['Boot']['BootSourceOverrideTarget'])
-#
-#print("")
 

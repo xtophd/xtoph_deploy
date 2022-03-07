@@ -16,9 +16,6 @@
 #
 #          curl  --insecure -s -u $BMC_USER:$BMC_PASS 'https://$BMC_IP/redfish/v1/Systems/System.Embedded.1/' | jq '.Boot'
 #
-#
-#
-#
 
 import argparse
 import json
@@ -49,8 +46,6 @@ bmc_ip       = args["i"]
 bmc_username = args["u"]
 bmc_password = args["p"]
 
-
-
 ##
 ##    Determine what mode we're in (UEFI vs Legacy/BIOS)
 ## 
@@ -68,23 +63,21 @@ print("Current Override Target: %s" % override_target)
 
 print("")
 
+##
+##    BootOnce: 'disable' and set boot device to 'normal'
+##
 
-url      = 'https://%s/redfish/v1/Systems/System.Embedded.1' % bmc_ip
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration' % bmc_ip
 headers  = {'content-type': 'application/json'}
+payload  = {"ShareParameters": {"Target":"ALL"},"ImportBuffer": "<SystemConfiguration><Component FQDD=\"iDRAC.Embedded.1\"><Attribute Name=\"ServerBoot.1#BootOnce\">Disabled</Attribute><Attribute Name=\"ServerBoot.1#FirstBootDevice\">Normal</Attribute></Component></SystemConfiguration>"}
 
-if override_mode == "UEFI":
-    payload  = {'Boot':{'BootSourceOverrideTarget':'None', 'UefiTargetBootSourceOverride': 'None', 'BootSourceOverrideEnabled':'Once'}}
-else:
-    payload  = {'Boot':{'BootSourceOverrideTarget':'None', 'BootSourceOverrideEnabled':'Once'}}
-
-response = requests.patch(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
+response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
 
 result_code = response.status_code
 
-if result_code != 200:
-    print("FATAL: clear boot-once result code %s returned" % result_code)
+if result_code == 202:
+    print("SUCCESS: result code %s returned" % result_code)
+else:
+    print("FAIL: result code %s returned" % result_code)
     print(response.json())
     sys.exit(1)
-else:
-    print("SUCCESS: boot-once cleared \"Pxe\"")
-
