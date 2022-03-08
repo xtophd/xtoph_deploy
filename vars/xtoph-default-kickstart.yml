@@ -63,6 +63,7 @@ pxe_nowait:
 
 rhel84:
     name:              "rhel84"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 DVD" 
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -84,6 +85,7 @@ rhel84:
 
 rhel84-bootiso:
     name:              "rhel84-bootiso"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 Boot ISO" 
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -105,6 +107,7 @@ rhel84-bootiso:
 
 rhel84-pxe:
     name:              "rhel84-pxe"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 PXE"
     method:            "pxe"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -132,6 +135,7 @@ rhel84-pxe:
 
 rhel83:
     name:              "rhel83"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.3 DVD" 
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -151,6 +155,7 @@ rhel83:
 
 rhel83-bootiso:
     name:              "rhel83-bootiso"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.3 Boot ISO" 
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -178,6 +183,7 @@ rhel83-bootiso:
 
 rhel82:
     name:              "rhel82"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 DVD" 
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -197,6 +203,7 @@ rhel82:
  
 rhel82-bootiso:
     name:              "rhel82-bootiso"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 Boot ISO" 
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -218,6 +225,7 @@ rhel82-bootiso:
    
 rhel82-pxe:
     name:              "rhel82-pxe"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 PXE" 
     method:            "pxe"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -246,6 +254,7 @@ rhel82-pxe:
 
 rhel81:
     name:              "rhel81"
+    family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.1 DVD" 
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -273,6 +282,7 @@ rhel81:
 
 rhel79:
     name:              "rhel79"
+    family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 DVD" 
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -291,6 +301,7 @@ rhel79:
 
 rhel79-bootiso:
     name:              "rhel79-bootiso"
+    family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 Boot ISO" 
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -309,6 +320,7 @@ rhel79-bootiso:
 
 rhel79-pxe:
     name:              "rhel79-pxe"
+    family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 PXE" 
     method:            "pxe"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -332,6 +344,7 @@ rhel79-pxe:
 
 centos7:
     name:              "centos7"
+    family:            "rhel7"
     description:       "CentOS 7 DVD" 
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -348,6 +361,7 @@ centos7:
 
 centos7-netinstall:
     name:              "centos7-netinstall"
+    family:            "rhel7"
     description:       "CentOS 7 NetInstall" 
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -364,6 +378,7 @@ centos7-netinstall:
 
 centos7-pxe:
     name:              "centos7-netinstall"
+    family:            "rhel7"
     description:       "CentOS 7 NetInstall" 
     method:            "pxe"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"

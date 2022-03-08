@@ -125,8 +125,19 @@ dell_r630:
       platform: "baremetal"
       description: "DELL r630"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('eno0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
       usb_storage_delay: "10"
       storage:
         default:
@@ -157,49 +168,24 @@ dell_r630:
         custom_actions:  "racadm-custom-actions.sh"
 
 
-#dell_r740:
-#      platform: "baremetal"
-#      description: "DELL r740"
-#      kickstart:
-#        blkdev: "{{ h_blkDEV | default('sda') }}"
-#        netdev: "{{ h_netDEV | default('eno0') }}"
-#      usb_storage_delay: "10"
-#      storage:
-#        default:
-#      network:
-#        default:
-#          ip: "{{ h_pubIP | default('') }}"
-#          mac: "{{ h_pubMAC| default('') }}"
-#      ipmi:
-#        fqdn:         "{{ ipmi_fqdn | default('') }}"
-#        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-#        power_on:     "-I lanplus chassis power on"
-#        power_off:    "-I lanplus chassis power off"
-#        config_steps:
-#          - "-I lanplus sel time set now"
-#          - "-I lanplus chassis bootdev pxe"
-#      bmc:
-#        fqdn:            "{{ bmc_fqdn | default('') }}"
-#        login_status:    "redfish-dell-login-status.py"
-#        power_status:    "redfish-dell-power-status.py"
-#        power_on:        "redfish-dell-power-on.py"
-#        power_off:       "redfish-dell-power-off.py"
-#        media_status:    "redfish-dell-vmedia-status.py"
-#        media_eject:     "redfish-dell-vmedia-eject.py"
-#        media_insert:    "redfish-dell-vmedia-insert.py"
-#        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
-#        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
-#        bootonce_clear:  "racadm-bootonce-clear.sh"
-#        custom_actions:  "redfish-dell-custom-actions.py"
-
-
-dell_r740:
+dell_r740_racadm:
       platform: "baremetal"
-      description: "DELL r740 with redfish support"
-      kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('eno0') }}"
+      description: "DELL r740"
       usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
       storage:
         default:
       network:
@@ -215,7 +201,54 @@ dell_r740:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
       bmc:
-        fqdn:            "{{ redfish_fqdn | default('') }}"
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
+        bootonce_clear:  "racadm-bootonce-clear.sh"
+        custom_actions:  "redfish-dell-custom-actions.py"
+
+
+dell_r740:
+      platform: "baremetal"
+      description: "DELL r740 with redfish support"
+      usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus sel time set now"
+          - "-I lanplus chassis bootdev pxe"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
         power_status:    "redfish-dell-power-status.py"
         power_on:        "redfish-dell-power-on.py"
@@ -234,13 +267,72 @@ dell_r740:
 ## HP ENTRIES   
 ##
 
+
+
 hp_dl360_g8:
       platform: "baremetal"
       description: "HP DL360 Generation 8 (Intel E5, DDR3)"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('eno1') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
       usb_storage_delay: "10"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      ipmi:
+        fqdn:         "{{ ipmi_fqdn | default('') }}"
+        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
+        power_on:     "-I lanplus chassis power on"
+        power_off:    "-I lanplus chassis power off"
+        config_steps:
+          - "-I lanplus sel time set now"
+          - "-I lanplus chassis bootdev pxe"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-hp-login-status.py"
+        power_status:    "redfish-hp-power-status.py"
+        power_on:        "redfish-hp-power-on.py"
+        power_off:       "redfish-hp-power-off.py"
+        media_status:    "redfish-hp-vmedia-status.py"
+        media_eject:     "redfish-hp-vmedia-eject.py"
+        media_insert:    "redfish-hp-vmedia-insert.py"
+        bootonce_media:  "redfish-hp-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
+        bootonce_clear:  "redfish-hp-bootonce-clear.py"
+        custom_actions:  "redfish-hp-custom-actions.py"
+    
+hp_dl380_g8:
+      platform: "baremetal"
+      description: "HP DL380"
+      usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
       storage:
         default:
       network:
@@ -271,25 +363,6 @@ hp_dl360_g8:
 
 
 
-
-
-    
-hp_dl380:
-      platform: "baremetal"
-      description: "HP DL380"
-      kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('eno0') }}"
-      usb_storage_delay: "10"
-      storage:
-        default:
-      network:
-        default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
-
-
-
 ##
 ## SUPERMICRO ENTRIES   
 ##
@@ -316,42 +389,6 @@ supermicro_x9drd_if:
         config_steps:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
-
-##
-## SUSHI ENTRIES - sushi is a redfish emulator that
-##                 runs on top of libvirt/kvm.  Good
-##                 for testing.
-##
-
-sushi_vm:
-      platform: "baremetal"
-      description: "VM Controller by Sushi Redfish Emulator"
-      kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('enp1s0') }}"
-      storage:
-        default:
-      network:
-        default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
-      redfish:
-        fqdn:              "{{ redfish_fqdn | default('') }}"
-        get_power:         "noop"
-        get_media:         "-H 'Accept: application/json' -k -X GET https://$bmc/redfish/v1/Managers/Self/VirtualMedia/1 | python3 -m json.tool | egrep 'MediaStatus|Image'"
-        set_power_on:      "noop"
-        set_power_off:     "noop"
-        set_media_insert:  "-H 'Content-Type: application/json' -H 'Accept: application/json' -d '{Image: http://10.10.3.20:8080/assets/rhcos-4.8.2-x86_64-live.x86_64.iso}'  -X POST https://$bmc/redfish/v1/Managers/Self/VirtualMedia/1/Actions/VirtualMedia.InsertMedia"
-        set_media_eject:   "-H 'Content-Type: application/json' -H 'Accept: application/json' -d '{}' -X POST https://$bmc/redfish/v1/Managers/Self/VirtualMedia/1/Actions/VirtualMedia.EjectMedia"
-        set_media_boot:    "-H 'Content-Type: application/json' -H 'Accept: application/json' -d '{Boot:{ BootSourceOverrideEnabled: Once, BootSourceOverrideTarget: Cd, BootSourceOverrideMode: UEFI}}' -X PATCH https://$bmc/redfish/v1/Systems/Self"
-
-        custom_pre_tasks:
-          - "noop"
-          - "noop"
-
-        custom_post_tasks:
-          - "noop"
-          - "noop"
 
 
 

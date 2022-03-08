@@ -160,7 +160,7 @@
 ##        network.defaults to xtoph_deploy.machine_profile
 ##
 ##        This obviously creates some duplication of data, but
-##        if makes life easier when coding and troubleshooting 
+##        it makes life easier when coding and troubleshooting 
 ##        the various playbooks.  All the required data is
 ##        available in the various build profiles.
 ##
@@ -178,13 +178,40 @@
 ##              in the first place.  An empty set will have 0 elements
 ##             
 
+## DEPRECATED 07MAR22: replaced with tiered method for setting netdev and blkdev below
+#- name: "main.yml : copy platform_profile kickstart values to machine_profile"
+#  set_fact:
+#    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {item.key: item.value}}}, recursive=True ) }}"
+#  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart | default({}) ) }}"
+#  when: xtoph_deploy.machine_profile.kickstart[item.key] is undefined
 
+##
+##        set kickstart.netdev to 1 of 3 values:
+##            #1 h_netDEV
+##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netdev, 
+##            #3 machine_profile_kickstart.dev_hints.default.netdev
+##
+##        same logic applies to kickstart.blkdev
+##            #1 h_blkDEV
+##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netblk, 
+##            #3 machine_profile_kickstart.dev_hints.default.netblk
+##
 
-- name: "main.yml : copy platform_profile kickstart values to machine_profile"
+- name: "main.yml : special handling for kickstart netdev"
   set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {item.key: item.value}}}, recursive=True ) }}"
-  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart | default({}) ) }}"
-  when: xtoph_deploy.machine_profile.kickstart[item.key] is undefined
+    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'netdev': t_netdev}}}, recursive=True ) }}"
+  vars:
+    t_netdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['netdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.netdev) }}"
+  when:
+    - xtoph_deploy.machine_profile.kickstart.netdev == ''
+
+- name: "main.yml : special handling for kickstart blkdev"
+  set_fact:
+    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'blkdev': t_blkdev}}}, recursive=True ) }}"
+  vars:
+    t_blkdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['blkdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.blkdev) }}"
+  when:
+    - xtoph_deploy.machine_profile.kickstart.blkdev == ''
 
 - name: "main.yml : copy platform_profile default storage values to machine_profile"
   set_fact:
