@@ -10,23 +10,23 @@
 
 
 
-kvm_default:
-      description: "KVM vm using defaults"
-      platform: "libvirt"
-      kickstart:
-      storage:
-        default:
-      network:
-        default:
-          ip:  "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
-    
 kvm_vda:
       description: "KVM vm using sparse virtio storage"
       platform: "libvirt"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('vda') }}"
-        netdev: "{{ h_netDEV | default('enp1s0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "vda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "vda"
+            netdev: "enp1s0"
+          rhel7:
+            blkdev: "vda"
+            netdev: "eth0"
       storage:
         default:
           bus: "virtio"
@@ -40,8 +40,19 @@ kvm_nest_vda:
       description: "KVM vm with nested-virt and virtio disks"
       platform: "libvirt"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('vda') }}"
-        netdev: "{{ h_netDEV | default('enp1s0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "vda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "vda"
+            netdev: "enp1s0"
+          rhel7:
+            blkdev: "vda"
+            netdev: "eth0"
       cpu:
         type: "host-passthrough"
       storage:
@@ -56,8 +67,19 @@ kvm_sda:
       description: "KVM vm with virtio-scsi disks"
       platform: "libvirt"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('enp1s0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "enp1s0"
+          rhel7:
+            blkdev: "sda"
+            netdev: "eth0"
       storage:
         default:
           bus: "virtio-scsi"
@@ -73,25 +95,25 @@ kvm_sda:
 ##
 
 
-ovirt_default:
-      description: "oVirt default vm"
-      platform: "ovirt"
-      default_os_type: "rhel_8x64"
-      kickstart:
-      storage:
-        default:
-          bus: "virtio_scsi"
-      network:
-        default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
     
 ovirt_sda:
       description: "oVirt vm using disk bus = virtio-scsi (sda)"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "ens3"
+          rhel7:
+            blkdev: "sda"
+            netdev: "eth0"
       storage:
         default:
           bus: "virtio_scsi"
@@ -104,7 +126,13 @@ ovirt_vda:
       platform: "ovirt"
       default_os_type: "rhel_8x64"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('vda') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "vda"
+            netdev: "eth0"
       storage:
         default:
           bus: "virtio"
@@ -285,7 +313,7 @@ hp_dl360_g8:
             netdev: "eno1"
           rhel7:
             blkdev: "sda"
-            netdev: "em1"
+            netdev: "eno1"
       usb_storage_delay: "10"
       storage:
         default:
@@ -332,7 +360,7 @@ hp_dl380_g8:
             netdev: "eno1"
           rhel7:
             blkdev: "sda"
-            netdev: "em1"
+            netdev: "eno1"
       storage:
         default:
       network:
@@ -373,8 +401,19 @@ supermicro_x9drd_if:
       platform: "baremetal"
       description: "SuperMicro X9DRD-iF"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('enp5s0f0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "enp5s0f0"
+          rhel7:
+            blkdev: "sda"
+            netdev: "enp5s0f0"
       storage:
         default:
       network:
@@ -389,6 +428,8 @@ supermicro_x9drd_if:
         config_steps:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
+      bmc:
+        fqdn:         ""
 
 
 
@@ -402,8 +443,13 @@ pc_nvme:
       platform: "baremetal"
       description: "Generic PC with nvme"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('nvme0n1') }}"
-        netdev: "{{ h_netDEV | default('eno0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "nvme0n1"
+            netdev: "eno0"
       storage:
         default:
       network:
@@ -416,8 +462,13 @@ pc_sda:
       platform: "baremetal"
       description: "Generic PC with (sata/sas/scsi) sda"
       kickstart:
-        blkdev: "{{ h_blkDEV | default('sda') }}"
-        netdev: "{{ h_netDEV | default('eno0') }}"
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eno0"
       storage:
         default:
       network:

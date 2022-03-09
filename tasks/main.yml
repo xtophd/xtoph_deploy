@@ -197,13 +197,17 @@
 ##            #3 machine_profile_kickstart.dev_hints.default.netblk
 ##
 
+- name: "main.yml : debug"
+  debug: var=xtoph_deploy
+  when: xtoph_deploy.debug == true
+
 - name: "main.yml : special handling for kickstart netdev"
   set_fact:
     xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'netdev': t_netdev}}}, recursive=True ) }}"
   vars:
     t_netdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['netdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.netdev) }}"
   when:
-    - xtoph_deploy.machine_profile.kickstart.netdev == ''
+    - xtoph_deploy.machine_profile.kickstart.netdev is defined and xtoph_deploy.machine_profile.kickstart.netdev == ''
 
 - name: "main.yml : special handling for kickstart blkdev"
   set_fact:
@@ -211,7 +215,7 @@
   vars:
     t_blkdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['blkdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.blkdev) }}"
   when:
-    - xtoph_deploy.machine_profile.kickstart.blkdev == ''
+    - xtoph_deploy.machine_profile.kickstart.blkdev is defined and xtoph_deploy.machine_profile.kickstart.blkdev == ''
 
 - name: "main.yml : copy platform_profile default storage values to machine_profile"
   set_fact:
@@ -275,21 +279,6 @@
   include_tasks: "deployer-setup.yml"
   when: 
     - xtoph_deploy_action == "setup" 
-
-# Deprecated: 20210921 - ovirt and baremetal were incorporated into deployhost-setup.yml and 
-#                        libvirt was broken out as separate action (config-libvirt)
-#
-#- name: "main.yml : setup platform specifics"
-#  include_tasks: "{{ platform_item.tasks }}"
-#  when: 
-#    - xtoph_deploy_action == "setup" 
-#    - platform_item.platform in xtoph_deploy.deployhost.platform_enable
-#  loop_control:
-#    loop_var: platform_item
-#  with_items:
-#    - { platform: 'libvirt',   tasks: 'libvirt-setup.yml'   } 
-#    - { platform: 'ovirt',     tasks: 'ovirt-setup.yml'     } 
-#    - { platform: 'baremetal', tasks: 'baremetal-setup.yml' } 
 
 - name: "main.yml : setup deployhost with dhcp/pxe"
   include_tasks: "deployer-setup-dhcp.yml"

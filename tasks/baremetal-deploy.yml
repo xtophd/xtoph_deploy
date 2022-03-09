@@ -490,14 +490,14 @@
       - throttle: 1
         block:
 
-            - name: "baremetal-deploy : (ipmi) config steps"
+            - name: "baremetal-deploy : (IPMI) config steps"
               shell:
                 cmd: |
                   ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
               loop:
                 "{{ xtoph_deploy.machine_profile.ipmi.config_steps }}"
     
-            - name: "baremetal-deploy : (ipmi) execute power-on"
+            - name: "baremetal-deploy : (IPMI) execute power-on"
               shell:
                 cmd: |
                   ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ xtoph_deploy.machine_profile.ipmi.power_on }}
