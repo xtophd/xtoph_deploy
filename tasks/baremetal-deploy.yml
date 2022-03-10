@@ -446,12 +446,14 @@
             when: xtoph_deploy.cleanup == true
 
         when: xtoph_deploy.kickstart_profile is defined and
-              xtoph_deploy.kickstart_profile.method != "pxe"
+              xtoph_deploy.kickstart_profile.method != "pxe" and
+              xtoph_deploy.kickstart_profile.method != "simple_cdrom" 
 
 
 
       ##
-      ##    Create the kickstart config for PXE/NETWORK supported installs
+      ##    Create the kickstart config for PXE and NETWORK (BOOTISO) supported installs
+      ##    CDROM installs are self contained and do not need it
       ##
 
 
@@ -532,7 +534,7 @@
                   - "BMC Bootonce PXE    : {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}"
                   - "BMC Bootonce VMedia : {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}"
                   - "BMC Bootonce Clear  : {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}"
-                  - "BMC VMedia URL Path : {{ t_media }}"
+                  - "BMC VMedia URL Path : {{ t_url }}"
                   - "BMC VMedia NFS Path : {{ t_nfs }}"
                   - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
               when:
@@ -541,17 +543,17 @@
             - name: "baremetal-deploy : (BMC) bootonce-clear"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}" 
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
               when:
 
             - name: "baremetal-deploy-post : (BMC) media-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_status }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}"
+                  -i "{{ t_bmc }}"
                   --chomp
               register: bmc_result
               when:
@@ -560,9 +562,9 @@
             - name: "baremetal-deploy : (BMC) media-eject"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_eject }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}"
+                  -i "{{ t_bmc }}"
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
                 - bmc_result.stdout == "inserted"
@@ -570,9 +572,9 @@
             - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_status }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}"
+                  -i "{{ t_bmc }}"
                   --chomp
               register: local_result
               until: local_result.stdout == "ejected"
@@ -585,27 +587,27 @@
             - name: "baremetal-deploy : (BMC) custom-actions"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.custom_actions }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
 
             - name: "baremetal-deploy : (BMC) media-insert"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_insert }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
-                  -m {{ t_media }}
-                  -n {{ t_nfs }}
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc  }}" 
+                  -m "{{ t_url  }}"
+                  -n "{{ t_nfs  }}"
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
             - name: "baremetal-deploy : (BMC) wait for media-status == inserted"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_status }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
                   --chomp
               register: targetinfo_result
               until: targetinfo_result.stdout == "inserted"
@@ -617,18 +619,18 @@
             - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}" 
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
             - name: "baremetal-deploy : (BMC) bootonce-pxe"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}" 
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
               when:
                 - xtoph_deploy.kickstart_profile.method == "pxe"
 
@@ -647,26 +649,26 @@
             - name: "baremetal-deploy : (BMC) power-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_status }}
-                  -u {{ t_user }}
-                  -p {{ t_pass }}
-                  -i {{ t_bmc }}
+                  -u "{{ t_user }}"
+                  -p "{{ t_pass }}"
+                  -i "{{ t_bmc }}"
                   --chomp
               register: bmc_result
 
             - name: "baremetal-deploy : (BMC) power-on"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_on }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}" 
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
               when: bmc_result.stdout == "off"
 
             - name: "baremetal-deploy : (BMC) wait for power-status == on"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_status }}
-                  -u {{ t_user }} 
-                  -p {{ t_pass }} 
-                  -i {{ t_bmc }} 
+                  -u "{{ t_user }}" 
+                  -p "{{ t_pass }}" 
+                  -i "{{ t_bmc }}" 
                   --chomp
               register: targetinfo_result
               until: targetinfo_result.stdout == "on"
@@ -674,11 +676,13 @@
               delay: 5
 
         vars:
-          t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
-          t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
-          t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
-          t_media:  "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-          t_nfs:    "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          t_user: "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
+          t_pass: "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
+          t_bmc:  "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+          t_url:  "{{ xtoph_deploy.machine_profile.kickstart.iso_url }}"
+          t_nfs:  "{{ xtoph_deploy.machine_profile.kickstart.iso_nfs }}"
+          ##t_url:    "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          ##t_nfs:    "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         when:
           - xtoph_deploy.machine_profile.bmc.fqdn is defined
           - xtoph_deploy.machine_profile.bmc.fqdn|length > 0

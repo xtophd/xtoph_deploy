@@ -5,15 +5,18 @@
 ##
 ##    Kickstart "methods" :
 ##
-##       cdrom:    boot system with ISO, 
-##                 source for install is CDROM
+##       cdrom:         boot system with customized ISO, 
+##                      source for install is CDROM
 ##
-##       network:  boot system with ISO, 
-##                 source for install is network URL
+##       network:       boot system with customized ISO, 
+##                      source for install is network URL
 ##
-##       pxe:      just start VM with PXE
-##                 limited control with wait_for_* options
+##       pxe:           just start VM with PXE
+##                      limited control with wait_for_* options
 ##
+##       simple_cdrom:  boot system with 3rd party ISO,
+##                      put ISO somewhere accessible,
+##                      specify URL with h_isoURL
 
 
 
@@ -61,6 +64,42 @@ pxe_nowait:
 
 
 
+vmedia_wait:
+
+    ##
+    ## Host will poweroff after vmedia install, so wait around
+    ## to start it back up
+    ##
+
+    name:              "vmedia_wait"
+    description:       "There is no kickstart or repo, just vmedia boot"
+    method:            "simple_cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    iso_url:           "{{ h_isoURL | default('') }}"
+    wait_for_ssh:      true
+
+vmedia_nowait:
+
+    ##
+    ## Host will NOT poweroff after vmedia_install, so DO NOT
+    ## wait around to start it back up
+    ##
+
+    name:              "vmedia_nowait"
+    description:       "There is no kickstart or repo, just vmedia boot"
+    method:            "simple_cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
+    iso_url:           "{{ h_isoURL | default('') }}"
+    wait_for_ssh:      true
+
+
+
+##
+##
+##
+
+
+
 rhel84:
     name:              "rhel84"
     family:            "rhel8"
@@ -81,8 +120,6 @@ rhel84:
             name:      "my-rhel-8-appstream-rpms"
             subpath:   "/AppStream"
 
-
-
 rhel84-bootiso:
     name:              "rhel84-bootiso"
     family:            "rhel8"
@@ -102,8 +139,6 @@ rhel84-bootiso:
         appstream:
             name:      "my-rhel8-appstream-rpms"
             subpath:   "/AppStream"
-
-
 
 rhel84-pxe:
     name:              "rhel84-pxe"
@@ -220,8 +255,6 @@ rhel82-bootiso:
         appstream:
             name:      "my-rhel-8-appstream-rpms"
             subpath:   "/AppStream"
-
-
    
 rhel82-pxe:
     name:              "rhel82-pxe"
