@@ -390,49 +390,83 @@
               shell:
                 cmd: |
                   {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh
-  
-  
-  
-            ##
-            ##    Transfer the ISO image to ovirt storage domain
-            ##
-            ##    NOTE: to avoid concurrency problems with
-            ##          disk space and i/o bandwidth, we
-            ##          set 'throttle = 1'
-            ##
-      
-      
-  
-            - name: "ovirt-deploy : upload iso image"
-              throttle: 1
-              ovirt_disk:
-                auth: "{{ ovirt_auth }}"
-                name: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-                description: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-                upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-                bootable: true
-                content_type: iso
-                format: raw
-                storage_domain: "{{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
-      
+
+        when: xtoph_deploy.kickstart_profile is defined and
+              xtoph_deploy.kickstart_profile.method != "pxe" and
+              xtoph_deploy.kickstart_profile.method != "simple_cdrom"
+
+
+
+      ##
+      ##    If method == 'simple_cdrom' just copy specified ISO to tmp dir
+      ## 
+
+
+
+      - block:
+    
+          - name: "ovirt-deploy : stat simple_cdrom image"
+            stat:
+              path: "{{xtoph_deploy.deployhost.tmp_dir}}/{{t_filename}}"
+            register: local_result
+        
+          - name: "ovirt-deploy : pull simple_cdrom image"
+            get_url:
+              url:  "{{ t_url }}"
+              dest: "{{xtoph_deploy.deployhost.tmp_dir}}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+              mode: "0644"
+              timeout: 60
+              force: no
+            register: download_result
+            until: download_result is not failed
+            retries: 5
+            when: not local_result.stat.exists
+
+        vars:
+          t_url: "{{ xtoph_deploy.machine_profile.kickstart.iso_url }}"
+          t_filename: "{{ t_url | basename }}"
+        when: xtoph_deploy.kickstart_profile.method == "simple_cdrom"
 
       
-            - name: "ovirt-deploy : clean-up temporary work-space"
-              shell:
-                cmd: |
-                  if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
-                    rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-                  fi
-    
-                  if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
-                    rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-                  fi
-              when: xtoph_deploy.cleanup == true
+
+      ##
+      ##    Transfer the ISO image to ovirt storage domain
+      ##
+      ##    NOTE: to avoid concurrency problems with
+      ##          disk space and i/o bandwidth, we
+      ##          set 'throttle = 1'
+      ##
+
+      - block:
+
+          - name: "ovirt-deploy : upload iso image"
+            throttle: 1
+            ovirt_disk:
+              auth: "{{ ovirt_auth }}"
+              name: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+              description: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+              upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+              bootable: true
+              content_type: iso
+              format: raw
+              storage_domain: "{{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
+
+          - name: "ovirt-deploy : clean-up temporary work-space"
+            shell:
+              cmd: |
+                if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
+                  rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+                fi
+
+                if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
+                  rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                fi
+            when: xtoph_deploy.cleanup == true
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe"
 
-
+              
 
       ##
       ##    Create the kickstart config for PXE/NETWORK supported installs

@@ -681,8 +681,6 @@
           t_bmc:  "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
           t_url:  "{{ xtoph_deploy.machine_profile.kickstart.iso_url }}"
           t_nfs:  "{{ xtoph_deploy.machine_profile.kickstart.iso_nfs }}"
-          ##t_url:    "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-          ##t_nfs:    "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         when:
           - xtoph_deploy.machine_profile.bmc.fqdn is defined
           - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
