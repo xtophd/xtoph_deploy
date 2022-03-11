@@ -591,6 +591,7 @@
           src:  virt-install-cdrom.j2
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/50-cdrom"
         when: xtoph_deploy.kickstart_profile.method == "cdrom" or
+              xtoph_deploy.kickstart_profile.method == "simple_cdrom" or
               xtoph_deploy.kickstart_profile.method == "network"
 
       - name: "libvirt-deploy: virt-install finish fragment"

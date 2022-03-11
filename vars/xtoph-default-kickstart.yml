@@ -54,7 +54,7 @@ pxe_nowait:
     description:       "There is no kickstart or repo, just pxe boot"
     method:            "pxe"
     wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
-    wait_for_ssh:      true
+    wait_for_ssh:      false
 
 
 
@@ -74,8 +74,8 @@ vmedia_wait:
     name:              "vmedia_wait"
     description:       "There is no kickstart or repo, just vmedia boot"
     method:            "simple_cdrom"
-    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     iso_url:           "{{ h_isoURL | default('') }}"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
 
 vmedia_nowait:
@@ -88,9 +88,9 @@ vmedia_nowait:
     name:              "vmedia_nowait"
     description:       "There is no kickstart or repo, just vmedia boot"
     method:            "simple_cdrom"
-    wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
     iso_url:           "{{ h_isoURL | default('') }}"
-    wait_for_ssh:      true
+    wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
+    wait_for_ssh:      false
 
 
 
