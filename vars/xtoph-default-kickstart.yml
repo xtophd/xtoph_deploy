@@ -98,6 +98,69 @@ vmedia_nowait:
 ##
 ##
 
+rhel90:
+    name:              "rhel90"
+    description:       "Red Hat Enterprise Linux 9.0 DVD"
+    method:            "cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    template:          "ks-rhel9.j2"
+    boot_iso:          "rhel-baseos-9.0-x86_64-dvd.iso"
+    repo_iso:          "rhel-baseos-9.0-x86_64-dvd.iso"
+    mnt:               "rhel-9beta"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel90-bootiso:
+    name:              "rhel90-bootiso"
+    description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
+    method:            "network"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-baseos-9.0-x86_64-boot.iso"
+    repo_iso:          "rhel-baseos-9.0-x86_64-dvd.iso"
+    mnt:               "rhel-9beta"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel8-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel90-pxe:
+    name:              "rhel90-bootiso"
+    description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
+    method:            "network"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-baseos-9.0-x86_64-boot.iso"
+    repo_iso:          "rhel-baseos-9.0-x86_64-dvd.iso"
+    mnt:               "rhel-9beta"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel8-appstream-rpms"
+            subpath:   "/AppStream"
+
+
+
+##
+##
+##
+
 
 
 rhel84:
