@@ -62,14 +62,20 @@
 ##    allowed to declare an ipmi OR bmc, not
 ##    both
 ##
+##        NOTE: using a list of validations,
+##              select true results to build new list
+##              test size
+##    
+##              list size can be 0 OR 1 to pass this assertion
+##
 
 
 - name: "common-assertions : assert that machine_profile does NOT enable both 'ipmi' AND 'bmc'"
   any_errors_fatal: true
   assert:
     that:
-      - (xtoph_deploy.machine_profile.bmc.fqdn|length == 0 ) or 
-        (xtoph_deploy.machine_profile.ipmi.fqdn|length == 0 )
+      - "[ {{ xtoph_deploy.machine_profile.bmc  is defined }},
+           {{ xtoph_deploy.machine_profile.ipmi is defined }} ] | select() | list | length <= 1"
     fail_msg: "CONFIG ERROR: a machine_profile is only allowed bmc OR ipmi, not both (CHECK YOUR CONFIGS)"
     success_msg: "Assertion Passed"
   when:
