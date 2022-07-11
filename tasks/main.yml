@@ -220,6 +220,8 @@
     - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
 
+- debug: var=xtoph_deploy
+
 
 - name: "main.yml : (SIMPLE CDROM) special handling for kickstart iso_url, iso_nfs"
   block:
@@ -230,7 +232,8 @@
       - set_fact:
           xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_nfs': '' }}}, recursive=True ) }}"
 
-  when: xtoph_deploy.kickstart_profile.method == 'simple_cdrom'
+  when: 
+    - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method == 'simple_cdrom'
 
 
 
@@ -247,7 +250,7 @@
     t_url: "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
     t_nfs: "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
   when:
-    - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
+    - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
 
 
