@@ -100,6 +100,7 @@ vmedia_nowait:
 
 rhel90:
     name:              "rhel90"
+    family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 DVD"
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -119,6 +120,7 @@ rhel90:
 
 rhel90-bootiso:
     name:              "rhel90-bootiso"
+    family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -138,6 +140,7 @@ rhel90-bootiso:
 
 rhel90-pxe:
     name:              "rhel90-bootiso"
+    family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
