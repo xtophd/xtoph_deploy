@@ -616,12 +616,23 @@
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
+            ##
+            ##    NOTE: setting bootonce via redfish on dell creates
+            ##          a job which needs to finish.  So hopefully 
+            ##          we can just try a couple of times and it
+            ##          will eventually complete
+            ##
+
             - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}
                   -u "{{ t_user }}" 
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
+              register: targetinfo_result
+              until: targetinfo_result.rc == 0
+              retries: 12
+              delay: 5
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
