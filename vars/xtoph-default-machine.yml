@@ -343,10 +343,9 @@ hp_dl360_g8:
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
     
-hp_dl380_g8:
+hp_dl380_g9:
       platform: "baremetal"
-      description: "HP DL380"
-      usb_storage_delay: "10"
+      description: "HP DL380 Generation 9 (Intel E5, DDR4)"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -361,6 +360,7 @@ hp_dl380_g8:
           rhel7:
             blkdev: "sda"
             netdev: "eno1"
+      usb_storage_delay: "10"
       storage:
         default:
       network:
