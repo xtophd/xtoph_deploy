@@ -199,12 +199,13 @@
 
 
 
-- name: "main.yml : special handling for kickstart netdev, blkdev"
+- name: "main.yml : special handling for kickstart netdev"
   set_fact:
     xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'netdev': t_netdev}}}, recursive=True ) }}"
   vars:
     t_netdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['netdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.netdev) }}"
   when:
+    - xtoph_deploy.kickstart_profile.family is defined
     - xtoph_deploy.machine_profile.kickstart.netdev is defined and xtoph_deploy.machine_profile.kickstart.netdev == ''
     - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
@@ -216,6 +217,7 @@
   vars:
     t_blkdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['blkdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.blkdev) }}"
   when:
+    - xtoph_deploy.kickstart_profile.family is defined
     - xtoph_deploy.machine_profile.kickstart.blkdev is defined and xtoph_deploy.machine_profile.kickstart.blkdev == ''
     - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
@@ -230,7 +232,8 @@
       - set_fact:
           xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_nfs': '' }}}, recursive=True ) }}"
 
-  when: xtoph_deploy.kickstart_profile.method == 'simple_cdrom'
+  when: 
+    - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method == 'simple_cdrom'
 
 
 
@@ -247,7 +250,7 @@
     t_url: "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
     t_nfs: "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
   when:
-    - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
+    - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
 
 
