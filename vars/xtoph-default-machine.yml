@@ -291,6 +291,49 @@ dell_r740:
 
 
 
+dell_xr:
+      platform: "baremetal"
+      description: "DELL XXXXXX with redfish support"
+      usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "nvme0n1"
+            netdev: "em1"
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "eno8303np0"
+          rhel8:
+            blkdev: "nvme0n1"
+            netdev: "eno8303np0"
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "em1"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
+        bootonce_clear:  "redfish-dell-bootonce-clear.py"
+        custom_actions:  "redfish-dell-custom-actions.py"
+
+
+
 ##
 ## HP ENTRIES   
 ##
@@ -475,3 +518,6 @@ pc_sda:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
+
+
+
