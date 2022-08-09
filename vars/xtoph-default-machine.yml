@@ -27,6 +27,7 @@ kvm_vda:
           rhel7:
             blkdev: "vda"
             netdev: "eth0"
+      boot_mode: "bios"
       storage:
         default:
           bus: "virtio"
@@ -55,6 +56,7 @@ kvm_nest_vda:
             netdev: "eth0"
       cpu:
         type: "host-passthrough"
+      boot_mode: "bios"
       storage:
         default:
           bus: "virtio"
@@ -80,6 +82,7 @@ kvm_sda:
           rhel7:
             blkdev: "sda"
             netdev: "eth0"
+      boot_mode: "bios"
       storage:
         default:
           bus: "virtio-scsi"
@@ -114,13 +117,16 @@ ovirt_sda:
           rhel7:
             blkdev: "sda"
             netdev: "eth0"
+      boot_mode: "bios"
       storage:
         default:
           bus: "virtio_scsi"
       network:
         default:
           ip: "{{ h_pubIP | default('') }}"
-    
+   
+
+ 
 ovirt_vda:
       description: "oVirt vm using disk bus = virtio (vda)"
       platform: "ovirt"
@@ -133,6 +139,13 @@ ovirt_vda:
           default:
             blkdev: "vda"
             netdev: "eth0"
+          rhel8:
+            blkdev: "vda"
+            netdev: "ens3"
+          rhel7:
+            blkdev: "vda"
+            netdev: "eth0"
+      boot_mode: "bios"
       storage:
         default:
           bus: "virtio"
@@ -148,10 +161,10 @@ ovirt_vda:
 ##
 
 
- 
+
 dell_r630:
       platform: "baremetal"
-      description: "DELL r630"
+      description: "DELL r630 in BIOS mode (uses racadm)"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -166,6 +179,7 @@ dell_r630:
           rhel7:
             blkdev: "sda"
             netdev: "em1"
+      boot_mode: "bios"
       usb_storage_delay: "10"
       storage:
         default:
@@ -173,14 +187,6 @@ dell_r630:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-      ipmi:
-        fqdn:         "{{ ipmi_fqdn | default('') }}"
-        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-        power_on:     "-I lanplus chassis power on"
-        power_off:    "-I lanplus chassis power off"
-        config_steps:
-          - "-I lanplus sel time set now"
-          - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "racadm-login-status.sh"
@@ -196,9 +202,51 @@ dell_r630:
         custom_actions:  "racadm-custom-actions.sh"
 
 
-dell_r740_racadm:
+
+dell_r630_uefi:
       platform: "baremetal"
-      description: "DELL r740"
+      description: "DELL r630 in UEFI mode (uses mostly redfish)"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
+      boot_mode: "uefi"
+      usb_storage_delay: "10"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "racadm-bootonce-pxe.sh"
+        bootonce_clear:  "racadm-bootonce-clear.sh"
+        custom_actions:  "redfish-dell-custom-actions.py"
+
+
+
+dell_r740:
+      platform: "baremetal"
+      description: "DELL r740 in BIOS mode (uses mostly redfish)"
       usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
@@ -214,20 +262,13 @@ dell_r740_racadm:
           rhel7:
             blkdev: "sda"
             netdev: "em1"
+      boot_mode: "bios"
       storage:
         default:
       network:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-      ipmi:
-        fqdn:         "{{ ipmi_fqdn | default('') }}"
-        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-        power_on:     "-I lanplus chassis power on"
-        power_off:    "-I lanplus chassis power off"
-        config_steps:
-          - "-I lanplus sel time set now"
-          - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -243,9 +284,10 @@ dell_r740_racadm:
         custom_actions:  "redfish-dell-custom-actions.py"
 
 
-dell_r740:
+
+dell_r740_uefi:
       platform: "baremetal"
-      description: "DELL r740 with redfish support"
+      description: "DELL r740 in UEFI mode (uses mostly redfish)"
       usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
@@ -261,20 +303,13 @@ dell_r740:
           rhel7:
             blkdev: "sda"
             netdev: "em1"
+      boot_mode: "uefi"
       storage:
         default:
       network:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-      ipmi:
-        fqdn:         "{{ ipmi_fqdn | default('') }}"
-        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-        power_on:     "-I lanplus chassis power on"
-        power_off:    "-I lanplus chassis power off"
-        config_steps:
-          - "-I lanplus sel time set now"
-          - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -358,6 +393,7 @@ hp_dl360_g8:
             blkdev: "sda"
             netdev: "eno1"
       usb_storage_delay: "10"
+      boot_mode: "bios"
       storage:
         default:
       network:
@@ -386,9 +422,10 @@ hp_dl360_g8:
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
     
-hp_dl380_g9:
+hp_dl380_g8:
       platform: "baremetal"
-      description: "HP DL380 Generation 9 (Intel E5, DDR4)"
+      description: "HP DL380"
+      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -403,7 +440,7 @@ hp_dl380_g9:
           rhel7:
             blkdev: "sda"
             netdev: "eno1"
-      usb_storage_delay: "10"
+      boot_mode: "bios"
       storage:
         default:
       network:
@@ -457,6 +494,7 @@ supermicro_x9drd_if:
           rhel7:
             blkdev: "sda"
             netdev: "enp5s0f0"
+      boot_mode: "bios"
       storage:
         default:
       network:
@@ -493,6 +531,7 @@ pc_nvme:
           default:
             blkdev: "nvme0n1"
             netdev: "eno0"
+      boot_mode: "bios"
       storage:
         default:
       network:
@@ -512,6 +551,7 @@ pc_sda:
           default:
             blkdev: "sda"
             netdev: "eno0"
+      boot_mode: "bios"
       storage:
         default:
       network:
