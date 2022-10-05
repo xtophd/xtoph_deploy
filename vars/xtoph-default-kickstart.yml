@@ -100,6 +100,7 @@ vmedia_nowait:
 
 rhel90:
     name:              "rhel90"
+    family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 DVD"
     method:            "cdrom"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -119,6 +120,7 @@ rhel90:
 
 rhel90-bootiso:
     name:              "rhel90-bootiso"
+    family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -138,6 +140,7 @@ rhel90-bootiso:
 
 rhel90-pxe:
     name:              "rhel90-bootiso"
+    family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
     method:            "network"
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -280,6 +283,74 @@ rhel84-pxe:
     boot_iso:          "rhel-8.4-x86_64-boot.iso"
     repo_iso:          "rhel-8.4-x86_64-dvd.iso"
     mnt:               "rhel-8.4"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-8-appstream-rpms"
+            subpath:   "/AppStream"
+
+
+
+##
+##
+##
+
+
+
+rhel86:
+    name:              "rhel86"
+    family:            "rhel8"
+    description:       "Red Hat Enterprise Linux 8.6 DVD"
+    method:            "cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    template:          "ks-rhel8.j2"
+    boot_iso:          "rhel-8.6-x86_64-dvd.iso"
+    repo_iso:          "rhel-8.6-x86_64-dvd.iso"
+    mnt:               "rhel-8.6"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-8-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel86-bootiso:
+    name:              "rhel86-bootiso"
+    family:            "rhel8"
+    description:       "Red Hat Enterprise Linux 8.6 Boot ISO"
+    method:            "network"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    template:          "ks-rhel8-bootiso.j2"
+    boot_iso:          "rhel-8.6-x86_64-boot.iso"
+    repo_iso:          "rhel-8.6-x86_64-dvd.iso"
+    mnt:               "rhel-8.6"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel8-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel86-pxe:
+    name:              "rhel86-pxe"
+    family:            "rhel8"
+    description:       "Red Hat Enterprise Linux 8.6 PXE"
+    method:            "pxe"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    template:          "ks-rhel8-bootiso.j2"
+    boot_iso:          "rhel-8.6-x86_64-boot.iso"
+    repo_iso:          "rhel-8.6-x86_64-dvd.iso"
+    mnt:               "rhel-8.6"
     kvm_os_type:       "rhel_8x64"
     repos:
         baseos:
