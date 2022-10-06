@@ -41,6 +41,22 @@
     - ansible_distribution_major_version == "8"
 
 
+- block:
+
+      - name: "libvirt-setup : (rhel 9) install python3"
+        yum: name=python3 state=installed
+
+      - name: "libvirt-setup: (rhel 9) configure python3 alternatives"
+        alternatives:
+           name='python'
+           link='/usr/bin/unversioned-python'
+           path='/usr/bin/python3'
+
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version == "9"
+
+
 
 ##
 ##    Install additional packages

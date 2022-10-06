@@ -13,13 +13,17 @@
     - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
     - ansible_distribution_major_version == "7"
 
-
-
 - name: "deployer-setup-dhcp : package installation (RHEL8)"
   yum: name=dhcp-server state=installed
   when:
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "8"
+
+- name: "deployer-setup-dhcp : package installation (RHEL9)"
+  yum: name=dhcp-server state=installed
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version == "9"
 
 
 
@@ -82,7 +86,7 @@
 
 
 
-- name: "deployer-setup-dhcp : copy extra bios files to support SuperMicro on RHEL8"
+- name: "deployer-setup-dhcp : copy extra bios files to support SuperMicro on RHEL8/RHEL9"
   copy:
     src:   "{{ item }}"
     dest:  "/var/lib/tftpboot/bios"
@@ -95,7 +99,7 @@
     - "/usr/share/syslinux/libutil.c32"
   when:
     - ansible_distribution == "RedHat"
-    - ansible_distribution_major_version == "8"
+    - ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9"
 
 
 
