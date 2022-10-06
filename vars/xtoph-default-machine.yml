@@ -529,9 +529,46 @@ pc_nvme:
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
-            blkdev: "nvme0n1"
+            blkdev: "sda"
             netdev: "eno0"
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel8:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
       boot_mode: "bios"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+
+pc_nvme_efi:
+      platform: "baremetal"
+      description: "Generic PC with nvme"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eno0"
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel8:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+      boot_mode: "efi"
       storage:
         default:
       network:
@@ -551,6 +588,12 @@ pc_sda:
           default:
             blkdev: "sda"
             netdev: "eno0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "enp4s0"
+          rhel9:
+            blkdev: "sda"
+            netdev: "enp4s0"
       boot_mode: "bios"
       storage:
         default:

@@ -14,6 +14,11 @@ text
 bootloader --location=mbr --append="nofb quiet splash=quiet"
 url --url={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}
 
+{%if xtoph_deploy.kickstart_profile.netcfg_override == "static" %}
+## Override kernel level network args with a static kickstart config
+network --bootproto=static --device={{ xtoph_deploy.machine_profile.kickstart.netdev }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machine_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }}
+{% endif %}
+
 {% for key in xtoph_deploy.kickstart_profile.repos %}
 repo --name={{ xtoph_deploy['kickstart_profile']['repos'][key].name }} --baseurl={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][key].subpath }}
 {% endfor %}
