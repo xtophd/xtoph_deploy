@@ -207,6 +207,7 @@
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
               p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -470,6 +471,7 @@
               vars:
                 p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
                 p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+                p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
               template:
                 src:   "{{ xtoph_deploy.kickstart_profile.template }}"
                 dest:  "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"

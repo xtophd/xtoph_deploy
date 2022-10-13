@@ -9,7 +9,7 @@
 lang en_US
 keyboard us
 timezone America/New_York --isUtc
-rootpw $1$XJbwDNTe$Wqttcf7vWP5n.nPo2J9mk. --iscrypted
+rootpw {{ p_rootpw }} --iscrypted
 reboot
 text
 bootloader --location=mbr --append="nofb quiet splash=quiet"
@@ -77,11 +77,6 @@ cloud-init
 ##
 
 %post
-
-{% if (xtoph_deploy.kickstart_profile.rootpw_randomize) %}
-##-- Randomize root password
-head -n1 /dev/urandom | md5sum | awk {'print $1'} | passwd --stdin root
-{% endif %}
 
 ##- Preserve kernel kickstart args
 cat /proc/cmdline >> /root/anaconda-cmdline.txt
