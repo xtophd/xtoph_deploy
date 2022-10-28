@@ -65,9 +65,11 @@
     cmd: |
       nm_connection=$(nmcli -t con | grep {{ xtoph_deploy.machine_profile.kickstart.netdev }} | cut -d: -f1)
       nmcli con modify "${nm_connection}" ipv4.dns-search {{ xtoph_deploy.machine_profile.network.default.fqdn }}
-  when: xtoph_deploy.kickstart_profile.family == "rhel7" or
-        xtoph_deploy.kickstart_profile.family == "rhel8" or
-        xtoph_deploy.kickstart_profile.family == "rhel9"
+  when:
+    - xtoph_deploy.kickstart_profile.family is defined
+    - xtoph_deploy.kickstart_profile.family == "rhel7" or
+      xtoph_deploy.kickstart_profile.family == "rhel8" or
+      xtoph_deploy.kickstart_profile.family == "rhel9"
 
 
 
@@ -75,9 +77,11 @@
   shell:
     cmd: |
       hostnamectl set-hostname {{ xtoph_deploy.hostname }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}
-  when: xtoph_deploy.kickstart_profile.family == "rhel7" or
-        xtoph_deploy.kickstart_profile.family == "rhel8" or
-        xtoph_deploy.kickstart_profile.family == "rhel9"
+  when: 
+    - xtoph_deploy.kickstart_profile.family is defined
+    - xtoph_deploy.kickstart_profile.family == "rhel7" or
+      xtoph_deploy.kickstart_profile.family == "rhel8" or
+      xtoph_deploy.kickstart_profile.family == "rhel9"
 
 
 

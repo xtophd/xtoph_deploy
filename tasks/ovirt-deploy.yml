@@ -31,7 +31,7 @@
       throttle: 1
       ovirt_auth:
         hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
-        ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
+        #ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
         insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
         username: "{{ t_uid }}"
         password: "{{ t_pw  }}"
@@ -411,7 +411,7 @@
               path: "{{xtoph_deploy.deployhost.tmp_dir}}/{{t_filename}}"
             register: local_result
         
-          - name: "ovirt-deploy : pull simple_cdrom image"
+          - name: "ovirt-deploy : copy simple_cdrom image to tmp dir"
             get_url:
               url:  "{{ t_url }}"
               dest: "{{xtoph_deploy.deployhost.tmp_dir}}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
@@ -439,15 +439,29 @@
       ##
 
       - block:
+          - name: "ovirt-deploy : DEBUG vm status/info results"
+            debug: 
+              msg: 
+                - "## OVIRT-DISK: UPLOAD DETAILS"
+                - "name: {{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                - "description: {{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                - "upload_image_path: {{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                #- "bootable: true"
+                - "content_type: iso"
+                - "format: raw"
+                - "storage_domain: {{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
+            when: xtoph_deploy.debug == true
 
           - name: "ovirt-deploy : upload iso image"
             throttle: 1
+            #no_log: false
             ovirt_disk:
               auth: "{{ ovirt_auth }}"
               name: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
               description: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
               upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-              bootable: true
+              #bootable: yes
+              #pass_discard: no
               content_type: iso
               format: raw
               storage_domain: "{{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
@@ -527,7 +541,7 @@
               mac_address: "{{ h_pubMAC }}"
           graphical_console:
              protocol:
-               - spice
+               - vnc
           operating_system: "{{ xtoph_deploy.kickstart_profile.kvm_os_type | default(xtoph_deploy.machine_profile.default_os_type) }}"
           high_availability: false
           type: server
