@@ -67,17 +67,22 @@ print("")
 ##    BootOnce: 'disable' and set boot device to 'normal'
 ##
 
-url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration' % bmc_ip
-headers  = {'content-type': 'application/json'}
-payload  = {"ShareParameters": {"Target":"ALL"},"ImportBuffer": "<SystemConfiguration><Component FQDD=\"iDRAC.Embedded.1\"><Attribute Name=\"ServerBoot.1#BootOnce\">Disabled</Attribute><Attribute Name=\"ServerBoot.1#FirstBootDevice\">Normal</Attribute></Component></SystemConfiguration>"}
+if override_target != "None":
+    
+    url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration' % bmc_ip
+    headers  = {'content-type': 'application/json'}
+    payload  = {"ShareParameters": {"Target":"ALL"},"ImportBuffer": "<SystemConfiguration><Component FQDD=\"iDRAC.Embedded.1\"><Attribute Name=\"ServerBoot.1#BootOnce\">Disabled</Attribute><Attribute Name=\"ServerBoot.1#FirstBootDevice\">Normal</Attribute></Component></SystemConfiguration>"}
+    
+    response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
+    
+    result_code = response.status_code
+    
+    if result_code == 202:
+        print("SUCCESS: result code %s returned" % result_code)
+    else:
+        print("FAIL: result code %s returned" % result_code)
+        print(response.json())
+        sys.exit(1)
 
-response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
-
-result_code = response.status_code
-
-if result_code == 202:
-    print("SUCCESS: result code %s returned" % result_code)
 else:
-    print("FAIL: result code %s returned" % result_code)
-    print(response.json())
-    sys.exit(1)
+    print("SUCCESS: no bootonce setting detected")

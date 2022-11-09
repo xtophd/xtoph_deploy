@@ -56,6 +56,9 @@ response = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
 
 data = response.json()
 
+## DEBUG HELP
+##print(json.dumps(data,indent=4,sort_keys=True))
+
 override_mode     = data['Boot']['BootSourceOverrideMode']
 override_target   = data['Boot']['BootSourceOverrideTarget']
 override_enabled  = data['Boot']['BootSourceOverrideEnabled']
@@ -65,9 +68,6 @@ print("Current Override Target: %s" % override_target)
 print("Current Override Enabled: %s" % override_enabled)
 
 print("")
-
-## DEBUG HELP
-## print(json.dumps(data,indent=4,sort_keys=True))
 
 ##
 ##    Ouput status of boot-once override device
