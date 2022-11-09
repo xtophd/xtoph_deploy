@@ -47,6 +47,12 @@
     - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
     - ansible_distribution_major_version == "8"
 
+- name: "deployer-setup : install supporting packages (RHEL 9)"
+  yum: name=genisoimage,xorriso,syslinux,git,wget,yum-utils,net-tools,traceroute,nmap,python3  state=installed
+  when:
+    - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "9"
+
 
 
 
@@ -176,8 +182,68 @@
           line: "bind-interfaces"
           state: present
 
-      - name: "deployer-setup : enable dnsmasq system services"
-        service: name="dnsmasq" state=restarted enabled=yes masked=no
+      - name: "deployer-setup : disable the listen on loopback interface only config"
+        replace:
+          dest: "/etc/dnsmasq.conf"
+          regexp: "^interface=lo"
+          replace: "#interface=lo"
+
+      - name: "deployer-setup : adjust /etc/dnsmasq.conf to forward"
+        lineinfile:
+          dest: "/etc/dnsmasq.conf"
+          insertafter: "^#server=/localnet/.*$"
+          line: "server={{ xtoph_deploy.platform_profile.network.default.nameserver }}"
+          state:  present
+
+      - name: "deployer-setup : /etc/dnsmasq.conf to forward"
+        lineinfile:
+          dest: "/etc/dnsmasq.conf"
+          insertafter: "^server=.*$"
+          line: "local=/{{ xtoph_deploy.platform_profile.network.default.fqdn }}/"
+          state:  present
+
+      ##
+      ##    disable networkmanager from toying with /etc/resolv.conf
+      ##
+
+      - name: "deployer-setup : disable network-manager /etc/resolv.conf adjustments"
+        template:
+          src:   "dns-resolv-fix.j2"
+          dest:  "/etc/NetworkManager/conf.d/90-dns-none.conf"
+          owner: root
+
+      - name: "deployer-setup : restart networkmanager service"
+        service: name=NetworkManager state=reloaded enabled=yes
+
+      - name: "ocp4-workshop : bastion-dns : template deploy resolv.conf to point to localhost"
+        vars:
+          - p_search:     "{{ workshop_extras.network_fqdn }}"
+          - p_nameserver: "127.0.0.1"
+        template:
+          src:   "dns-resolv-conf.j2"
+          dest:  "/etc/resolv.conf"
+          owner: root
+
+      ##
+      ##    Last couple of items:
+      ##
+      ##      disable nscd       dnsmasq already performs caching
+      ##      firewall rules     add 'dns' to firewalld if firewalld is enabled
+      ##      systemd overrides  add restart=always to dnsmasq service
+      ##      service restart
+      ##
+
+      - name: "ocp4-workshop : bastion-dns : disable nscd socket and service"
+        service:
+          name: "{{ item }}"
+          enabled: no
+          state: stopped
+          masked: no
+        when:
+          - ansible_facts['services']['nscd.service']['state'] is defined
+        with_items:
+          - 'nscd.socket'
+          - 'nscd.service'
 
       - name: "deployer-setup : add dns firewalld services"
         firewalld:
@@ -187,6 +253,10 @@
           state: enabled
         when: 
           - xtoph_deploy.deployhost.firewalld_enable
+
+      - name: "deployer-setup : enable dnsmasq system services"
+        service: name="dnsmasq" state=restarted enabled=yes masked=no
+
 
   when: xtoph_deploy.deployhost.dnsmasq_enable
 
@@ -279,12 +349,17 @@
           - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
           - ansible_distribution_major_version == "7"
       
-      
       - name: "ovirt-setup : install oVirt SDK supporting packages (RHEL8)"
         yum: name=python3-ovirt-engine-sdk4 state=installed
         when:
           - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
           - ansible_distribution_major_version == "8"
+
+      - name: "ovirt-setup : install oVirt SDK supporting packages (RHEL9)"
+        yum: name=python3-ovirt-engine-sdk4 state=installed
+        when:
+          - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
+          - ansible_distribution_major_version == "9"
 
   when: 
     - "'ovirt' in xtoph_deploy.deployhost.platform_enable"

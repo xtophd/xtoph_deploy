@@ -9,10 +9,22 @@
 lang en_US
 keyboard us
 timezone America/New_York --isUtc
-rootpw $1$XJbwDNTe$Wqttcf7vWP5n.nPo2J9mk. --iscrypted
+rootpw {{ p_rootpw }} --iscrypted
 text
 cdrom
 bootloader --location=mbr --append="nofb quiet splash=quiet"
+
+{%if xtoph_deploy.kickstart_profile.netcfg_override == "static" %}
+## Override kernel level network args with a static kickstart config
+network --bootproto=static --device={{ xtoph_deploy.machine_profile.kickstart.netdev }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machin
+e_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }
+} --hostname={{ xtoph_deploy.hostname }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}
+{% endif %}
+
+{% for key in xtoph_deploy.kickstart_profile.repos %}
+repo --name={{ xtoph_deploy['kickstart_profile']['repos'][key].name }} --baseurl={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['k
+ickstart_profile']['repos'][key].subpath }}
+{% endfor %}
 
 {%if p_ssh_key is defined and p_ssh_key|length %}
 ## Authorized SSH Key
@@ -66,9 +78,6 @@ cloud-init
 ##
 
 %post
-
-##-- Randomize root password
-head -n1 /dev/urandom | md5sum | awk {'print $1'} | passwd --stdin root
 
 ##-- Preserve kernel kickstart args
 cat /proc/cmdline >> /root/anaconda-cmdline.txt
