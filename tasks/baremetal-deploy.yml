@@ -546,7 +546,6 @@
                   -u "{{ t_user }}" 
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
-              when:
 
             - name: "baremetal-deploy-post : (BMC) media-status"
               script: >
