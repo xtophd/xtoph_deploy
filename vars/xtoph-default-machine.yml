@@ -364,7 +364,8 @@ dell_xr:
         media_insert:    "redfish-dell-vmedia-insert.py"
         bootonce_media:  "redfish-dell-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
-        bootonce_clear:  "racadm-bootonce-clear.sh"
+        #bootonce_clear:  "racadm-bootonce-clear.sh"
+        bootonce_clear:  "redfish-noop.py"
         custom_actions:  "redfish-dell-custom-actions.py"
 
 
