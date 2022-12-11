@@ -16,6 +16,15 @@
       ##    All tasks here are blocked and delegated 
       ##    to execute on the deployhost
       ##
+
+      - name: "baremetal-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+        copy:
+          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+          content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
+
+
+      ##
       ##    Execute "ipmi" calls to ready system for deployment
       ##
       ##    WHEN:
