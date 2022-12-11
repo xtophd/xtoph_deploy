@@ -9,6 +9,12 @@ hostname: "{{ inventory_hostname }}"
 
 clustername: "{{ xtoph_vars.clustername }}"
 
+selected_profile:
+  kickstart: "{{ h_ksPROF | default ('') }}"
+  machine:   "{{ h_hwPROF | default ('') }}"
+  platform:  "{{ h_plPROF | default ('') }}"
+  resource:  "{{ h_rsPROF | default ('') }}"
+
 deployhost:
 
     ##     platform type [ ovirt | libvirt | baremetal ]
