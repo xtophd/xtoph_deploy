@@ -17,13 +17,16 @@
       ##          will be explicitly delegated to the libvirt platform(s)
       ##
 
+      - name: "libvirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+        copy:
+          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+          content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
 
 
       ##
       ##    Determine state of the vm
       ##
-    
-    
     
       - name: "libvirt-deploy : determine state of vm"
         delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
@@ -42,8 +45,6 @@
       ##    If the node is absent OR node NOT up, 
       ##    then set_fact to deploy the node
       ##
-    
-    
     
       - set_fact:
           deploy_node: false
@@ -147,15 +148,13 @@
               p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ item }}"
+              dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
               owner: root
               group: root
               mode: 0444
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-    
-    
-    
+   
+
+ 
           ##
           ##    Adjust the isolinux.cfg (BIOS)
           ##

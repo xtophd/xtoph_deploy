@@ -57,6 +57,37 @@
       file:
         path: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
         state: absent
+      when: xtoph_deploy.kickstart_profile.wait_for_shutdown == true
+
+
+
+    - name: "libvirt-deploy-monitor : copy async restart monitor to platform host"
+      delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+      copy:
+        src: libvirt-restart-monitor.sh
+        dest: /var/tmp/libvirt-restart-monitor.sh
+        mode: 0755
+        owner: root
+        group: root
+      when: xtoph_deploy.kickstart_profile.launch_restart_monitor is defined and
+            xtoph_deploy.kickstart_profile.launch_restart_monitor == true
+
+
+
+    - name: "libvirt-deploy-monitor : launch async restart monitor"
+      delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+      async: 3600
+      poll: 0
+      shell:
+        cmd: >
+          /var/tmp/libvirt-restart-monitor.sh
+          -d {{ xtoph_deploy.platform_profile.vm.name }}
+          -t 3600
+          -c 1
+          -e "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+      when: xtoph_deploy.kickstart_profile.launch_restart_monitor is defined and
+            xtoph_deploy.kickstart_profile.launch_restart_monitor == true
+
 
 
 

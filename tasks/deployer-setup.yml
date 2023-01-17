@@ -310,7 +310,7 @@
 
       - name: "deployer-setup : add cockpit custom firewalld ports"
         firewalld:
-          port: "{{ kvm_cfg.cockpit_port }}/tcp"
+          port: "{{ xtoph_deploy.deployhost.cockpit_port }}/tcp"
           immediate: yes
           permanent: yes
           state: enabled

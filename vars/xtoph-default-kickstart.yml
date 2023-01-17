@@ -161,6 +161,48 @@ rhel90-pxe:
             name:      "my-rhel9-appstream-rpms"
             subpath:   "/AppStream"
 
+rhel91:
+    name:              "rhel91"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.1 DVD"
+    method:            "cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9.j2"
+    boot_iso:          "rhel-baseos-9.1-x86_64-dvd.iso"
+    repo_iso:          "rhel-baseos-9.1-x86_64-dvd.iso"
+    mnt:               "rhel-9.1"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel91-bootiso:
+    name:              "rhel91-bootiso"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.1 Boot ISO"
+    method:            "network"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-baseos-9.1-x86_64-boot.iso"
+    repo_iso:          "rhel-baseos-9.1-x86_64-dvd.iso"
+    mnt:               "rhel-9.1"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
 rhel91-pxe:
     name:              "rhel91-pxe"
     family:            "rhel9"
@@ -170,9 +212,9 @@ rhel91-pxe:
     wait_for_ssh:      true
     netcfg_override:   "static"
     template:          "ks-rhel9-bootiso.j2"
-    boot_iso:          "rhel-baseos-9.1-beta-1-x86_64-boot.iso"
-    repo_iso:          "rhel-baseos-9.1-beta-1-x86_64-dvd.iso"
-    mnt:               "rhel-9.1-beta"
+    boot_iso:          "rhel-baseos-9.1-x86_64-boot.iso"
+    repo_iso:          "rhel-baseos-9.1-x86_64-dvd.iso"
+    mnt:               "rhel-9.1"
     kvm_os_type:       "rhel_8x64"
     repos:
         baseos:
