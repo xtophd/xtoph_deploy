@@ -26,7 +26,7 @@
       
       - name: "common-deploy-post : wait for ssh alive"
         wait_for:
-          host: "{{ ansible_host }}"
+          host: "{{ inventory_hostname }}"
           connect_timeout: 5
           port: 22
           sleep: 15
