@@ -44,6 +44,7 @@ bmc_username = args["u"]
 bmc_password = args["p"]
 
 ##
+<<<<<<< HEAD
 ##    Get power status
 ##
 
@@ -69,30 +70,83 @@ if ( data['Inserted'] ):
     print("Current vMedia Status: inserted")
 else:
     print("Current vMedia Status: ejected")
+=======
+##    Get Chassis power status
+##
+
+url           = 'https://%s/redfish/v1/Chassis/System.Embedded.1' % bmc_ip
+response      = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
+data          = response.json()
+
+chassis_power = data['PowerState']
+>>>>>>> inventory_hostname_fixes
 
 ##
 ##    Determine what mode we're in (UEFI vs Legacy/BIOS)
 ## 
 
+<<<<<<< HEAD
 url      = 'https://%s/redfish/v1/Systems/System.Embedded.1/' % bmc_ip
 response = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
 
 data = response.json()
+=======
+url           = 'https://%s/redfish/v1/Systems/System.Embedded.1/' % bmc_ip
+response      = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
+data          = response.json()
+>>>>>>> inventory_hostname_fixes
 
 ## DEBUG HELP
 ##print(json.dumps(data,indent=4,sort_keys=True))
 
+<<<<<<< HEAD
+=======
+hardware_model    = data['Model']
+hardware_sn       = data['SerialNumber']
+hardware_bios     = data['BiosVersion']
+>>>>>>> inventory_hostname_fixes
 override_mode     = data['Boot']['BootSourceOverrideMode']
 override_target   = data['Boot']['BootSourceOverrideTarget']
 override_enabled  = data['Boot']['BootSourceOverrideEnabled']
 boot_order        = data['Boot']['BootOrder']
 
+<<<<<<< HEAD
 print("Current Override Mode: %s" % override_mode)
 print("Current Override Target: %s" % override_target)
 print("Current Override Enabled: %s" % override_enabled)
 print("Current Boot Order: %s" % boot_order)
 
 
+=======
+print("Hardware Model: %s" % hardware_model)
+print("Hardware S/N: %s" % hardware_sn)
+print("Hardware BIOS: %s" % hardware_bios)
+print("Current Chassis Power: %s" % chassis_power)
+print("Current Override Mode: %s" % override_mode)
+print("Current Override Target: %s" % override_target)
+print("Current Override Enabled: %s" % override_enabled)
+
+
+##
+##    Get virtualmedia status
+##
+##    NOTE: the value we want is a boolean, so simple evaluation works
+##
+
+url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD' % bmc_ip
+response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
+
+data = response.json()
+
+if ( data['Inserted'] ):
+    print("Current vMedia Status: inserted")
+else:
+    print("Current vMedia Status: ejected")
+
+##
+##    Collect Boot Device Info
+##
+>>>>>>> inventory_hostname_fixes
 
 url      = 'https://%s/redfish/v1/Systems/System.Embedded.1/BootOptions?$expand=*($levels=1)' % bmc_ip
 response = requests.get(url,auth=(bmc_username, bmc_password), verify=False)
@@ -109,6 +163,10 @@ if data["Members"] == []:
     print("FATAL: no boot devices detected")
     sys.exit()
 
+<<<<<<< HEAD
+=======
+print("Current Boot Order: %s" % boot_order)
+>>>>>>> inventory_hostname_fixes
 print("Current Boot Devices:")
 
 for i in data["Members"]:
@@ -128,5 +186,10 @@ for i in data["Members"]:
 
     print ( "  %s | %s | %s" % (dev_id, dev_display, dev_uefi))
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> inventory_hostname_fixes
 print("")
 
