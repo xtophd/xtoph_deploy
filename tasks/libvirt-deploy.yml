@@ -83,7 +83,14 @@
 
 
 
-      - name: "libvirt-deploy : create additional temp workspace"
+      - name: "libvirt-deploy : delete prior temp workspace"
+        file:
+          path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
+          state=absent
+        loop:
+          - virt-install-fragments
+
+      - name: "libvirt-deploy : create fresh temp workspace"
         file:
           path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
           mode="0755"
