@@ -608,8 +608,8 @@
           cluster:      "{{ xtoph_deploy.platform_profile.cluster_name }}"
           cd_iso:       "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
           boot_devices:
-            - cdrom
             - hd
+            - cdrom
         when:
           - xtoph_deploy.kickstart_profile is defined and
             xtoph_deploy.kickstart_profile.method != "pxe"
