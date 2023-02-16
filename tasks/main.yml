@@ -193,8 +193,8 @@
       ##
       ##        same logic applies to kickstart.blkdev
       ##            #1 h_blkDEV
-      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netblk, 
-      ##            #3 machine_profile_kickstart.dev_hints.default.netblk
+      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].blkdev, 
+      ##            #3 machine_profile_kickstart.dev_hints.default.blkdev
       ##
       
       
