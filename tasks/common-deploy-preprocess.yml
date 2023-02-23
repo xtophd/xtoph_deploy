@@ -105,7 +105,6 @@
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-#          line:   "{{ h_pubIP }} {{ inventory_hostname }}.{{  xtoph_deploy.machine_profile.network.default.fqdn }}"
           line:   "{{ h_pubIP }} {{ inventory_hostname }}"
           state:  present
 
