@@ -1,6 +1,13 @@
 
 This document in intended to provide some overview of major release changes/updates/gotchas.
 
+== (xtoph_deploy) Dropping "clustername" and replacing it with "projectname" (2023/01/24)
+
+clustername was conflicting with the xtoph_ocp4 (openshift) role.  In the context
+of xtoph_deploy, the variable was being used to set temp directories, dhcp group
+names, etc...  Existing configs will need to replace workshop_vars.clustername with
+workshop_vars.projectname.
+
 == (xtoph_deploy) NEW machine_profile dictionary (2022/03/05)
 
 Implemented a method for a machine_profile to provide kickstart.dev_hints based on 

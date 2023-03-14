@@ -347,6 +347,7 @@ dell_xr:
           rhel7:
             blkdev: "nvme0n1"
             netdev: "em1"
+      boot_mode: "uefi"
       storage:
         default:
       network:

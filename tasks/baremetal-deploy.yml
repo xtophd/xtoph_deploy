@@ -16,6 +16,15 @@
       ##    All tasks here are blocked and delegated 
       ##    to execute on the deployhost
       ##
+
+      - name: "baremetal-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+        copy:
+          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+          content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
+
+
+      ##
       ##    Execute "ipmi" calls to ready system for deployment
       ##
       ##    WHEN:
@@ -361,7 +370,7 @@
               t_net_dns:   "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
               t_ks_repo:   "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
               t_ks_hd:     "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
-              t_ks_url:    "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              t_ks_url:    "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
               t_usb_delay: "{{ xtoph_deploy.machine_profile.usb_storage_delay | default('0') }}"
 
 
@@ -465,7 +474,7 @@
               file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
 
             - name: "baremetal-deploy : cleanup any previous kickstart config"
-              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg" state=absent
+              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg" state=absent
 
             - name: "baremetal-deploy : deploy kickstart config to http dir"
               vars:
@@ -474,7 +483,7 @@
                 p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
               template:
                 src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-                dest:  "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+                dest:  "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
                 owner: root
                 group: root
                 mode: 0444

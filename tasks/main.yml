@@ -193,8 +193,8 @@
       ##
       ##        same logic applies to kickstart.blkdev
       ##            #1 h_blkDEV
-      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netblk, 
-      ##            #3 machine_profile_kickstart.dev_hints.default.netblk
+      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].blkdev, 
+      ##            #3 machine_profile_kickstart.dev_hints.default.blkdev
       ##
       
       
@@ -280,7 +280,7 @@
 
 
 
-      - name: "main.yml : debug"
+      - name: "main.yml : display state of xtoph_deploy if debug enabled"
         debug: var=xtoph_deploy
         when: xtoph_deploy.debug == true
 
@@ -288,7 +288,8 @@
           _xtoph_deploy_dict_processed: true
 
 
-  when: _xtoph_deploy_dict_processed is undefined
+  when: _xtoph_deploy_dict_processed is undefined or
+        not _xtoph_deploy_dict_processed
 
 
 

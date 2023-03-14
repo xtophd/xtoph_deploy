@@ -13,6 +13,12 @@
     ##          on the deployhost/localhost 
     ##
 
+    - name: "ovirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+      copy:
+        dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+        content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
+
 
     ##
     ##    Log in to the oVIRT API service
@@ -24,8 +30,6 @@
     ##          hitting the api at scale, we
     ##          set 'throttle = 1'
     ##
-    
-    
     
     - name: "ovirt-deploy : Login to oVirt"
       throttle: 1
@@ -46,16 +50,12 @@
     ##    Determine state of the vm
     ##
     
-    
-    
     - name: "ovirt-deploy : determine state of vm"
       ovirt_vm_info:
         pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
         auth: "{{ ovirt_auth }}"
       register: vminfo_result
       ignore_errors: true
-    
-    
 
     - name: "ovirt-deploy : DEBUG vm status/info results"
       debug: var=vminfo_result
@@ -67,8 +67,6 @@
     ##    If the node is absent OR node NOT up, 
     ##    then set_fact to deploy the node
     ##
-    
-    
     
     - set_fact:
         deploy_node: false
@@ -345,7 +343,7 @@
                 t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
                 t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
                 t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
-                t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+                t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
       
               ## End-Of-Block
 
@@ -508,7 +506,7 @@
               group: root
               mode: 0444
             loop:
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.template is defined and
@@ -610,8 +608,8 @@
           cluster:      "{{ xtoph_deploy.platform_profile.cluster_name }}"
           cd_iso:       "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
           boot_devices:
-            - cdrom
             - hd
+            - cdrom
         when:
           - xtoph_deploy.kickstart_profile is defined and
             xtoph_deploy.kickstart_profile.method != "pxe"

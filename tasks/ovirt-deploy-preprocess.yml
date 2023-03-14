@@ -53,4 +53,8 @@
           h_pubMAC: '{{ macgen_output.stdout }}'
         when: makeupmac.changed
 
+      - name: "ovirt-deploy-preprocess: ensure dictionary is rebuilt with the new MAC (_xtoph_deploy_dict_processed = false)"
+        set_fact:
+          _xtoph_deploy_dict_processed: false
+        when: makeupmac.changed
 
