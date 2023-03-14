@@ -578,7 +578,6 @@ pc_nvme_efi:
           mac: "{{ h_pubMAC| default('') }}"
 
 pc_sda:
-    machine_profile:
       platform: "baremetal"
       description: "Generic PC with (sata/sas/scsi) sda"
       kickstart:
@@ -602,6 +601,4 @@ pc_sda:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-
-
 
