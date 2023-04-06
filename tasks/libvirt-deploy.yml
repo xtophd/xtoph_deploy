@@ -241,6 +241,12 @@
               ##             for the whole block at the end
               ##             of the block
               ##
+              ##    * NOTE * the use of single quotes to define t_ks_hd
+              ##             is required to avoid ansible behaviour
+              ##             handling escaped charaters which started
+              ##             with python38
+              ##             https://github.com/ansible/ansible/issues/52868
+              ##
 
 
               - name: "libvirt-deploy : isolinux.cfg : kernel args for BIOS iso (cdrom install)"
@@ -306,7 +312,7 @@
               t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
               t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
+              t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
               t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
     
             ## End-Of-Block
