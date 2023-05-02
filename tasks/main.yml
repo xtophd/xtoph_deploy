@@ -40,7 +40,7 @@
           file: '{{ item.filename }}'
         loop:
           - { varname: '',             filename: '../../../config/credentials.yml'  }
-          - { varname: 'xtoph_config', filename: '../../../config/xtoph-config.yml' }
+          - { varname: 'xtoph_config', filename: '../../../config/xtoph-deploy.yml' }
       
       
       
@@ -50,10 +50,10 @@
           file: '{{ item.filename }}'
         when: item.filename|length > 0
         loop:
-          - { varname: 'xtoph_config_machine',   filename: '{{ lookup("fileglob","../../../config/xtoph-config-machine.yml") }}' }
-          - { varname: 'xtoph_config_resource',  filename: '{{ lookup("fileglob","../../../config/xtoph-config-resource.yml") }}' }
-          - { varname: 'xtoph_config_platform',  filename: '{{ lookup("fileglob","../../../config/xtoph-config-platform.yml") }}' }
-          - { varname: 'xtoph_config_kickstart', filename: '{{ lookup("fileglob","../../../config/xtoph-config-kickstart.yml") }}' }
+          - { varname: 'xtoph_config_machine',   filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-machine.yml") }}' }
+          - { varname: 'xtoph_config_resource',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-resource.yml") }}' }
+          - { varname: 'xtoph_config_platform',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-platform.yml") }}' }
+          - { varname: 'xtoph_config_kickstart', filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-kickstart.yml") }}' }
       
       
       
