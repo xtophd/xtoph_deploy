@@ -192,14 +192,15 @@
         lineinfile:
           dest: "/etc/dnsmasq.conf"
           insertafter: "^#server=/localnet/.*$"
-          line: "server={{ xtoph_deploy.platform_profile.network.default.nameserver }}"
+          line: "server={{ workshop_vars.network_nameserver }}"
           state:  present
+        when: xtoph_deploy.deployhost.dnsmasq_override_ip | length
 
-      - name: "deployer-setup : /etc/dnsmasq.conf to forward"
+      - name: "deployer-setup : adjust /etc/dnsmasq.conf to resolv our local project domain"
         lineinfile:
           dest: "/etc/dnsmasq.conf"
-          insertafter: "^server=.*$"
-          line: "local=/{{ xtoph_deploy.platform_profile.network.default.fqdn }}/"
+          insertafter: "^#local=/localnet/.*$"
+          line: "local=/{{ workshop_extras.network_fqdn }}/"
           state:  present
 
       ##
@@ -211,9 +212,11 @@
           src:   "dns-resolv-fix.j2"
           dest:  "/etc/NetworkManager/conf.d/90-dns-none.conf"
           owner: root
+        when: xtoph_deploy.deployhost.dnsmasq_override_nm
 
       - name: "deployer-setup : restart networkmanager service"
         service: name=NetworkManager state=reloaded enabled=yes
+        when: xtoph_deploy.deployhost.dnsmasq_override_nm
 
       - name: "ocp4-workshop : bastion-dns : template deploy resolv.conf to point to localhost"
         vars:
@@ -223,6 +226,7 @@
           src:   "dns-resolv-conf.j2"
           dest:  "/etc/resolv.conf"
           owner: root
+        when: xtoph_deploy.deployhost.dnsmasq_override_nm
 
       ##
       ##    Last couple of items:
