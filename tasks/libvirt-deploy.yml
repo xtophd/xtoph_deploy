@@ -17,13 +17,16 @@
       ##          will be explicitly delegated to the libvirt platform(s)
       ##
 
+      - name: "libvirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+        copy:
+          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+          content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
 
 
       ##
       ##    Determine state of the vm
       ##
-    
-    
     
       - name: "libvirt-deploy : determine state of vm"
         delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
@@ -42,8 +45,6 @@
       ##    If the node is absent OR node NOT up, 
       ##    then set_fact to deploy the node
       ##
-    
-    
     
       - set_fact:
           deploy_node: false
@@ -82,7 +83,14 @@
 
 
 
-      - name: "libvirt-deploy : create additional temp workspace"
+      - name: "libvirt-deploy : delete prior temp workspace"
+        file:
+          path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
+          state=absent
+        loop:
+          - virt-install-fragments
+
+      - name: "libvirt-deploy : create fresh temp workspace"
         file:
           path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
           mode="0755"
@@ -144,17 +152,16 @@
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
               p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ item }}"
+              dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
               owner: root
               group: root
               mode: 0444
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-    
-    
-    
+   
+
+ 
           ##
           ##    Adjust the isolinux.cfg (BIOS)
           ##
@@ -234,6 +241,12 @@
               ##             for the whole block at the end
               ##             of the block
               ##
+              ##    * NOTE * the use of single quotes to define t_ks_hd
+              ##             is required to avoid ansible behaviour
+              ##             handling escaped charaters which started
+              ##             with python38
+              ##             https://github.com/ansible/ansible/issues/52868
+              ##
 
 
               - name: "libvirt-deploy : isolinux.cfg : kernel args for BIOS iso (cdrom install)"
@@ -299,8 +312,8 @@
               t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
               t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
               t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
-              t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
+              t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
     
             ## End-Of-Block
     
@@ -437,6 +450,7 @@
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
               p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -444,7 +458,7 @@
               group: root
               mode: 0444
             loop:
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.template is defined and
@@ -547,15 +561,26 @@
       ##    Create virt-install script
       ##
 
-
+      - name: "libvirt-deploy : some facts about our platform host"
+        debug:
+          msg:
+            - "{{ hostvars[xtoph_deploy.platform_profile.host_fqdn].ansible_distribution }}"
+            - "{{ hostvars[xtoph_deploy.platform_profile.host_fqdn].ansible_distribution_major_version }}"
+            - "{{ hostvars[xtoph_deploy.platform_profile.host_fqdn].ansible_distribution_version }}"
 
       - name: "libvirt-deploy : virt-install base fragment"
-        vars:
-          t_nic_profile:  "{{ xtoph_deploy.resource_profile.network.extra[t_nicname].hw_network_profile | default('default') }}"
-          t_disk_profile: "{{ xtoph_deploy.resource_profile.storage.extra[t_diskname].hw_storage_profile | default('default') }}"
         template:
           src:  virt-install-base.j2
           dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/10-base"
+        when:
+          - hostvars[xtoph_deploy.platform_profile.host_fqdn].ansible_distribution_major_version is version('9.0',operator='<')
+
+      - name: "libvirt-deploy : virt-install base fragment"
+        template:
+          src:  virt-install-base-rhel9.j2
+          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/virt-install-fragments/10-base"
+        when:
+          - hostvars[xtoph_deploy.platform_profile.host_fqdn].ansible_distribution_major_version is version('9.0',operator='>=')
 
       - name: "libvirt-deploy : virt-install network fragments"
         vars:

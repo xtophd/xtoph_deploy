@@ -26,7 +26,7 @@
       
       - name: "common-deploy-post : wait for ssh alive"
         wait_for:
-          host: "{{ ansible_host }}"
+          host: "{{ inventory_hostname }}"
           connect_timeout: 5
           port: 22
           sleep: 15
@@ -38,7 +38,7 @@
       - name: "common-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
-          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}"
+          p_fqdn:   "{{ inventory_hostname }}"
         shell:
           cmd: |
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
@@ -57,6 +57,31 @@
 ##    NOTE: 
 ##          Reminder that gather_facts was NOT executed
 ##   
+
+
+
+- name: "common-deploy-post : configure dns search (resolv.conf)"
+  shell:
+    cmd: |
+      nm_connection=$(nmcli -t con | grep {{ xtoph_deploy.machine_profile.kickstart.netdev }} | cut -d: -f1)
+      nmcli con modify "${nm_connection}" ipv4.dns-search {{ xtoph_deploy.machine_profile.network.default.fqdn }}
+  when:
+    - xtoph_deploy.kickstart_profile.family is defined
+    - xtoph_deploy.kickstart_profile.family == "rhel7" or
+      xtoph_deploy.kickstart_profile.family == "rhel8" or
+      xtoph_deploy.kickstart_profile.family == "rhel9"
+
+
+
+- name: "common-deploy-post : configure hostname"
+  shell:
+    cmd: |
+      hostnamectl set-hostname {{ inventory_hostname }}
+  when: 
+    - xtoph_deploy.kickstart_profile.family is defined
+    - xtoph_deploy.kickstart_profile.family == "rhel7" or
+      xtoph_deploy.kickstart_profile.family == "rhel8" or
+      xtoph_deploy.kickstart_profile.family == "rhel9"
 
 
 
@@ -82,4 +107,6 @@
     gpgcheck:    "no"
   with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
   when: xtoph_deploy.kickstart_profile.repos is defined
+
+
 

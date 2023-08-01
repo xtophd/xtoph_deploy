@@ -7,7 +7,13 @@ cleanup: true
 
 hostname: "{{ inventory_hostname }}"
 
-clustername: "{{ xtoph_vars.clustername }}"
+projectname: "{{ xtoph_vars.projectname }}"
+
+selected_profile:
+  kickstart: "{{ h_ksPROF | default ('') }}"
+  machine:   "{{ h_hwPROF | default ('') }}"
+  platform:  "{{ h_plPROF | default ('') }}"
+  resource:  "{{ h_rsPROF | default ('') }}"
 
 deployhost:
 
@@ -27,20 +33,28 @@ deployhost:
     firewalld_enable: true
 
     ##
-    ##    dnsmasq_enable:    ensures dnsmasq is installed
-    ##                       and enabled on the deployhost
+    ##    dnsmasq_enable:      ensures dnsmasq is installed
+    ##                         and enabled on the deployhost
     ##
-    ##    dnsmasq_asprimary: deployed hosts/vms will be
-    ##                       configured to use deployhost's
-    ##                       dns as primary resolver
+    ##    dnsmasq_asprimary:   deployed hosts/vms will be
+    ##                         configured to use deployhost's
+    ##                         dns as primary resolver
     ##
-    ##                       host/vm resolves to ->
-    ##                         deployhost which forwards to ->
-    ##                           real-dns
+    ##                         host/vm resolves to ->
+    ##                           deployhost which forwards to ->
+    ##                             real-dns
+    ##
+    ##    dnsmasq_override_nm  overrides whatever NetworkManager put
+    ##                         in resolv.conf with 127.0.0.1
+    ##
+    ##    dnsmasq_override_ip  writes this ip into dnsmasq.conf as
+    ##                         the forwarding NS to resolv lookups
     ##
 
-    dnsmasq_enable: false
-    dnsmasq_asprimary: false
+    dnsmasq_enable:      false
+    dnsmasq_asprimary:   false
+    dnsmasq_override_nm: false
+    dnsmasq_override_ip: ""
 
     ##
     ##    http_enable:    must be true unless http content
@@ -72,7 +86,7 @@ deployhost:
     ##     NOTE: needs to be unique for every host
     ##
 
-    tmp_dir: "/home/tmp/{{ xtoph_vars.clustername }}/{{ inventory_hostname }}"
+    tmp_dir: "/home/tmp/{{ xtoph_vars.projectname }}/{{ inventory_hostname }}"
 
     ##
     ##    Where will the kickstart configs be stored
@@ -117,6 +131,6 @@ deployhost:
     dhcp:
       enable:   true
       efi_http: true
-      tmp_dir:  "/home/tmp/{{ xtoph_vars.clustername }}/dhcp"
+      tmp_dir:  "/home/tmp/{{ xtoph_vars.projectname }}/dhcp"
 
 

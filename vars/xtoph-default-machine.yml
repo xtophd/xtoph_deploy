@@ -347,6 +347,7 @@ dell_xr:
           rhel7:
             blkdev: "nvme0n1"
             netdev: "em1"
+      boot_mode: "uefi"
       storage:
         default:
       network:
@@ -364,7 +365,8 @@ dell_xr:
         media_insert:    "redfish-dell-vmedia-insert.py"
         bootonce_media:  "redfish-dell-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
-        bootonce_clear:  "racadm-bootonce-clear.sh"
+        #bootonce_clear:  "racadm-bootonce-clear.sh"
+        bootonce_clear:  "redfish-noop.py"
         custom_actions:  "redfish-dell-custom-actions.py"
 
 
@@ -529,8 +531,17 @@ pc_nvme:
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
-            blkdev: "nvme0n1"
+            blkdev: "sda"
             netdev: "eno0"
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel8:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
       boot_mode: "bios"
       storage:
         default:
@@ -539,8 +550,35 @@ pc_nvme:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
 
+pc_nvme_efi:
+      platform: "baremetal"
+      description: "Generic PC with nvme"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eno0"
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel8:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+      boot_mode: "efi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+
 pc_sda:
-    machine_profile:
       platform: "baremetal"
       description: "Generic PC with (sata/sas/scsi) sda"
       kickstart:
@@ -551,6 +589,12 @@ pc_sda:
           default:
             blkdev: "sda"
             netdev: "eno0"
+          rhel8:
+            blkdev: "sda"
+            netdev: "enp4s0"
+          rhel9:
+            blkdev: "sda"
+            netdev: "enp4s0"
       boot_mode: "bios"
       storage:
         default:
@@ -558,6 +602,4 @@ pc_sda:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-
-
 

@@ -13,6 +13,12 @@
     ##          on the deployhost/localhost 
     ##
 
+    - name: "ovirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
+      copy:
+        dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
+        content:  "{{ xtoph_deploy | to_nice_yaml }}"
+
+
 
     ##
     ##    Log in to the oVIRT API service
@@ -25,13 +31,11 @@
     ##          set 'throttle = 1'
     ##
     
-    
-    
     - name: "ovirt-deploy : Login to oVirt"
       throttle: 1
       ovirt_auth:
         hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
-        ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
+        #ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
         insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
         username: "{{ t_uid }}"
         password: "{{ t_pw  }}"
@@ -46,16 +50,12 @@
     ##    Determine state of the vm
     ##
     
-    
-    
     - name: "ovirt-deploy : determine state of vm"
       ovirt_vm_info:
         pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
         auth: "{{ ovirt_auth }}"
       register: vminfo_result
       ignore_errors: true
-    
-    
 
     - name: "ovirt-deploy : DEBUG vm status/info results"
       debug: var=vminfo_result
@@ -67,8 +67,6 @@
     ##    If the node is absent OR node NOT up, 
     ##    then set_fact to deploy the node
     ##
-    
-    
     
     - set_fact:
         deploy_node: false
@@ -192,6 +190,7 @@
               vars:
                 p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
                 p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+                p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
               template:
                 src:   "{{ xtoph_deploy.kickstart_profile.template }}"
                 dest:  "{{ item }}"
@@ -279,7 +278,13 @@
                 ##             for the whole block at the end
                 ##             of the block
                 ##
-      
+                ##    * NOTE * the use of single quotes to define t_ks_hd
+                ##             is required to avoid ansible behaviour
+                ##             handling escaped charaters which started
+                ##             with python38
+                ##             https://github.com/ansible/ansible/issues/52868
+                ##
+
                 - name: "ovirt-deploy : isolinux.cfg : kernel args for BIOS iso (cdrom install)"
                   replace:
                     path:   "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
@@ -292,7 +297,7 @@
                         ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "cdrom"
-      
+
                 - name: "ovirt-deploy : grub.cfg : kernel args for UEFI iso (cdrom install)"
                   replace:
                     path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
@@ -319,7 +324,7 @@
                         ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "network"
-      
+
                 - name: "ovirt-deploy : grub.cfg : kernel args for UEFI boot-iso (network install)"
                   replace:
                     path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
@@ -333,9 +338,9 @@
                         ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                         nameserver={{ t_net_dns }}
                   when: xtoph_deploy.kickstart_profile.method == "network"
-      
-      
-      
+
+
+
               vars:
                 t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
                 t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
@@ -343,8 +348,8 @@
                 t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
                 t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
                 t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-                t_ks_hd:    "hd:LABEL={{ isoinfo_volume_id.stdout | replace(' ','\\x20') }}"
-                t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+                t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
+                t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
       
               ## End-Of-Block
 
@@ -410,7 +415,7 @@
               path: "{{xtoph_deploy.deployhost.tmp_dir}}/{{t_filename}}"
             register: local_result
         
-          - name: "ovirt-deploy : pull simple_cdrom image"
+          - name: "ovirt-deploy : copy simple_cdrom image to tmp dir"
             get_url:
               url:  "{{ t_url }}"
               dest: "{{xtoph_deploy.deployhost.tmp_dir}}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
@@ -438,15 +443,29 @@
       ##
 
       - block:
+          - name: "ovirt-deploy : DEBUG vm status/info results"
+            debug: 
+              msg: 
+                - "## OVIRT-DISK: UPLOAD DETAILS"
+                - "name: {{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                - "description: {{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                - "upload_image_path: {{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                #- "bootable: true"
+                - "content_type: iso"
+                - "format: raw"
+                - "storage_domain: {{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
+            when: xtoph_deploy.debug == true
 
           - name: "ovirt-deploy : upload iso image"
             throttle: 1
+            #no_log: false
             ovirt_disk:
               auth: "{{ ovirt_auth }}"
               name: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
               description: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
               upload_image_path: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-              bootable: true
+              #bootable: yes
+              #pass_discard: no
               content_type: iso
               format: raw
               storage_domain: "{{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
@@ -484,6 +503,8 @@
             vars:
               p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
               p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
+
             template:
               src:   "{{ xtoph_deploy.kickstart_profile.template }}"
               dest:  "{{ item }}"
@@ -491,7 +512,7 @@
               group: root
               mode: 0444
             loop:
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.clustername }}-{{ inventory_hostname }}.cfg"
+              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.template is defined and
@@ -524,7 +545,7 @@
               mac_address: "{{ h_pubMAC }}"
           graphical_console:
              protocol:
-               - spice
+               - vnc
           operating_system: "{{ xtoph_deploy.kickstart_profile.kvm_os_type | default(xtoph_deploy.machine_profile.default_os_type) }}"
           high_availability: false
           type: server
@@ -593,8 +614,8 @@
           cluster:      "{{ xtoph_deploy.platform_profile.cluster_name }}"
           cd_iso:       "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
           boot_devices:
-            - cdrom
             - hd
+            - cdrom
         when:
           - xtoph_deploy.kickstart_profile is defined and
             xtoph_deploy.kickstart_profile.method != "pxe"

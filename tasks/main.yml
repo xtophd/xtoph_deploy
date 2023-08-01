@@ -11,278 +11,285 @@
 - name: "main.yml : ***** BEGIN XTOPH_DEPLOY ROLE PROCESSING *****"
   debug: msg="inventory_hostname={{ inventory_hostname }} xtoph_deploy_action={{ xtoph_deploy_action }}"
 
+- block:
 
-
-##
-##        Load variables
-##
-##        NOTE: at first I used 'with_fileglob', the existance
-##              of the file is optional and so no errors
-##              are generated and I don't need ignore_errors
-##
-##              But I wanted to pass the top level var to
-##              encapsulate the loaded parms.  So I use combination 
-##              of when and lookup which now allows me to pass
-##              multiple item parms.
-##
-##              It was a total PITA to find resolution to test
-##              if item.filename exists.  Using the length filter
-##              wound up providing the desired results.
-##
-##              Nice improvement over the old method
-##
-
-
-
-- name: "main.yml : loading required configs"
-  include_vars:
-    name: '{{ item.varname  }}'
-    file: '{{ item.filename }}'
-  loop:
-    - { varname: '',             filename: '../../../config/credentials.yml'  }
-    - { varname: 'xtoph_config', filename: '../../../config/xtoph-config.yml' }
-
-
-
-- name: "main.yml : loading optional configs"
-  include_vars:
-    name: '{{ item.varname }}'
-    file: '{{ item.filename }}'
-  when: item.filename|length > 0
-  loop:
-    - { varname: 'xtoph_config_machine',   filename: '{{ lookup("fileglob","../../../config/xtoph-config-machine.yml") }}' }
-    - { varname: 'xtoph_config_resource',  filename: '{{ lookup("fileglob","../../../config/xtoph-config-resource.yml") }}' }
-    - { varname: 'xtoph_config_platform',  filename: '{{ lookup("fileglob","../../../config/xtoph-config-platform.yml") }}' }
-    - { varname: 'xtoph_config_kickstart', filename: '{{ lookup("fileglob","../../../config/xtoph-config-kickstart.yml") }}' }
-
-
-
-- name: "main.yml : loading default configs"
-  include_vars:
-    name: '{{ item.varname }}'
-    file: '{{ item.filename }}'
-  when: item.filename|length > 0
-  loop:
-    - { varname: 'xtoph_default',           filename: 'xtoph-default.yml' }
-    - { varname: 'xtoph_default_kickstart', filename: 'xtoph-default-kickstart.yml' }
-    - { varname: 'xtoph_default_machine',   filename: 'xtoph-default-machine.yml' }
-    - { varname: 'xtoph_default_resource',  filename: 'xtoph-default-resource.yml' }
-    - { varname: 'xtoph_default_platform',  filename: 'xtoph-default-platform.yml' }
-
-
-
-##
-##        Start a fresh xtoph_deploy hash based on xtoph_default
-##
+      ##
+      ##        Load variables
+      ##
+      ##        NOTE: at first I used 'with_fileglob', the existance
+      ##              of the file is optional and so no errors
+      ##              are generated and I don't need ignore_errors
+      ##
+      ##              But I wanted to pass the top level var to
+      ##              encapsulate the loaded parms.  So I use combination 
+      ##              of when and lookup which now allows me to pass
+      ##              multiple item parms.
+      ##
+      ##              It was a total PITA to find resolution to test
+      ##              if item.filename exists.  Using the length filter
+      ##              wound up providing the desired results.
+      ##
+      ##              Nice improvement over the old method
+      ##
+      
+      
+      
+      - name: "main.yml : loading required configs"
+        include_vars:
+          name: '{{ item.varname  }}'
+          file: '{{ item.filename }}'
+        loop:
+          - { varname: '',             filename: '../../../config/credentials.yml'  }
+          - { varname: 'xtoph_config', filename: '../../../config/xtoph-deploy.yml' }
+      
+      
+      
+      - name: "main.yml : loading optional configs"
+        include_vars:
+          name: '{{ item.varname }}'
+          file: '{{ item.filename }}'
+        when: item.filename|length > 0
+        loop:
+          - { varname: 'xtoph_config_machine',   filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-machine.yml") }}' }
+          - { varname: 'xtoph_config_resource',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-resource.yml") }}' }
+          - { varname: 'xtoph_config_platform',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-platform.yml") }}' }
+          - { varname: 'xtoph_config_kickstart', filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-kickstart.yml") }}' }
+      
+      
+      
+      - name: "main.yml : loading default configs"
+        include_vars:
+          name: '{{ item.varname }}'
+          file: '{{ item.filename }}'
+        when: item.filename|length > 0
+        loop:
+          - { varname: 'xtoph_default',           filename: 'xtoph-default.yml' }
+          - { varname: 'xtoph_default_kickstart', filename: 'xtoph-default-kickstart.yml' }
+          - { varname: 'xtoph_default_machine',   filename: 'xtoph-default-machine.yml' }
+          - { varname: 'xtoph_default_resource',  filename: 'xtoph-default-resource.yml' }
+          - { varname: 'xtoph_default_platform',  filename: 'xtoph-default-platform.yml' }
 
 
 
-- name: "main.yml : copy xtoph_default => xtoph_deploy"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_default }}"
-
-- name: "main.yml : apply custom config => xtoph_deploy"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine( {item.key: item.value}, recursive=true) }}"
-  loop: "{{ lookup('dict', xtoph_config | default({}) ) }}"
-  when: xtoph_config is defined
-
-
-
-##
-##        Graft various default build profile parameters on 
-##        to xtoph_deploy hash, these are defined in:
-##
-##          ./roles/xtoph_deploy/vars/xtoph-default*
-##
-
-
-
-- name: "main.yml : graft default_machine => xtoph_deploy.machine_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'machine_profile': xtoph_default_machine[xtoph_deploy.selected_profile.machine] }, recursive=true) }}"
-  when: xtoph_default_machine[xtoph_deploy.selected_profile.machine] is defined
-
-- name: "main.yml : graft default_platform profile => xtoph_deploy.platform_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'platform_profile': xtoph_default_platform[xtoph_deploy.selected_profile.platform] }, recursive=true) }}"
-  when: xtoph_default_platform[xtoph_deploy.selected_profile.platform] is defined
-
-- name: "main.yml : graft default_resource => xtoph_deploy.resource_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'resource_profile': xtoph_default_resource[xtoph_deploy.selected_profile.resource] }, recursive=true) }}"
-  when: xtoph_default_resource[xtoph_deploy.selected_profile.resource] is defined
-
-- name: "main.yml : graft default_kickstart profile => xtoph_deploy.kickstart_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'kickstart_profile': xtoph_default_kickstart[xtoph_deploy.selected_profile.kickstart] }, recursive=true) }}"
-  when: xtoph_default_kickstart[xtoph_deploy.selected_profile.kickstart] is defined
-
-
-
-##
-##        Overwrite default build profile parameters with 
-##        custom config values, these are defined in: 
-##
-##          ./configs/xtoph-config*
-##
+      ##
+      ##        Start a fresh xtoph_deploy hash based on xtoph_default
+      ##
+      
+      
+      
+      - name: "main.yml : copy xtoph_default => xtoph_deploy"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_default }}"
+      
+      - name: "main.yml : apply custom config => xtoph_deploy"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {item.key: item.value}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config | default({}) ) }}"
+        when: xtoph_config is defined
+      
+      
+      
+      ##
+      ##        Graft various default build profile parameters on 
+      ##        to xtoph_deploy hash, these are defined in:
+      ##
+      ##          ./roles/xtoph_deploy/vars/xtoph-default*
+      ##
+      
+      
+      
+      - name: "main.yml : graft default_machine => xtoph_deploy.machine_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'machine_profile': xtoph_default_machine[xtoph_deploy.selected_profile.machine] }, recursive=true) }}"
+        when: xtoph_default_machine[xtoph_deploy.selected_profile.machine] is defined
+      
+      - name: "main.yml : graft default_platform profile => xtoph_deploy.platform_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'platform_profile': xtoph_default_platform[xtoph_deploy.selected_profile.platform] }, recursive=true) }}"
+        when: xtoph_default_platform[xtoph_deploy.selected_profile.platform] is defined
+      
+      - name: "main.yml : graft default_resource => xtoph_deploy.resource_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'resource_profile': xtoph_default_resource[xtoph_deploy.selected_profile.resource] }, recursive=true) }}"
+        when: xtoph_default_resource[xtoph_deploy.selected_profile.resource] is defined
+      
+      - name: "main.yml : graft default_kickstart profile => xtoph_deploy.kickstart_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'kickstart_profile': xtoph_default_kickstart[xtoph_deploy.selected_profile.kickstart] }, recursive=true) }}"
+        when: xtoph_default_kickstart[xtoph_deploy.selected_profile.kickstart] is defined
 
 
 
-- name: "main.yml : apply config_machine profile => xtoph_deploy.machine_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'machine_profile': {item.key: item.value}}, recursive=true) }}"
-  loop: "{{ lookup('dict', xtoph_config_machine[xtoph_deploy.selected_profile.machine] | default({}) ) }}"
-  when: xtoph_config_machine[xtoph_deploy.selected_profile.machine] is defined
+      ##
+      ##        Overwrite default build profile parameters with 
+      ##        custom config values, these are defined in: 
+      ##
+      ##          ./configs/xtoph-config*
+      ##
+      
+      
+      
+      - name: "main.yml : apply config_machine profile => xtoph_deploy.machine_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'machine_profile': {item.key: item.value}}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config_machine[xtoph_deploy.selected_profile.machine] | default({}) ) }}"
+        when: xtoph_config_machine[xtoph_deploy.selected_profile.machine] is defined
+      
+      - name: "main.yml : apply config_platform profile => xtoph_deploy.platform_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'platform_profile': {item.key: item.value}}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config_platform[xtoph_deploy.selected_profile.platform] | default({}) ) }}"
+        when: xtoph_config_platform[xtoph_deploy.selected_profile.platform] is defined
+      
+      - name: "main.yml : apply config_resource profile => xtoph_deploy.resource_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'resource_profile': {item.key: item.value}}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config_resource[xtoph_deploy.selected_profile.resource] | default({}) ) }}"
+        when: xtoph_config_resource[xtoph_deploy.selected_profile.resource] is defined
+      
+      - name: "main.yml : apply config_kickstart profile => xtoph_deploy.kickstart_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'kickstart_profile': {item.key: item.value}}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config_kickstart[xtoph_deploy.selected_profile.kickstart] | default({}) ) }}"
+        when: xtoph_config_kickstart[xtoph_deploy.selected_profile.kickstart] is defined
+      
+      
+      
+      ##
+      ##        Copy platform_profile kickstart, storage.defaults & 
+      ##        network.defaults to xtoph_deploy.machine_profile
+      ##
+      ##        This obviously creates some duplication of data, but
+      ##        it makes life easier when coding and troubleshooting 
+      ##        the various playbooks.  All the required data is
+      ##        available in the various build profiles.
+      ##
+      ##        NOTE: ansible 2.9 does NOT provide 'list_merge' option for 
+      ##              the combine() filter as later releases do.  Thus, to 
+      ##              mimic the behaviour of right hash overriding the left 
+      ##              hash, we use a 'when' test to determine if the key is
+      ##              undefined
+      ##
+      ##        NOTE: when running action = 'setup' a situation arises for
+      ##              the deployhost whereby the platform_profile is undefined,
+      ##              thus to avoid failure we provide the default({}) empty
+      ##              dictionary to the loop.  Also by using this technique
+      ##              we don't have to test if the dictionaries exist
+      ##              in the first place.  An empty set will have 0 elements
+      ##             
+      
+      ## DEPRECATED 07MAR22: replaced with tiered method for setting netdev and blkdev below
+      #- name: "main.yml : copy platform_profile kickstart values to machine_profile"
+      #  set_fact:
+      #    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {item.key: item.value}}}, recursive=True ) }}"
+      #  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart | default({}) ) }}"
+      #  when: xtoph_deploy.machine_profile.kickstart[item.key] is undefined
+      
+      ##
+      ##        set kickstart.netdev to 1 of 3 values:
+      ##            #1 h_netDEV
+      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netdev, 
+      ##            #3 machine_profile_kickstart.dev_hints.default.netdev
+      ##
+      ##        same logic applies to kickstart.blkdev
+      ##            #1 h_blkDEV
+      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].blkdev, 
+      ##            #3 machine_profile_kickstart.dev_hints.default.blkdev
+      ##
+      
+      
+      
+      - name: "main.yml : special handling for kickstart netdev"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'netdev': t_netdev}}}, recursive=True ) }}"
+        vars:
+          t_netdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['netdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.netdev) }}"
+        when:
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.machine_profile.kickstart.netdev is defined and xtoph_deploy.machine_profile.kickstart.netdev == ''
+          - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
+      
+      
+      
+      - name: "main.yml : special handling for kickstart blkdev"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'blkdev': t_blkdev}}}, recursive=True ) }}"
+        vars:
+          t_blkdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['blkdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.blkdev) }}"
+        when:
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.machine_profile.kickstart.blkdev is defined and xtoph_deploy.machine_profile.kickstart.blkdev == ''
+          - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
-- name: "main.yml : apply config_platform profile => xtoph_deploy.platform_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'platform_profile': {item.key: item.value}}, recursive=true) }}"
-  loop: "{{ lookup('dict', xtoph_config_platform[xtoph_deploy.selected_profile.platform] | default({}) ) }}"
-  when: xtoph_config_platform[xtoph_deploy.selected_profile.platform] is defined
-
-- name: "main.yml : apply config_resource profile => xtoph_deploy.resource_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'resource_profile': {item.key: item.value}}, recursive=true) }}"
-  loop: "{{ lookup('dict', xtoph_config_resource[xtoph_deploy.selected_profile.resource] | default({}) ) }}"
-  when: xtoph_config_resource[xtoph_deploy.selected_profile.resource] is defined
-
-- name: "main.yml : apply config_kickstart profile => xtoph_deploy.kickstart_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine({'kickstart_profile': {item.key: item.value}}, recursive=true) }}"
-  loop: "{{ lookup('dict', xtoph_config_kickstart[xtoph_deploy.selected_profile.kickstart] | default({}) ) }}"
-  when: xtoph_config_kickstart[xtoph_deploy.selected_profile.kickstart] is defined
 
 
-
-##
-##        Copy platform_profile kickstart, storage.defaults & 
-##        network.defaults to xtoph_deploy.machine_profile
-##
-##        This obviously creates some duplication of data, but
-##        it makes life easier when coding and troubleshooting 
-##        the various playbooks.  All the required data is
-##        available in the various build profiles.
-##
-##        NOTE: ansible 2.9 does NOT provide 'list_merge' option for 
-##              the combine() filter as later releases do.  Thus, to 
-##              mimic the behaviour of right hash overriding the left 
-##              hash, we use a 'when' test to determine if the key is
-##              undefined
-##
-##        NOTE: when running action = 'setup' a situation arises for
-##              the deployhost whereby the platform_profile is undefined,
-##              thus to avoid failure we provide the default({}) empty
-##              dictionary to the loop.  Also by using this technique
-##              we don't have to test if the dictionaries exist
-##              in the first place.  An empty set will have 0 elements
-##             
-
-## DEPRECATED 07MAR22: replaced with tiered method for setting netdev and blkdev below
-#- name: "main.yml : copy platform_profile kickstart values to machine_profile"
-#  set_fact:
-#    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {item.key: item.value}}}, recursive=True ) }}"
-#  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.kickstart | default({}) ) }}"
-#  when: xtoph_deploy.machine_profile.kickstart[item.key] is undefined
-
-##
-##        set kickstart.netdev to 1 of 3 values:
-##            #1 h_netDEV
-##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netdev, 
-##            #3 machine_profile_kickstart.dev_hints.default.netdev
-##
-##        same logic applies to kickstart.blkdev
-##            #1 h_blkDEV
-##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].netblk, 
-##            #3 machine_profile_kickstart.dev_hints.default.netblk
-##
+      - name: "main.yml : (SIMPLE CDROM) special handling for kickstart iso_url, iso_nfs"
+        block:
+      
+            - set_fact:
+                xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_url': h_isoURL }}}, recursive=True ) }}"
+      
+            - set_fact:
+                xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_nfs': '' }}}, recursive=True ) }}"
+      
+        when: 
+          - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method == 'simple_cdrom'
+      
+      
+      
+      - name: "main.yml : (CDROM,NETBOOT) special handling for kickstart iso_url"
+        block:
+      
+            - set_fact:
+                xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_url': t_url}}}, recursive=True ) }}"
+      
+            - set_fact:
+                xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_nfs': t_nfs}}}, recursive=True ) }}"
+      
+        vars:
+          t_url: "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+          t_nfs: "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+        when:
+          - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
+      
+      
+      
+      
+      - name: "main.yml : copy platform_profile default storage values to machine_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'storage': {'default': {item.key: item.value}}}}, recursive=True ) }}"
+        loop: "{{ lookup('dict', xtoph_deploy.platform_profile.storage.default | default({}) ) }}"
+        when: xtoph_deploy.machine_profile.storage.default[item.key] is undefined
+      
+      - name: "main.yml : copy platform_profile default network values to machine_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {item.key: item.value}}}}, recursive=True ) }}"
+        loop: "{{ lookup('dict', xtoph_deploy.platform_profile.network.default | default({}) ) }}"
+        when: xtoph_deploy.machine_profile.network.default[item.key] is undefined
+      
+      
+      
+      ##
+      ##        At this point, pruning and grafting 
+      ##        xtoph_deploy dictionary is complete
+      ##
+      ##
+      ##        If xtoph_deploy.debug is 'true', 
+      ##        dump the current xtoph_deploy dictionary
+      ## 
 
 
 
-- name: "main.yml : special handling for kickstart netdev"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'netdev': t_netdev}}}, recursive=True ) }}"
-  vars:
-    t_netdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['netdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.netdev) }}"
-  when:
-    - xtoph_deploy.kickstart_profile.family is defined
-    - xtoph_deploy.machine_profile.kickstart.netdev is defined and xtoph_deploy.machine_profile.kickstart.netdev == ''
-    - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
-
-
-
-- name: "main.yml : special handling for kickstart blkdev"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'blkdev': t_blkdev}}}, recursive=True ) }}"
-  vars:
-    t_blkdev:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['blkdev'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.blkdev) }}"
-  when:
-    - xtoph_deploy.kickstart_profile.family is defined
-    - xtoph_deploy.machine_profile.kickstart.blkdev is defined and xtoph_deploy.machine_profile.kickstart.blkdev == ''
-    - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
-
-
-
-- name: "main.yml : (SIMPLE CDROM) special handling for kickstart iso_url, iso_nfs"
-  block:
+      - name: "main.yml : display state of xtoph_deploy if debug enabled"
+        debug: var=xtoph_deploy
+        when: xtoph_deploy.debug == true
 
       - set_fact:
-          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_url': h_isoURL }}}, recursive=True ) }}"
-
-      - set_fact:
-          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_nfs': '' }}}, recursive=True ) }}"
-
-  when: 
-    - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method == 'simple_cdrom'
+          _xtoph_deploy_dict_processed: true
 
 
-
-- name: "main.yml : (CDROM,NETBOOT) special handling for kickstart iso_url"
-  block:
-
-      - set_fact:
-          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_url': t_url}}}, recursive=True ) }}"
-
-      - set_fact:
-          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'iso_nfs': t_nfs}}}, recursive=True ) }}"
-
-  vars:
-    t_url: "{{ xtoph_deploy.deployhost.generated_iso.url }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-    t_nfs: "{{ xtoph_deploy.deployhost.generated_iso.nfs }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-  when:
-    - xtoph_deploy.kickstart_profile.method is defined and xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
-
-
-
-
-- name: "main.yml : copy platform_profile default storage values to machine_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'storage': {'default': {item.key: item.value}}}}, recursive=True ) }}"
-  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.storage.default | default({}) ) }}"
-  when: xtoph_deploy.machine_profile.storage.default[item.key] is undefined
-
-- name: "main.yml : copy platform_profile default network values to machine_profile"
-  set_fact:
-    xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {item.key: item.value}}}}, recursive=True ) }}"
-  loop: "{{ lookup('dict', xtoph_deploy.platform_profile.network.default | default({}) ) }}"
-  when: xtoph_deploy.machine_profile.network.default[item.key] is undefined
-
-
-
-##
-##        At this point, pruning and grafting 
-##        xtoph_deploy dictionary is complete
-##
-##
-##        If xtoph_deploy.debug is 'true', 
-##        dump the current xtoph_deploy dictionary
-## 
-
-
-
-- name: "main.yml : debug"
-  debug: var=xtoph_deploy
-  when: xtoph_deploy.debug == true
+  when: _xtoph_deploy_dict_processed is undefined or
+        not _xtoph_deploy_dict_processed
 
 
 
