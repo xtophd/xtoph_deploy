@@ -42,13 +42,13 @@
     - ansible_distribution_major_version == "7"
 
 - name: "deployer-setup : install supporting packages (RHEL 8)"
-  yum: name=genisoimage,xorriso,syslinux,git,wget,yum-utils,net-tools,traceroute,nmap,python3  state=installed
+  yum: name=genisoimage,xorriso,syslinux,git,wget,yum-utils,net-tools,traceroute,nmap,python3 state=installed
   when:
     - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
     - ansible_distribution_major_version == "8"
 
 - name: "deployer-setup : install supporting packages (RHEL 9)"
-  yum: name=genisoimage,xorriso,syslinux,git,wget,yum-utils,net-tools,traceroute,nmap,python3  state=installed
+  yum: name=genisoimage,xorriso,syslinux,git,wget,yum-utils,net-tools,traceroute,nmap,python3 state=installed
   when:
     - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
     - ansible_distribution_major_version == "9"

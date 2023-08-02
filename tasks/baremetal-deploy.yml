@@ -83,10 +83,14 @@
         debug:
            msg:
              - "BMC Address         : {{ t_bmc }}"
+             - "BMC User ID         : {{ t_user }}"
              - "BMC Login Status    : {{ xtoph_deploy.machine_profile.bmc.login_status }}"
              - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
              - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
              - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
+             - "BMC Media Status    : {{ xtoph_deploy.machine_profile.bmc.media_status }}"
+             - "BMC Media Eject     : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
+             - "BMC Media Insert    : {{ xtoph_deploy.machine_profile.bmc.media_insert }}"
         when:
           - xtoph_deploy.debug == true
 

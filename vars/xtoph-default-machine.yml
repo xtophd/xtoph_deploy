@@ -402,14 +402,6 @@ hp_dl360_g8:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-      ipmi:
-        fqdn:         "{{ ipmi_fqdn | default('') }}"
-        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-        power_on:     "-I lanplus chassis power on"
-        power_off:    "-I lanplus chassis power off"
-        config_steps:
-          - "-I lanplus sel time set now"
-          - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-hp-login-status.py"
@@ -424,7 +416,7 @@ hp_dl360_g8:
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
     
-hp_dl380_g8:
+hp_dl380_g9:
       platform: "baremetal"
       description: "HP DL380"
       usb_storage_delay: "10"
@@ -449,14 +441,6 @@ hp_dl380_g8:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-      ipmi:
-        fqdn:         "{{ ipmi_fqdn | default('') }}"
-        get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
-        power_on:     "-I lanplus chassis power on"
-        power_off:    "-I lanplus chassis power off"
-        config_steps:
-          - "-I lanplus sel time set now"
-          - "-I lanplus chassis bootdev pxe"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-hp-login-status.py"
@@ -511,8 +495,6 @@ supermicro_x9drd_if:
         config_steps:
           - "-I lanplus sel time set now"
           - "-I lanplus chassis bootdev pxe"
-      bmc:
-        fqdn:         ""
 
 
 
