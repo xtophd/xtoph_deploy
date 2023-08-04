@@ -428,12 +428,57 @@ hp_dl380_g9:
           default:
             blkdev: "sda"
             netdev: "eth0"
+          rhel9:
+            blkdev: "sda"
+            netdev: "eno1"
           rhel8:
             blkdev: "sda"
             netdev: "eno1"
           rhel7:
             blkdev: "sda"
             netdev: "eno1"
+      boot_mode: "bios"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-hp-login-status.py"
+        power_status:    "redfish-hp-power-status.py"
+        power_on:        "redfish-hp-power-on.py"
+        power_off:       "redfish-hp-power-off.py"
+        media_status:    "redfish-hp-vmedia-status.py"
+        media_eject:     "redfish-hp-vmedia-eject.py"
+        media_insert:    "redfish-hp-vmedia-insert.py"
+        bootonce_media:  "redfish-hp-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
+        bootonce_clear:  "redfish-hp-bootonce-clear.py"
+        custom_actions:  "redfish-hp-custom-actions.py"
+
+hp_dl380_g9_560flr:
+      platform: "baremetal"
+      description: "HP DL380"
+      usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+          rhel9:
+            blkdev: "sda"
+            netdev: "eno49"
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno49"
+          rhel7:
+            blkdev: "sda"
+            netdev: "en49"
       boot_mode: "bios"
       storage:
         default:
