@@ -13,7 +13,7 @@ rootpw {{ p_rootpw }} --iscrypted
 reboot
 text
 cdrom
-bootloader --location=mbr --append="nofb quiet splash=quiet"
+bootloader --location=mbr --append="nofb quiet splash=quiet {{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
 
 {%if xtoph_deploy.kickstart_profile.netcfg_override == "static" %}
 ## Override kernel level network args with a static kickstart config

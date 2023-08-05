@@ -16,6 +16,7 @@ kvm_vda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -43,6 +44,7 @@ kvm_nest_vda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -71,6 +73,7 @@ kvm_sda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -106,6 +109,7 @@ ovirt_sda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -134,6 +138,7 @@ ovirt_vda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -168,6 +173,7 @@ dell_r630:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -209,6 +215,7 @@ dell_r630_uefi:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -251,6 +258,7 @@ dell_r740:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -292,6 +300,7 @@ dell_r740_uefi:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -333,6 +342,7 @@ dell_xr:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -383,6 +393,7 @@ hp_dl360_g8:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -416,6 +427,50 @@ hp_dl360_g8:
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
     
+hp_dl360_g8_560flr:
+      platform: "baremetal"
+      description: "HP DL360 G8 (Intel E5, DDR3) with 560FLR-SFP+ FlexLOM"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+            kernel_opts: ""
+          rhel8:
+            blkdev: "sda"
+            netdev: "eno1"
+            ## Fix system hang issue and sluggish ilo5 html console
+            kernel_opts: "intel_iommu=off intremap=off"
+          rhel7:
+            blkdev: "sda"
+            netdev: "eno1"
+            kernel_opts: ""
+      usb_storage_delay: "10"
+      boot_mode: "bios"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-hp-login-status.py"
+        power_status:    "redfish-hp-power-status.py"
+        power_on:        "redfish-hp-power-on.py"
+        power_off:       "redfish-hp-power-off.py"
+        media_status:    "redfish-hp-vmedia-status.py"
+        media_eject:     "redfish-hp-vmedia-eject.py"
+        media_insert:    "redfish-hp-vmedia-insert.py"
+        bootonce_media:  "redfish-hp-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
+        bootonce_clear:  "redfish-hp-bootonce-clear.py"
+        custom_actions:  "redfish-hp-custom-actions.py"
+
 hp_dl380_g9:
       platform: "baremetal"
       description: "HP DL380"
@@ -423,6 +478,7 @@ hp_dl380_g9:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -460,11 +516,12 @@ hp_dl380_g9:
 
 hp_dl380_g9_560flr:
       platform: "baremetal"
-      description: "HP DL380"
+      description: "HP DL380 with 560FLR-SFP+ FlexLOM"
       usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -514,6 +571,7 @@ supermicro_x9drd_if:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -555,6 +613,7 @@ pc_nvme:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -583,6 +642,7 @@ pc_nvme_efi:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -611,6 +671,7 @@ pc_sda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: ""
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:

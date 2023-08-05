@@ -328,6 +328,7 @@
                       inst.ks={{ t_ks_hd }}
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
+                      {{ t_krn_opts }}
                 when: xtoph_deploy.kickstart_profile.method == "cdrom"
      
               - name: "baremetal-deploy : grub.cfg : kernel args for UEFI iso (cdrom install)"
@@ -341,6 +342,7 @@
                       inst.ks={{ t_ks_hd }}
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }} 
+                      {{ t_krn_opts }}
                 when: xtoph_deploy.kickstart_profile.method == "cdrom"
     
               - name: "baremetal-deploy : isolinux.cfg : kernel args for BIOS boot-iso (network install)"
@@ -355,6 +357,7 @@
                       inst.repo={{ t_ks_repo }}
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }}
+                      {{ t_krn_opts }}
                 when: xtoph_deploy.kickstart_profile.method == "network"
     
               - name: "baremetal-deploy : grub.cfg : kernel args for UEFI boot-iso (network install)"
@@ -369,6 +372,7 @@
                       inst.repo={{ t_ks_repo }}
                       ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                       nameserver={{ t_net_dns }} 
+                      {{ t_krn_opts }}
                 when: xtoph_deploy.kickstart_profile.method == "network"
     
         
@@ -379,6 +383,7 @@
               t_net_nm:    "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
               t_net_gw:    "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
               t_net_dns:   "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
+              t_krn_opts:  "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
               t_ks_repo:   "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
               t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
               t_ks_url:    "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"

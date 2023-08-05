@@ -196,6 +196,11 @@
       ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].blkdev, 
       ##            #3 machine_profile_kickstart.dev_hints.default.blkdev
       ##
+      ##        same logic applies to kickstart.kernel_opts
+      ##            #1 h_krnOPT
+      ##            #2 machine_profile_kickstart.dev_hints[kickstart_profile.family].kernel_opts, 
+      ##            #3 machine_profile_kickstart.dev_hints.default.kernel_opts
+      ##
       
       
       
@@ -219,6 +224,18 @@
         when:
           - xtoph_deploy.kickstart_profile.family is defined
           - xtoph_deploy.machine_profile.kickstart.blkdev is defined and xtoph_deploy.machine_profile.kickstart.blkdev == ''
+          - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
+
+
+
+      - name: "main.yml : special handling for kernel options"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'kickstart': {'kernel_opts': t_kernel_opts}}}, recursive=True ) }}"
+        vars:
+          t_kernel_opts:  "{{ xtoph_deploy.machine_profile.kickstart.dev_hints[xtoph_deploy.kickstart_profile.family]['kernel_opts'] | default(xtoph_deploy.machine_profile.kickstart.dev_hints.default.kernel_opts) }}"
+        when:
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.machine_profile.kickstart.kernel_opts is defined and xtoph_deploy.machine_profile.kickstart.kernel_opts == ''
           - xtoph_deploy.kickstart_profile.method != 'simple_cdrom'
 
 
