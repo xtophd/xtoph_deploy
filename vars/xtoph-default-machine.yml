@@ -16,12 +16,13 @@ kvm_vda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "vda"
             netdev: "enp1s0"
@@ -44,12 +45,13 @@ kvm_nest_vda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "vda"
             netdev: "enp1s0"
@@ -73,12 +75,13 @@ kvm_sda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "enp1s0"
@@ -109,12 +112,13 @@ ovirt_sda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "ens3"
@@ -138,12 +142,13 @@ ovirt_vda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "vda"
             netdev: "ens3"
@@ -173,12 +178,13 @@ dell_r630:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "eno1"
@@ -215,12 +221,13 @@ dell_r630_uefi:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "eno1"
@@ -258,12 +265,13 @@ dell_r740:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "eno1"
@@ -300,12 +308,13 @@ dell_r740_uefi:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "eno1"
@@ -342,12 +351,13 @@ dell_xr:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "nvme0n1"
             netdev: "em1"
+            kernel_opts: ""
           rhel9:
             blkdev: "nvme0n1"
             netdev: "eno8303np0"
@@ -393,12 +403,13 @@ hp_dl360_g8:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "eno1"
@@ -433,7 +444,7 @@ hp_dl360_g8_560flr:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
@@ -478,12 +489,13 @@ hp_dl380_g9:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel9:
             blkdev: "sda"
             netdev: "eno1"
@@ -521,12 +533,13 @@ hp_dl380_g9_560flr:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel9:
             blkdev: "sda"
             netdev: "eno49"
@@ -571,12 +584,13 @@ supermicro_x9drd_if:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eth0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "enp5s0f0"
@@ -613,12 +627,13 @@ pc_nvme:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eno0"
+            kernel_opts: ""
           rhel7:
             blkdev: "nvme0n1"
             netdev: "enp4s0"
@@ -642,12 +657,13 @@ pc_nvme_efi:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eno0"
+            kernel_opts: ""
           rhel7:
             blkdev: "nvme0n1"
             netdev: "enp4s0"
@@ -671,12 +687,13 @@ pc_sda:
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
-        kernel_opts: ""
+        kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
             netdev: "eno0"
+            kernel_opts: ""
           rhel8:
             blkdev: "sda"
             netdev: "enp4s0"
