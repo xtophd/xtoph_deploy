@@ -228,6 +228,69 @@ rhel91-pxe:
 ##
 ##
 
+rhel88:
+    name:              "rhel88"
+    family:            "rhel8"
+    description:       "Red Hat Enterprise Linux 8.8 DVD"
+    method:            "cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel8.j2"
+    boot_iso:          "rhel-8.8-x86_64-dvd.iso"
+    repo_iso:          "rhel-8.8-x86_64-dvd.iso"
+    mnt:               "rhel-8.8"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-8-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel88-bootiso:
+    name:              "rhel88-bootiso"
+    family:            "rhel8"
+    description:       "Red Hat Enterprise Linux 8.8 Boot ISO"
+    method:            "network"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel8-bootiso.j2"
+    boot_iso:          "rhel-8.8-x86_64-boot.iso"
+    repo_iso:          "rhel-8.8-x86_64-dvd.iso"
+    mnt:               "rhel-8.8"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel8-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel88-pxe:
+    name:              "rhel88-pxe"
+    family:            "rhel8"
+    description:       "Red Hat Enterprise Linux 8.8 PXE"
+    method:            "pxe"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel8-bootiso.j2"
+    boot_iso:          "rhel-8.8-x86_64-boot.iso"
+    repo_iso:          "rhel-8.8-x86_64-dvd.iso"
+    mnt:               "rhel-8.8"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-8-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-8-appstream-rpms"
+            subpath:   "/AppStream"
+
 rhel86:
     name:              "rhel86"
     family:            "rhel8"

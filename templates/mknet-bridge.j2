@@ -60,11 +60,15 @@ if ! nmcli dev show "{{ xtoph_deploy.machine_profile.network.default.network_nam
     
     
     
-    ifdown "{{ xtoph_deploy.machine_profile.network.default.bridge_netdev }}"
-    ifdown "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
-    ifup   "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+    #ifdown "{{ xtoph_deploy.machine_profile.network.default.bridge_netdev }}"
+    #ifdown "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+    #ifup   "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
 
-     echo "network CHANGED : bridge {{ xtoph_deploy.machine_profile.network.default.network_name }} created"
+    nmcli con down "{{ xtoph_deploy.machine_profile.network.default.bridge_netdev }}"
+    nmcli con down "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+    nmcli con up   "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
+
+    echo "network CHANGED : bridge {{ xtoph_deploy.machine_profile.network.default.network_name }} created"
 
 else
 
