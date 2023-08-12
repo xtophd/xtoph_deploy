@@ -37,7 +37,7 @@
           port: 22
           sleep: 15
           state: started
-          timeout: 1200
+          timeout: 1800
 
       - name: "baremetal-deploy-post : (BMC) media-status"
         script: >

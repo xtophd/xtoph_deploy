@@ -129,7 +129,7 @@
               port: 22
               sleep: 15
               state: started
-              timeout: 900
+              timeout: 1800
             when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
                   xtoph_deploy.kickstart_profile.wait_for_ssh == true
 
