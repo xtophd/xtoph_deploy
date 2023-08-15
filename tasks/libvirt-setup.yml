@@ -30,15 +30,6 @@
       - name: "libvirt-setup : (rhel 8) install python3"
         yum: name=python3 state=installed
 
-      # NOTE:    The alternatives modules was ripped from ansible core,
-      #          reverting the shell
-      #
-      #- name: "libvirt-setup: (rhel 8) configure python3 alternatives"
-      #  alternatives:
-      #     name='python'
-      #     link='/usr/bin/unversioned-python'
-      #     path='/usr/bin/python3'
-
       - name: "libvirt-setup: (rhel 8) configure python3 alternatives"
         shell:
           cmd: alternatives --auto python
@@ -53,19 +44,8 @@
       - name: "libvirt-setup : (rhel 9) install python3"
         yum: name=python3 state=installed
 
-      # NOTE:    The alternatives modules was ripped from ansible core,
-      #          reverting the shell
-      #
-      #- name: "libvirt-setup: (rhel 9) configure python3 alternatives"
-      #  alternatives:
-      #     name='python'
-      #     link='/usr/bin/unversioned-python'
-      #     path='/usr/bin/python3'
+      # NOTE:    There are no alternatives for python in rhel 9
 
-      - name: "libvirt-setup: (rhel 9) configure python3 alternatives"
-        shell:
-          cmd: alternatives --auto python
- 
   when:
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "9"

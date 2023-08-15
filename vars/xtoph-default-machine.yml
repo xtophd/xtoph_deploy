@@ -23,6 +23,9 @@ kvm_vda:
             blkdev: "vda"
             netdev: "eth0"
             kernel_opts: ""
+          rhel9:
+            blkdev: "vda"
+            netdev: "enp1s0"
           rhel8:
             blkdev: "vda"
             netdev: "enp1s0"
@@ -52,6 +55,9 @@ kvm_nest_vda:
             blkdev: "vda"
             netdev: "eth0"
             kernel_opts: ""
+          rhel9:
+            blkdev: "vda"
+            netdev: "enp1s0"
           rhel8:
             blkdev: "vda"
             netdev: "enp1s0"
@@ -82,6 +88,9 @@ kvm_sda:
             blkdev: "sda"
             netdev: "eth0"
             kernel_opts: ""
+          rhel9:
+            blkdev: "sda"
+            netdev: "enp1s0"
           rhel8:
             blkdev: "sda"
             netdev: "enp1s0"
