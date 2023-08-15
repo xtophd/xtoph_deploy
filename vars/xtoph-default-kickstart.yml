@@ -224,6 +224,70 @@ rhel91-pxe:
             name:      "my-rhel9-appstream-rpms"
             subpath:   "/AppStream"
 
+rhel92:
+    name:              "rhel92"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.2 DVD"
+    method:            "cdrom"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9.j2"
+    boot_iso:          "rhel-9.2-x86_64-dvd.iso"
+    repo_iso:          "rhel-9.2-x86_64-dvd.iso"
+    mnt:               "rhel-9.2"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel92-bootiso:
+    name:              "rhel92-bootiso"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.2 Boot ISO"
+    method:            "network"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-9.2-x86_64-boot.iso"
+    repo_iso:          "rhel-9.2-x86_64-dvd.iso"
+    mnt:               "rhel-9.2"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel92-pxe:
+    name:              "rhel92-pxe"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.2 Boot PXE"
+    method:            "pxe"
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-baseos-9.2-x86_64-boot.iso"
+    repo_iso:          "rhel-baseos-9.2-x86_64-dvd.iso"
+    mnt:               "rhel-9.2"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
+
 ##
 ##
 ##
