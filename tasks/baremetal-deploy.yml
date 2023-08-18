@@ -625,6 +625,10 @@
                   -i "{{ t_bmc  }}" 
                   -m "{{ t_url  }}"
                   -n "{{ t_nfs  }}"
+              register: local_result
+              retries: 12
+              delay: 5
+              until: local_result is not failed
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
