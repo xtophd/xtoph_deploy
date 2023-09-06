@@ -110,3 +110,15 @@
 
 
 
+- name: "common-deploy-post : create admin user"
+  ansible.builtin.user:
+    create_home: true
+    state: present
+    groups: wheel
+    name: "{{ host_credentials[inventory_hostname].username }}"
+    password: "{{ host_credentials[inventory_hostname].password | password_hash('sha512') }}"
+  when:
+    - host_credentials[inventory_hostname].username is defined
+    - host_credentials[inventory_hostname].password is defined
+       
+    

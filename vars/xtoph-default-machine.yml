@@ -557,7 +557,7 @@ hp_dl380_g9_560flr:
             netdev: "eno49"
           rhel7:
             blkdev: "sda"
-            netdev: "en49"
+            netdev: "eno49"
       boot_mode: "bios"
       storage:
         default:

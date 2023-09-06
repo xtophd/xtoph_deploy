@@ -108,6 +108,11 @@
           xtoph_deploy: "{{ xtoph_deploy | combine({'platform_profile': xtoph_default_platform[xtoph_deploy.selected_profile.platform] }, recursive=true) }}"
         when: xtoph_default_platform[xtoph_deploy.selected_profile.platform] is defined
       
+      - name: "main.yml : graft default_platform profile => xtoph_deploy.platform_setup"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'platform_setup': xtoph_default_platform[xtoph_deploy.selected_profile.platform] }, recursive=true) }}"
+        when: xtoph_default_platform[xtoph_deploy.selected_profile.platform_setup] is defined
+      
       - name: "main.yml : graft default_resource => xtoph_deploy.resource_profile"
         set_fact:
           xtoph_deploy: "{{ xtoph_deploy | combine({'resource_profile': xtoph_default_resource[xtoph_deploy.selected_profile.resource] }, recursive=true) }}"
@@ -140,6 +145,12 @@
           xtoph_deploy: "{{ xtoph_deploy | combine({'platform_profile': {item.key: item.value}}, recursive=true) }}"
         loop: "{{ lookup('dict', xtoph_config_platform[xtoph_deploy.selected_profile.platform] | default({}) ) }}"
         when: xtoph_config_platform[xtoph_deploy.selected_profile.platform] is defined
+      
+      - name: "main.yml : apply config_platform profile => xtoph_deploy.platform_setup"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'platform_setup': {item.key: item.value}}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config_platform[xtoph_deploy.selected_profile.platform_setup] | default({}) ) }}"
+        when: xtoph_config_platform[xtoph_deploy.selected_profile.platform_setup] is defined
       
       - name: "main.yml : apply config_resource profile => xtoph_deploy.resource_profile"
         set_fact:
@@ -303,7 +314,6 @@
 
       - set_fact:
           _xtoph_deploy_dict_processed: true
-
 
   when: _xtoph_deploy_dict_processed is undefined or
         not _xtoph_deploy_dict_processed

@@ -10,10 +10,11 @@ hostname: "{{ inventory_hostname }}"
 projectname: "{{ xtoph_vars.projectname }}"
 
 selected_profile:
-  kickstart: "{{ h_ksPROF | default ('') }}"
-  machine:   "{{ h_hwPROF | default ('') }}"
-  platform:  "{{ h_plPROF | default ('') }}"
-  resource:  "{{ h_rsPROF | default ('') }}"
+  kickstart:       "{{ h_ksPROF  | default ('') }}"
+  machine:         "{{ h_hwPROF  | default ('') }}"
+  platform:        "{{ h_plPROF  | default ('') }}"
+  platform_setup:  "{{ h_plSETUP | default ('') }}"
+  resource:        "{{ h_rsPROF  | default ('') }}"
 
 deployhost:
 
