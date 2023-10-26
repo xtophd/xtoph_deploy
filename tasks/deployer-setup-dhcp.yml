@@ -6,6 +6,9 @@
 ##
 
 
+- name: "deployer-setup-dhcp : distribution and version info"
+  debug: 
+    msg:  "{{ ansible_distribution }}  {{ ansible_distribution_major_version }}"
 
 - name: "deployer-setup-dhcp : package installation (RHEL7)"
   yum: name=dhcp state=installed
@@ -25,10 +28,14 @@
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "9"
 
-
+- name: "deployer-setup-dhcp : package installation (FEDORA)"
+  yum: name=dhcp-server state=installed
+  when:
+    - ansible_distribution == "Fedora"
+    - ansible_distribution_major_version == "38"
 
 - name: "deployer-setup-dhcp : package installation"
-  yum: name=tftp-server,ipxe-bootimgs,syslinux-tftpboot,yum-utils state=installed
+  yum: name=tftp-server,ipxe-bootimgs,syslinux,syslinux-tftpboot,yum-utils state=installed
 
 
 
