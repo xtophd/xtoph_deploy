@@ -188,41 +188,50 @@
           regexp: "^interface=lo"
           replace: "#interface=lo"
 
-      - name: "deployer-setup : adjust /etc/dnsmasq.conf to forward"
-        lineinfile:
-          dest: "/etc/dnsmasq.conf"
-          insertafter: "^#server=/localnet/.*$"
-          line: "server={{ xtoph_deploy.platform_profile.network.default.nameserver }}"
-          state:  present
-
-      - name: "deployer-setup : /etc/dnsmasq.conf to forward"
+      - name: "deployer-setup : adjust /etc/dnsmasq.conf to resolve the network fqdn"
         lineinfile:
           dest: "/etc/dnsmasq.conf"
           insertafter: "^server=.*$"
           line: "local=/{{ xtoph_deploy.platform_profile.network.default.fqdn }}/"
           state:  present
 
-      ##
-      ##    disable networkmanager from toying with /etc/resolv.conf
-      ##
+      - block: 
 
-      - name: "deployer-setup : disable network-manager /etc/resolv.conf adjustments"
-        template:
-          src:   "dns-resolv-fix.j2"
-          dest:  "/etc/NetworkManager/conf.d/90-dns-none.conf"
-          owner: root
+            - name: "deployer-setup : override nm : disable network-manager control of /etc/resolv.conf"
+              template:
+                src:   "dns-resolv-fix.j2"
+                dest:  "/etc/NetworkManager/conf.d/90-dns-none.conf"
+                owner: root
 
-      - name: "deployer-setup : restart networkmanager service"
-        service: name=NetworkManager state=reloaded enabled=yes
+            - name: "deployer-setup : override nm : adjust /etc/dnsmasq.conf to forward with default nameserver"
+              lineinfile:
+                dest: "/etc/dnsmasq.conf"
+                insertafter: "^#server=/localnet/.*$"
+                line: "server={{ xtoph_deploy.platform_profile.network.default.nameserver }}"
+                state:  present
+              when: xtoph_deploy.deployhost.dnsmasq_override_ip|length == 0
 
-      - name: "ocp4-workshop : bastion-dns : template deploy resolv.conf to point to localhost"
-        vars:
-          - p_search:     "{{ workshop_extras.network_fqdn }}"
-          - p_nameserver: "127.0.0.1"
-        template:
-          src:   "dns-resolv-conf.j2"
-          dest:  "/etc/resolv.conf"
-          owner: root
+            - name: "deployer-setup : override nm : adjust /etc/dnsmasq.conf to forward with override nameserver"
+              lineinfile:
+                dest: "/etc/dnsmasq.conf"
+                insertafter: "^#server=/localnet/.*$"
+                line: "server={{ xtoph_deploy.xtoph_deploy.deployhost.dnsmasq_override_ip }}"
+                state:  present
+              when: xtoph_deploy.deployhost.dnsmasq_override_ip|length > 0
+
+            - name: "deployer-setup : override nm : template deploy resolv.conf to point to localhost"
+              vars:
+                - p_search:     "{{ workshop_extras.network_fqdn }}"
+                - p_nameserver: "127.0.0.1"
+              template:
+                src:   "dns-resolv-conf.j2"
+                dest:  "/etc/resolv.conf"
+                owner: root
+
+            - name: "deployer-setup : override nm : restart networkmanager service"
+              service: name=NetworkManager state=reloaded enabled=yes
+
+        when: xtoph_deploy.deployhost.dnsmasq_override_nm
 
       ##
       ##    Last couple of items:
@@ -233,7 +242,7 @@
       ##      service restart
       ##
 
-      - name: "ocp4-workshop : bastion-dns : disable nscd socket and service"
+      - name: "deployer-setup : disable nscd socket and service"
         service:
           name: "{{ item }}"
           enabled: no
