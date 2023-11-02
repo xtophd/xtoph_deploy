@@ -1,0 +1,27 @@
+#!/bin/bash
+
+##
+##    This script is intended to be used with
+##    the xtoph_deploy ansible role.  It generates
+##    a new iso image using a source image and 
+##    copying (mapping) files onboard.
+##
+
+
+
+xorriso -indev "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}" \
+        -outdev "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" \
+        -compliance no_emul_toc \
+{% if bios_isolinux.stat.exists %}
+        -map "{{ bios_isolinux.stat.path }}"  "/isolinux/isolinux.cfg" \
+{% endif %}
+{% if bios_grub.stat.exists %}
+        -map "{{ bios_grub.stat.path }}"  "/boot/grub2/grub.cfg" \
+{% endif %}
+{% if uefi_grub.stat.exists %}
+        -map "{{ uefi_grub.stat.path }}"  "/EFI/BOOT/grub.cfg" \
+{% endif %}
+        -map "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"  "/ks.cfg" \
+        -boot_image any replay
+
+
