@@ -9,7 +9,7 @@
 lang en_US
 keyboard us
 timezone America/New_York --isUtc
-rootpw {{ p_rootpw }}  --iscrypted
+rootpw {{ p_rootpw }} --iscrypted
 text
 bootloader --location=mbr --append="nofb quiet splash=quiet {{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
 url --url={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}

@@ -17,14 +17,11 @@ bootloader --location=mbr --append="nofb quiet splash=quiet {{ xtoph_deploy.mach
 
 {%if xtoph_deploy.kickstart_profile.netcfg_override == "static" %}
 ## Override kernel level network args with a static kickstart config
-network --bootproto=static --device={{ xtoph_deploy.machine_profile.kickstart.netdev }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machin
-e_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }
-} --hostname={{ xtoph_deploy.hostname }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}
+network --bootproto=static --device={{ xtoph_deploy.machine_profile.kickstart.netdev }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machine_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }} --hostname={{ xtoph_deploy.hostname }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}
 {% endif %}
 
 {% for key in xtoph_deploy.kickstart_profile.repos %}
-repo --name={{ xtoph_deploy['kickstart_profile']['repos'][key].name }} --baseurl={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['k
-ickstart_profile']['repos'][key].subpath }}
+repo --name={{ xtoph_deploy['kickstart_profile']['repos'][key].name }} --baseurl={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][key].subpath }}
 {% endfor %}
 
 {%if p_ssh_key is defined and p_ssh_key|length %}
