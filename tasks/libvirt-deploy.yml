@@ -9,88 +9,24 @@
   delegate_to: localhost
   block:
 
-
-
       ##
       ##    NOTE: All tasks here are blocked and delegated to execute
       ##          on the localhost (deployhost/controller).  Some tasks
       ##          will be explicitly delegated to the libvirt platform(s)
       ##
 
-      - name: "libvirt-deploy : save state of xtoph_deploy dictionary to artifacts directory"
-        copy:
-          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
-          content:  "{{ xtoph_deploy | to_nice_yaml }}"
-
-
-
       ##
-      ##    Determine state of the vm
+      ##    Clean up the temp workspace
       ##
-    
-      - name: "libvirt-deploy : determine state of vm"
-        delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
-        shell:
-          cmd: "virsh domstate '{{ xtoph_deploy.platform_profile.vm.name }}'"
-        register: vminfo_result
-        ignore_errors: true
 
-      - name: "libvirt-deploy : DEBUG vm status/info results"
-        debug: var=vminfo_result
-        when: xtoph_deploy.debug == true
-    
-    
-    
-      ##
-      ##    If the node is absent OR node NOT up, 
-      ##    then set_fact to deploy the node
-      ##
-    
-      - set_fact:
-          deploy_node: false
-      
-      - set_fact:
-          deploy_node: true
-        when: vminfo_result.rc != 0
-    
-      - set_fact:
-          deploy_node: true
-        when: ( vminfo_result.rc == 0 and vminfo_result.stdout == "shut off" )
-
-      - name:  "libvirt-deploy : DEBUG vm status result"
-        debug:
-          var: vminfo_result
-        when: xtoph_deploy.debug == true
-
-      - name:  "libvirt-deploy : DEBUG vm status/info results"
-        debug:
-          msg: "deploy_node = {{ deploy_node }}"
-        when: xtoph_deploy.debug == true
-
-
-
-- delegate_to: localhost
-  block:
-
-      ##    deploy the current machine
-      ##
-      ##    WHEN:
-      ##          deploy_node = true
-      ##
-      ##    NOTE: 
-      ##          all tasks here are blocked and delegated
-      ##          to execute on the deployhost/localhost
-
-
-
-      - name: "libvirt-deploy : delete prior temp workspace"
+      - name: "libvirt-deploy : delete prior temp workspaces"
         file:
           path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
           state=absent
         loop:
           - virt-install-fragments
 
-      - name: "libvirt-deploy : create fresh temp workspace"
+      - name: "libvirt-deploy : create fresh temp workspaces"
         file:
           path="{{ xtoph_deploy.deployhost.tmp_dir }}/{{ item }}"
           mode="0755"
@@ -100,339 +36,43 @@
 
 
 
-      - block:
-
-          ##
-          ##    Create the custom ISO for the OS installation
-          ##
-          ##    NOTE:  to avoid concurrency problems with
-          ##           disk space and i/o bandwidth, we
-          ##           use serial at the import_task level
-          ##           DO NOT use "throttle" here as a stop gap
-          ##
-
-
-    
-          - name: "libvirt-deploy : test iso availability"
-            stat: 
-              path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            register: iso_result
-    
-          - fail: 
-              msg: "Specified ISO does not exist: {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            when: not iso_result.stat.exists
-    
-          - name: "libvirt-deploy : clone ISO source to temp workspace"
-            vars:
-              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-              t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-            shell:
-              cmd: |
-                xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
-
-          - name: "libvirt-deploy : preserve the ISO volume id"
-            vars:
-              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            shell:
-              cmd: |
-                isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
-            register: isoinfo_volume_id
-
-    
-          ##
-          ##    Create the kickstart config for the ISO
-          ##
-      
-      
-      
-          - name: "libvirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
-      
-          - name: "libvirt-deploy : deploy kickstart config iso temp workspace"
-            vars:
-              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
-              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
-            template:
-              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-              owner: root
-              group: root
-              mode: 0444
-   
-
- 
-          ##
-          ##    Adjust the isolinux.cfg (BIOS)
-          ##
-       
-      
-      
-          - name: "libvirt-deploy : isolinux.cfg: change default timeout to 3 seconds"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: '^timeout(\s+.*)?$'
-              replace: 'timeout 30'
-      
-          - name: "libvirt-deploy : remove default menu option from isolinux.cfg"
-            lineinfile:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: "^.*menu default.*$"
-              state:  absent
-      
-          - name: "libvirt-deploy : set new default menu option in isolinux.cfg"
-            lineinfile:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              insertafter: "^.*label linux.*$"
-              line: "  menu default"
-              state: present
-    
-    
-    
-
-          ##
-          ##    Adjust the grub.cfg (UEFI)
-          ##
-
-
-
-          - name: "libvirt-deploy : grub.cfg : change default timeout to 3 seconds"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-              regexp: '^set timeout=.*$'
-              replace: 'set timeout=30'
-
-          - name: "libvirt-deploy : grub.cfg : change default menu option"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-              regexp: '^set default=.*$'
-              replace: 'set default="0"'
-
-
-
-          ##
-          ##    NOTE:
-          ##
-          ##      Reference: 'man -7 dracut.cmdline', format for static ip= is as follows:
-          ##
-          ##        ip=<client-IP>:[<peer>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off|dhcp|on|any|dhcp6|auto6|ibft}[:[<dns1>][:<dns2>]]
-          ##
-          ##      Reference: http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
-          ##
-          ##        interface names 'enoX = onboard', 'ensX = pci-express', 'enp2s0 = physical location', 'enxYYYYYYYYYYYY = macaddress'
-          ##
-          ##      More discussions:
-          ##
-          ##        https://fedoraproject.org/wiki/Dracut/Options#Network
-          ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
-          ##
-
-
-
-
-          - block:
-
-              ##
-              ##    All tasks in this block are related to
-              ##    kernel parameter adjustments for
-              ##    the installation media
-              ##
-              ##    * NOTE * vars are defined once for the
-              ##             for the whole block at the end
-              ##             of the block
-              ##
-              ##    * NOTE * the use of single quotes to define t_ks_hd
-              ##             is required to avoid ansible behaviour
-              ##             handling escaped charaters which started
-              ##             with python38
-              ##             https://github.com/ansible/ansible/issues/52868
-              ##
-
-
-              - name: "libvirt-deploy : isolinux.cfg : kernel args for BIOS iso (cdrom install)"
-                replace:
-                  path:   "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-                  regexp: '(\s+)append(\s+.*)?$'
-                  replace: >
-                      \1append\2
-                      inst.text
-                      inst.ks={{ t_ks_hd }}
-                      ksdevice={{ t_net_dev }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }}
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "cdrom"
-    
-              - name: "libvirt-deploy : grub.cfg : kernel args for UEFI iso (cdrom install)"
-                replace:
-                  path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-                  regexp: '(\s+)linuxefi(\s+.*)?$'
-                  replace: >
-                      \1linuxefi\2
-                      inst.text
-                      inst.ks={{ t_ks_hd }}
-                      ksdevice={{ t_net_dev }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }}
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "cdrom"
-
-              - name: "libvirt-deploy : isolinux.cfg : kernel args for BIOS boot-iso (network install)"
-                replace:
-                  path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-                  regexp: '(\s+)append(\s+.*)?$'
-                  replace: >
-                      \1append\2
-                      inst.text
-                      inst.ks={{ t_ks_hd }}
-                      inst.repo={{ t_ks_repo }}
-                      ksdevice={{ t_net_dev }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }}
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "network"
-    
-              - name: "libvirt-deploy : grub.cfg : kernel args for UEFI boot-iso (network install)"
-                replace:
-                  path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-                  regexp: '(\s+)linuxefi(\s+.*)?$'
-                  replace: >
-                      \1linuxefi\2
-                      inst.text
-                      inst.ks={{ t_ks_url }}
-                      inst.repo={{ t_ks_hd }}
-                      ksdevice={{ t_net_dev }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }}
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "network"
-    
-    
-    
-            vars:
-              t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
-              t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
-              t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
-              t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
-              t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
-              t_krn_opts: "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
-              t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
-              t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
-    
-            ## End-Of-Block
-    
-    
-    
-          ##
-          ##    Preserve some files in the temp workspace
-          ##    artifacts directory for easy debugging
-          ##
-      
-      
-          
-          - name: "libvirt-deploy : copy files to temp workspace artifacts directory for preservation"
-            copy:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
-              src:  "{{ item }}"
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg" 
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-
-           
-    
-          ##
-          ##    Generate the custom ISO image
-          ##
-   
- 
-    
-          - name: "libvirt-deploy : create script to generate iso"
-            vars:
-              t_iso_label:  "{{ isoinfo_volume_id.stdout }}"
-              t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-              t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-            template:
-              src: "mkiso.j2"
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
-              owner: root
-              group: root
-              mode: 0755
-     
-          - name: "libvirt-deploy : execute mkiso.sh script"
-            shell: 
-              cmd: |
-                {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh
-    
-        when: xtoph_deploy.kickstart_profile is defined and
-              xtoph_deploy.kickstart_profile.method != "pxe" and
-              xtoph_deploy.kickstart_profile.method != "simple_cdrom"
-
-
-
       ##
-      ##    If method == 'simple_cdrom' just copy specified ISO to tmp dir
-      ##
-
-
-
-      - block:
-
-          - name: "libvirt-deploy : stat simple_cdrom image"
-            stat:
-              path: "{{xtoph_deploy.deployhost.tmp_dir}}/{{t_filename}}"
-            register: local_result
-
-          - name: "libvirt-deploy : pull simple_cdrom image"
-            get_url:
-              url:  "{{ t_url }}"
-              dest: "{{xtoph_deploy.deployhost.tmp_dir}}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-              mode: "0644"
-              timeout: 60
-              force: no
-            register: download_result
-            until: download_result is not failed
-            retries: 5
-            when: not local_result.stat.exists
-
-        vars:
-          t_url: "{{ xtoph_deploy.machine_profile.kickstart.iso_url }}"
-          t_filename: "{{ t_url | basename }}"
-        when: xtoph_deploy.kickstart_profile.method == "simple_cdrom"
-
-
-
-      ##
-      ##    Transfer the ISO image to ovirt libvirt domain
+      ##    Transfer the ISO image to libvirt storage domain
       ##
       ##    NOTE: to avoid concurrency problems with
       ##          disk space and i/o bandwidth, we
       ##          set 'throttle = 1'
       ##
 
-
-
       - block:
 
-          - name: "libvirt-deploy : upload iso image"
-            throttle: 1
-            delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
-            copy:
-              src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-              dest: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}"
+            - name: "ovirt-deploy : DEBUG info about image transfer"
+              debug:
+                msg:
+                  - "## libVIRT IMAGE TRANSFER DETAILS"
+                  - "hostname: {{ xtoph_deploy.platform_profile.vm.name }}"
+                  - "source: {{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                  - "destination: {{ xtoph_deploy.platform_profile.host_fqdn }}:{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+              when: xtoph_deploy.debug == true
 
-          - name: "libvirt-deploy : clean-up temporary work-space"
-            shell:
-              cmd: |
-                if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
-                  rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-                fi
+            - name: "libvirt-deploy : upload iso image"
+              throttle: 1
+              delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
+              copy:
+                src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                dest: "{{ xtoph_deploy.platform_profile.storage.default.qcow_dir }}"
 
-                if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
-                  rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-                fi
-            when: xtoph_deploy.cleanup == true
+            - name: "libvirt-deploy : clean-up temporary work-space"
+              shell:
+                cmd: |
+                  if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
+                    rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+                  fi
+  
+                  if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
+                    rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                  fi
+              when: xtoph_deploy.cleanup == true
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe"
@@ -440,42 +80,8 @@
 
 
       ##
-      ##    Create the kickstart config for PXE/NETWORK supported installs
-      ##
-
-  
-
-      - block:
-
-          - name: "libvirt-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
-
-
-          - name: "libvirt-deploy : deploy kickstart config iso to http dir"
-            vars:
-              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
-              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
-            template:
-              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ item }}"
-              owner: root
-              group: root
-              mode: 0444
-            loop:
-              - "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
-
-        when: xtoph_deploy.kickstart_profile is defined and
-              xtoph_deploy.kickstart_profile.template is defined and
-              xtoph_deploy.kickstart_profile.method != "cdrom"
-
-
-
-      ##
       ##    Network Config Checks
       ##
-
-
 
       - name: "libvirt-deploy : network validate fwd_type"
         fail: msg="currently only support network.fwd_type = [ nat | bridge | macvtap ]"
@@ -489,8 +95,6 @@
       ##
       ##    Network XML Templates
       ##
-
-
 
       - name: "libvirt-deploy : xml to define libvirt-network using 'nat'"
         template:
@@ -529,8 +133,6 @@
       ##          NOT used at any point during a "deploy".  During
       ##          "undeploy", the script will be templated again.
       ##
-
-
 
       - name: "libvirt-deploy : script to create libvirt network"
         vars:
@@ -642,8 +244,6 @@
       ##
       ##    Execute virtual machine installation scripts
       ##
-
-
 
       - name: "libvirt-deploy : copy xml network config to platform host"
         throttle: 1

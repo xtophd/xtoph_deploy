@@ -58,3 +58,83 @@
           _xtoph_deploy_dict_processed: false
         when: makeupmac.changed
 
+
+
+      ##
+      ##    Log in to the oVIRT API service
+      ##
+      ##    NOTE: username and password should be in
+      ##          the encrypted credentials.yml file
+      ##
+      ##    NOTE: to avoid concurrency problems with
+      ##          hitting the api at scale, we
+      ##          set 'throttle = 1'
+      ##
+  
+      - name: "ovirt-deploy-preprocess : Login to oVirt"
+        throttle: 1
+        ovirt_auth:
+          hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
+          #ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
+          insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
+          username: "{{ t_uid }}"
+          password: "{{ t_pw  }}"
+          state:    present
+        vars:
+          t_uid: "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['username'] | default(ovirt_credentials['default']['username']) }}"
+          t_pw:  "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['password'] | default(ovirt_credentials['default']['password']) }}"
+  
+  
+  
+      ##
+      ##    Determine state of the vm
+      ##
+  
+      - name: "ovirt-deploy-preprocess : determine state of vm"
+        ovirt_vm_info:
+          pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
+          auth: "{{ ovirt_auth }}"
+        register: vminfo_result
+        ignore_errors: true
+  
+      - name: "ovirt-deploy-preprocess : DEBUG vm status/info results"
+        debug: var=vminfo_result
+        when: xtoph_deploy.debug == true
+  
+  
+  
+      ##
+      ##    If the node is absent OR node NOT up,
+      ##    then set_fact to deploy the node
+      ##
+  
+      - set_fact:
+          deploy_node: false
+  
+      - set_fact:
+          deploy_node: true
+        when: vminfo_result.ovirt_vms|length == 0
+  
+      - set_fact:
+          deploy_node: true
+        when:
+          - vminfo_result.ovirt_vms[0].status is defined
+          - vminfo_result.ovirt_vms[0].status != "up"
+  
+      - name:  "ovirt-deploy-preprocess : DEBUG vm status/info results"
+        debug:
+          msg: "deploy_node = {{ deploy_node }}"
+        when: xtoph_deploy.debug == true
+
+
+
+      ##
+      ##    Log out of the oVIRT API service
+      ##
+
+      - name: Logout from oVirt
+        throttle: 1
+        ovirt_auth:
+          state: absent
+          ovirt_auth: "{{ ovirt_auth }}"
+

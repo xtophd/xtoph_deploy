@@ -454,6 +454,10 @@
 ##
 
 
+- name: "main.yml : platform (re)build ISO images"
+  include_tasks: "iso-fabrik.yml"
+  when: 
+    - xtoph_deploy_action == "deploy" 
 
 - name: "main.yml : platform deploy machines"
   include_tasks: "{{ platform_item.playbook }}"

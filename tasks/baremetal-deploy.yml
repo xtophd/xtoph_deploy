@@ -5,7 +5,8 @@
 ##
 
 ##
-##    NOTE: deploy_node only affects ipmi/bmc automation
+##    NOTE: deploy_node which was set in baremetal-deploy-preprocess.yml
+##          only affects ipmi/bmc automation
 ##
 
 - name: "baremetal-deploy : BEGIN"
@@ -17,459 +18,45 @@
       ##    to execute on the deployhost
       ##
 
-      - name: "baremetal-deploy : save state of xtoph_deploy dictionary to artifacts directory"
-        copy:
-          dest:     "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/xtoph_deploy.yml"
-          content:  "{{ xtoph_deploy | to_nice_yaml }}"
-
-
-
-      ##
-      ##    Execute "ipmi" calls to ready system for deployment
-      ##
-      ##    WHEN:
-      ##      if IPMI interface is defined & method == pxe
-      ##
-      ##    NOTE:
-      ##     
-      ##      xtoph_deploy only supports pxe for ipmi interfaces    
-      ##
-      ##      As a safety measure, only enable automated deployment 
-      ##      of a host if (and ONLY if) power is ALREADY off
-      ##
-
-      - name: "baremetal-deploy : (IPMI) power-status"
-        shell:
-          cmd: |
-            ipmitool -U {{ t_user }} -P {{ t_pass }} -H {{ t_bmc }} {{ xtoph_deploy.machine_profile.ipmi.get_power }} | grep -q 'off'
-        register: ipmi_result
-        ignore_errors: true
-
-      - set_fact:
-          deploy_node: true
-        when: ipmi_result.rc == 0
-
-  vars:
-    t_bmc:    "{{ xtoph_deploy.machine_profile.ipmi.fqdn }}"
-    t_user:   "{{ ipmi_credentials[ipmi_fqdn]['username'] | default(ipmi_credentials['default']['username']) }}"
-    t_pass:   "{{ ipmi_credentials[ipmi_fqdn]['password'] | default(ipmi_credentials['default']['password']) }}"
-  when:
-    - xtoph_deploy.machine_profile.ipmi.fqdn is defined
-    - xtoph_deploy.machine_profile.ipmi.fqdn|length > 0
-    - xtoph_deploy.kickstart_profile.method == "pxe" 
-
-
-
-- delegate_to: localhost
-  block:
-
-      ##
-      ##    All tasks here are blocked and delegated 
-      ##    to execute on the deployhost
-      ##
-      ##    Execute "bmc" calls to ready system for deployment
-      ##
-      ##    WHEN:
-      ##      if BMC interface (fqdn) is defined
-      ##
-      ##    NOTE:
-      ##
-      ##      As a safety measure, only enable automated deployment 
-      ##      of a host if (and ONLY if) power is ALREADY off
-      ##
-
-
-      - name: "baremetal-deploy : (BMC) debug"
-        debug:
-           msg:
-             - "BMC Address         : {{ t_bmc }}"
-             - "BMC User ID         : {{ t_user }}"
-             - "BMC Login Status    : {{ xtoph_deploy.machine_profile.bmc.login_status }}"
-             - "BMC Power Status    : {{ xtoph_deploy.machine_profile.bmc.power_status }}"
-             - "BMC Power On        : {{ xtoph_deploy.machine_profile.bmc.power_on }}"
-             - "BMC Power Off       : {{ xtoph_deploy.machine_profile.bmc.power_off }}"
-             - "BMC Media Status    : {{ xtoph_deploy.machine_profile.bmc.media_status }}"
-             - "BMC Media Eject     : {{ xtoph_deploy.machine_profile.bmc.media_eject }}"
-             - "BMC Media Insert    : {{ xtoph_deploy.machine_profile.bmc.media_insert }}"
-        when:
-          - xtoph_deploy.debug == true
-
-      - name: "baremetal-deploy : (BMC) login-status"
-        script: >
-            {{ xtoph_deploy.machine_profile.bmc.login_status }}
-            -u {{ t_user }} 
-            -p {{ t_pass }} 
-            -i {{ t_bmc }} 
-            --chomp
-
-      - name: "baremetal-deploy : (BMC) power-status"
-        script: >
-            {{ xtoph_deploy.machine_profile.bmc.power_status }}
-            -u {{ t_user }} 
-            -p {{ t_pass }} 
-            -i {{ t_bmc }} 
-            --chomp
-        register: bmc_result
-
-      - set_fact:
-          deploy_node: true
-        when: bmc_result.stdout == "off"
-
-  vars:
-    t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
-    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
-    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
-  when:
-    - xtoph_deploy.machine_profile.bmc.fqdn is defined
-    - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
-
-
-    
-- delegate_to: localhost
-  block:
-
-      ##
-      ##    All tasks here are blocked and 
-      ##    delegated to execute on the deployhost
-      ##
-      ##    WHEN:
-      ##      always
-      ##
-      ##
-      ##    NOTE:
-      ##
-      ##      this section is blocked primarily to follow the 
-      ##      flow of other platforms, although here we do
-      ##      NOT test for 'node_deploy'.  Some baremetal
-      ##      deployuments are manual and we cannot always test
-      ##      the machine status with ipmi.
-      ##
-      ##      so we always prepare media, kickstart configs, etc...
-      ##      based on the template parameters ... but relay on
-      ##      the user to manually engage pxe (when ipmi is not
-      ##      available)
-      ##
-      ##
-
-
-      ##
-      ##      If power state was determined above, then deploy_node
-      ##      was set accordingly.  If not, set it to false.
-      ##
-
-      - set_fact:
-          deploy_node: false
-        when: deploy_node is undefined
-
-      - debug: var=deploy_node
-        when: xtoph_deploy.debug == true
-
       - block:
-
     
-    
-          ##
-          ##    Create the custom ISO for the OS installation
-          ##
-          ##    * NOTE * to avoid concurrency problems with
-          ##             disk space and i/o bandwidth, we
-          ##             use serial at the import_task level
-          ##             DO NOT use "throttle" here as a stop gap
-          ##
-    
-    
-    
-          - name: "baremetal-deploy : test iso availability"
-            stat:
-              path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            register: iso_result
-    
-          - fail:
-              msg: "Specified ISO does not exist: {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            when: not iso_result.stat.exists
-     
-          - name: "baremetal-deploy : clone ISO source to temp workspace"
-            vars:
-              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-              t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-            shell:
-              cmd: |
-                xorriso -osirrox on -indev "{{ t_isofile }}" -extract / "{{ t_destdir }}"
-      
-          - name: "baremetal-deploy : preserve the ISO volume id"
-            vars:
-              t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-            shell:
-              cmd: |
-                isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
-            register: isoinfo_volume_id
-    
-    
-    
-          ##
-          ##    Create the kickstart config for the ISO
-          ##
-    
-    
-    
-          - name: "baremetal-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-            file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
+            ##
+            ##    Transfer the ISO image to baremetal storage location
+            ##
+            ##    NOTE: to avoid concurrency problems with
+            ##          disk space and i/o bandwidth, we
+            ##          set 'throttle: 1'
+            ##
           
-              
-          - name: "baremetal-deploy : deploy kickstart config to iso temp workspace"
-            vars:
-              p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-              p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
-              p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
-            template:
-              src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-              dest:  "{{ item }}"
-              owner: root
-              group: root
-              mode: 0444
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-    
-    
-        
-          ##
-          ##    Adjust the isolinux.cfg (BIOS)
-          ##
       
-      
-      
-          - name: "baremetal-deploy : isolinux.cfg: change default timeout to 3 seconds"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: '^timeout(\s+.*)?$'
-              replace: 'timeout 30'
+            - name: "baremetal-deploy : create generated iso dir '{{ xtoph_deploy.deployhost.generated_iso.dir }}'"
+              file: 
+                path: "{{ xtoph_deploy.deployhost.generated_iso.dir }}"
+                mode: "0755" 
+                state: directory
+           
+            - name: "baremetal-deploy : cleanup previously generated iso image"
+              file: 
+                path: "{{ xtoph_deploy.deployhost.generated_iso.dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                state: absent
+           
+            - name: "baremetal-deploy : upload iso image"
+              throttle: 1
+              copy:
+                src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                dest: "{{ xtoph_deploy.deployhost.generated_iso.dir }}"
           
-          - name: "baremetal-deploy : remove default menu option from isolinux.cfg"
-            lineinfile:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              regexp: "^.*menu default.*$"
-              state:  absent
-          
-          - name: "baremetal-deploy : set new default menu option in isolinux.cfg"
-            lineinfile:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-              insertafter: "^.*label linux.*$"
-              line: "  menu default"
-              state: present
-    
-    
-    
-          ##
-          ##    Adjust the grub.cfg (UEFI)
-          ##
-        
-        
-    
-          - name: "baremetal-deploy : grub.cfg : change default timeout to 3 seconds"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-              regexp: '^set timeout=.*$'
-              replace: 'set timeout=30'
-        
-          - name: "baremetal-deploy : grub.cfg : change default menu option"
-            replace:
-              path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-              regexp: '^set default=.*$'
-              replace: 'set default="0"'
-     
-    
-    
-          ##
-          ##    NOTE:
-          ##
-          ##      Reference: 'man -7 dracut.cmdline', format for static ip= is as follows:
-          ##
-          ##        ip=<client-IP>:[<peer>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off|dhcp|on|any|dhcp6|auto6|ibft}[:[<dns1>][:<dns2>]]
-          ##
-          ##      Reference: http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
-          ##
-          ##        interface names 'enoX = onboard', 'ensX = pci-express', 'enp2s0 = physical location', 'enxYYYYYYYYYYYY = macaddress'
-          ##
-          ##      More discussions:
-          ##
-          ##        https://fedoraproject.org/wiki/Dracut/Options#Network
-          ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
-          ##
-
-
-
-          - block:
-   
-              ##
-              ##    All tasks in this block are related to
-              ##    kernel parameter adjustments for 
-              ##    the installation media
-              ##
-              ##    * NOTE * vars are defined once for the 
-              ##             for the whole block at the end
-              ##             of the block
-              ##  
-              ##    * NOTE * the use of single quotes to define t_ks_hd
-              ##             is required to avoid ansible behaviour
-              ##             handling escaped charaters which started
-              ##             with python38
-              ##             https://github.com/ansible/ansible/issues/52868
-              ##
-              ##
-      
-              - name: "baremetal-deploy : isolinux.cfg : kernel args for BIOS iso (cdrom install)"
-                replace:
-                  path:   "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-                  regexp: '(\s+)append(\s+.*)?$'
-                  replace: >
-                      \1append\2
-                      inst.text
-                      usb-storage.delay_use={{ t_usb_delay }}
-                      inst.ks={{ t_ks_hd }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }}
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "cdrom"
-     
-              - name: "baremetal-deploy : grub.cfg : kernel args for UEFI iso (cdrom install)"
-                replace:
-                  path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-                  regexp: '(\s+)linuxefi(\s+.*)?$'
-                  replace: >
-                      \1linuxefi\2 
-                      inst.text
-                      usb-storage.delay_use={{ t_usb_delay }}
-                      inst.ks={{ t_ks_hd }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }} 
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "cdrom"
-    
-              - name: "baremetal-deploy : isolinux.cfg : kernel args for BIOS boot-iso (network install)"
-                replace:
-                  path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-                  regexp: '(\s+)append(\s+.*)?$'
-                  replace: >
-                      \1append\2
-                      inst.text
-                      usb-storage.delay_use={{ t_usb_delay }}
-                      inst.ks={{ t_ks_url }}
-                      inst.repo={{ t_ks_repo }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }}
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "network"
-    
-              - name: "baremetal-deploy : grub.cfg : kernel args for UEFI boot-iso (network install)"
-                replace:
-                  path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-                  regexp: '(\s+)linuxefi(\s+.*)?$'
-                  replace: >
-                      \1linuxefi\2 
-                      inst.text
-                      usb-storage.delay_use={{ t_usb_delay }}
-                      inst.ks={{ t_ks_url }}
-                      inst.repo={{ t_ks_repo }}
-                      ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                      nameserver={{ t_net_dns }} 
-                      {{ t_krn_opts }}
-                when: xtoph_deploy.kickstart_profile.method == "network"
-    
-        
-        
-            vars:
-              t_net_dev:   "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
-              t_net_ip:    "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
-              t_net_nm:    "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
-              t_net_gw:    "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
-              t_net_dns:   "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
-              t_krn_opts:  "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
-              t_ks_repo:   "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-              t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
-              t_ks_url:    "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
-              t_usb_delay: "{{ xtoph_deploy.machine_profile.usb_storage_delay | default('0') }}"
-
-
-      
-            ## End-Of-Block
-      
-      
-      
-          ##
-          ##    Preserve some files in the temp workspace
-          ##    artifacts directory for easy debugging
-          ##
-    
-    
-        
-          - name: "baremetal-deploy : copy files to temp workspace artifacts directory for preservation"
-            copy:
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
-              src:  "{{ item }}"
-            loop:
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg" 
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
-              - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/EFI/BOOT/grub.cfg"
-               
-  
-      
-          ##
-          ##    Generate the custom ISO image
-          ##
-    
-    
-    
-          - name: "baremetal-deploy : create script to generate iso"
-            vars:
-              t_iso_label:  "{{ isoinfo_volume_id.stdout }}"
-              t_iso_source: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-              t_iso_output: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-            template:
-              src: "mkiso.j2"
-              dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh"
-              owner: root
-              group: root
-              mode: 0755
+            - name: "baremetal-deploy : clean-up temporary work-space"
+              shell:
+                cmd: |
+                  if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
+                    rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+                  fi
          
-          - name: "baremetal-deploy : execute mkiso.sh script"
-            shell:
-              cmd: |
-                {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso.sh
-        
-    
-    
-          ##
-          ##    Transfer the ISO image to baremetal storage location
-          ##
-          ##    NOTE: to avoid concurrency problems with
-          ##          disk space and i/o bandwidth, we
-          ##          set 'throttle: 1'
-          ##
-    
-
-          - name: "baremetal-deploy : create generated iso dir '{{ xtoph_deploy.deployhost.generated_iso.dir }}'"
-            file: path="{{ xtoph_deploy.deployhost.generated_iso.dir }}" mode="0755" state=directory
-     
-          - name: "baremetal-deploy : cleanup previously generated iso image"
-            file: path="{{ xtoph_deploy.deployhost.generated_iso.dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" state=absent
-     
-          - name: "baremetal-deploy : upload iso image"
-            throttle: 1
-            copy:
-              src: "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-              dest: "{{ xtoph_deploy.deployhost.generated_iso.dir }}"
-    
-          - name: "baremetal-deploy : clean-up temporary work-space"
-            shell:
-              cmd: |
-                if [[ -d "{{ xtoph_deploy.deployhost.tmp_dir }}/iso" ]] ; then
-                  rm -rf "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-                fi
-    
-                if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
-                  rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
-                fi
-            when: xtoph_deploy.cleanup == true
+                  if [[ -e "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso" ]] ; then
+                    rm -f "{{ xtoph_deploy.deployhost.tmp_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                  fi
+              when: xtoph_deploy.cleanup == true
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe" and
@@ -478,43 +65,8 @@
 
 
       ##
-      ##    Create the kickstart config for PXE and NETWORK (BOOTISO) supported installs
-      ##    CDROM installs are self contained and do not need it
-      ##
-
-
-
-      - block:
-
-            - name: "baremetal-deploy : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
-              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
-
-            - name: "baremetal-deploy : cleanup any previous kickstart config"
-              file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg" state=absent
-
-            - name: "baremetal-deploy : deploy kickstart config to http dir"
-              vars:
-                p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-                p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
-                p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
-              template:
-                src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-                dest:  "{{ xtoph_deploy.deployhost.kickstart.dir }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
-                owner: root
-                group: root
-                mode: 0444
-
-        when: xtoph_deploy.kickstart_profile is defined and
-              xtoph_deploy.kickstart_profile.template is defined and
-              xtoph_deploy.kickstart_profile.method != "cdrom" 
-
-
-
-      ##
       ##    Execute baremetal ipmi calls to automate installation
       ##
-
-
 
       - throttle: 1
         block:
@@ -525,7 +77,7 @@
                   ipmitool -U {{ t_uid }} -P {{ t_pw }} -H {{ ipmi_fqdn }} {{ item }}
               loop:
                 "{{ xtoph_deploy.machine_profile.ipmi.config_steps }}"
-    
+
             - name: "baremetal-deploy : (IPMI) execute power-on"
               shell:
                 cmd: |
@@ -543,8 +95,6 @@
       ##
       ##    Execute baremetal BMC calls to automate installation
       ##
-
-
 
       - block:
 
@@ -566,7 +116,7 @@
                   - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
               when:
                 - xtoph_deploy.debug == true
-
+    
             - name: "baremetal-deploy : (BMC) bootonce-clear"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_clear }}
@@ -584,7 +134,7 @@
               register: bmc_result
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
-
+    
             - name: "baremetal-deploy : (BMC) media-eject"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_eject }}
@@ -594,7 +144,7 @@
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
                 - bmc_result.stdout == "inserted"
-
+    
             - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_status }}
@@ -609,14 +159,14 @@
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
                 - bmc_result.stdout == "inserted"
-
+    
             - name: "baremetal-deploy : (BMC) custom-actions"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.custom_actions }}
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
-
+    
             - name: "baremetal-deploy : (BMC) media-insert"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_insert }}
@@ -645,14 +195,16 @@
               delay: 5
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
-
+    
+    
+    
             ##
             ##    NOTE: setting bootonce via redfish on dell creates
             ##          a job which needs to finish.  So hopefully 
             ##          we can just try a couple of times and it
             ##          will eventually complete
             ##
-
+    
             - name: "baremetal-deploy : (BMC) bootonce-media"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_media }}
@@ -665,7 +217,7 @@
               delay: 5
               when:
                 - xtoph_deploy.kickstart_profile.method != "pxe"
-
+    
             - name: "baremetal-deploy : (BMC) bootonce-pxe"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.bootonce_pxe }}
@@ -675,6 +227,8 @@
               when:
                 - xtoph_deploy.kickstart_profile.method == "pxe"
 
+
+
             ##
             ##    NOTE: setting bootonce via redfish on dell causes a
             ##          a power-on, thus the actual power-on could 
@@ -682,11 +236,11 @@
             ##          so we pause for a few seconds, test power, 
             ##          and then continue
             ##
-
+     
             - name: "baremetal-deploy : (BMC) pause to allow bootonce set-up to complete"
               pause:
                 seconds: 3
-
+    
             - name: "baremetal-deploy : (BMC) power-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_status }}
@@ -695,7 +249,7 @@
                   -i "{{ t_bmc }}"
                   --chomp
               register: bmc_result
-
+    
             - name: "baremetal-deploy : (BMC) power-on"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_on }}
@@ -703,7 +257,7 @@
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
               when: bmc_result.stdout == "off"
-
+    
             - name: "baremetal-deploy : (BMC) wait for power-status == on"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_status }}
@@ -715,7 +269,7 @@
               until: targetinfo_result.stdout == "on"
               retries: 600
               delay: 5
-
+      
         vars:
           t_user: "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
           t_pass: "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"

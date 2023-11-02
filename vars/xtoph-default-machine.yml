@@ -128,6 +128,9 @@ ovirt_sda:
             blkdev: "sda"
             netdev: "eth0"
             kernel_opts: ""
+          fedora38:
+            blkdev: "sda"
+            netdev: "ens3"
           rhel9:
             blkdev: "sda"
             netdev: "ens3"
@@ -161,6 +164,9 @@ ovirt_vda:
             blkdev: "vda"
             netdev: "eth0"
             kernel_opts: ""
+          fedora38:
+            blkdev: "vda"
+            netdev: "ens3"
           rhel9:
             blkdev: "vda"
             netdev: "ens3"
