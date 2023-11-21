@@ -8,348 +8,350 @@
   delegate_to: localhost
   block:
   
-      ##
-      ##    Create the custom ISO for the OS installation
-      ##
-      ##    * NOTE * to avoid concurrency problems with
-      ##             disk space and i/o bandwidth, we
-      ##             use serial at the import_task level
-      ##             DO NOT use "throttle" here as a stop gap
-      ##
+      - name: "iso-fabrik : when method != ( pxe | simple_cdrom ) create custom ISO"
+        block:
+
+            ##
+            ##    Create the custom ISO for the OS installation
+            ##
+            ##    * NOTE * to avoid concurrency problems with
+            ##             disk space and i/o bandwidth, we
+            ##             use serial at the import_task level
+            ##             DO NOT use "throttle" here as a stop gap
+            ##
    
-      - name: "iso-fabrik : test source iso availability"
-        stat:
-          path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-        register: iso_result
+            - name: "iso-fabrik : test source iso availability"
+              stat:
+                path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+              register: iso_result
  
-      - fail:
-          msg: "Specified ISO does not exist: {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-        when: not iso_result.stat.exists
+            - fail:
+                msg: "Specified ISO does not exist: {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+              when: not iso_result.stat.exists
 
-      - name: "iso-fabrik : preserve the ISO volume id"
-        vars:
-          t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-        shell:
-          cmd: |
-            isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
-        register: isoinfo_volume_id
+            - name: "iso-fabrik : preserve the ISO volume id"
+              vars:
+                t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+              shell:
+                cmd: |
+                  isoinfo -d -i {{ t_isofile }} | grep 'Volume id:' | sed -e 's/Volume id: //g'
+              register: isoinfo_volume_id
 
-      - name: "iso-fabrik : extract specific files from ISO source to temp workspace"
-        vars:
-          t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
-          t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
-        shell:
-          cmd: |
-            xorriso -osirrox on -indev "{{ t_isofile }}" -extract "{{ item }}"  "{{ t_destdir }}{{ item }}" 
-        ignore_errors: true
-        with_items:
-          - /isolinux/isolinux.cfg
-          - /boot/grub2/grub.cfg
-          - /EFI/BOOT/grub.cfg
+            - name: "iso-fabrik : extract specific files from ISO source to temp workspace"
+              vars:
+                t_isofile: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+                t_destdir: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso"
+              shell:
+                cmd: |
+                  xorriso -osirrox on -indev "{{ t_isofile }}" -extract "{{ item }}"  "{{ t_destdir }}{{ item }}" 
+              ignore_errors: true
+              with_items:
+                - /isolinux/isolinux.cfg
+                - /boot/grub2/grub.cfg
+                - /EFI/BOOT/grub.cfg
     
   
   
-      ##
-      ##    Create the kickstart config for ISO supported installs
-      ##
+            ##
+            ##    Create the kickstart config for ISO supported installs
+            ##
 
-      - name: "iso-fabrik : deploy kickstart config iso temp workspace"
-        vars:
-          p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
-          p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
-          p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
-        template:
-          src:   "{{ xtoph_deploy.kickstart_profile.template }}"
-          dest:  "{{ item }}"
-          owner: root
-          group: root
-          mode: 0444
-        loop:
-          - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
-
-
-
-      ##
-      ##    Adjust isolinux.cfg defaults (BIOS)
-      ##    
-      ##    NOTE: Starting with Fedora37, no more isolinux.cfg   
-      ##    
-
-
- 
-      - name: "iso-fabrik : stat BIOS isolinux"
-        stat:
-          path: "{{xtoph_deploy.deployhost.tmp_dir}}//iso/isolinux/isolinux.cfg"
-        register: bios_isolinux
-
-      - name: "iso-fabrik : isolinux.cfg change default timeout to 3 seconds"
-        replace:
-          path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-          regexp: '^timeout(\s+.*)?$'
-          replace: 'timeout 30'
-        when: bios_isolinux.stat.exists
-
-      - name: "iso-fabrik : isolinux.cfg remove default menu option"
-        lineinfile:
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-          regexp: "^.*menu default.*$"
-          state:  absent
-        when: bios_isolinux.stat.exists
-
-      - name: "iso-fabrik : isolinux.cfg set new default menu option"
-        lineinfile:
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
-          insertafter: "^.*label linux.*$"
-          line: "  menu default"
-          state: present
-        when: bios_isolinux.stat.exists
+            - name: "iso-fabrik : deploy kickstart config iso temp workspace"
+              vars:
+                p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
+                p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
+                p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
+              template:
+                src:   "{{ xtoph_deploy.kickstart_profile.template }}"
+                dest:  "{{ item }}"
+                owner: root
+                group: root
+                mode: 0444
+              loop:
+                - "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg"
 
 
 
-      ##
-      ##    Adjust grub.cfg defaults (BIOS)
-      ##
+            ##
+            ##    Adjust isolinux.cfg defaults (BIOS)
+            ##    
+            ##    NOTE: Starting with Fedora37, no more isolinux.cfg   
+            ##    
 
 
-
-      - name: "iso-fabrik : stat grub.cfg (BIOS)"
-        stat:
-          path: "{{xtoph_deploy.deployhost.tmp_dir}}/iso/boot/grub2/grub.cfg"
-        register: bios_grub
-
-      - name: "iso-fabrik : grub.cfg (BIOS) : change default timeout to 3 seconds"
-        replace:
-          path: "{{ bios_grub.stat.path }}"
-          regexp: '^set timeout=.*$'
-          replace: 'set timeout=30'
-        when: bios_grub.stat.exists
-
-      - name: "iso-fabrik : grub.cfg (BIOS) : change default menu option"
-        replace:
-          path: "{{ bios_grub.stat.path }}"
-          regexp: '^set default=.*$'
-          replace: 'set default="0"'
-        when: bios_grub.stat.exists
-
-
+       
+            - name: "iso-fabrik : stat BIOS isolinux"
+              stat:
+                path: "{{xtoph_deploy.deployhost.tmp_dir}}//iso/isolinux/isolinux.cfg"
+              register: bios_isolinux
       
-      ##
-      ##    Adjust grub.cfg defaults (UEFI)
-      ##
-
-
-
-      - name: "iso-fabrik : stat grub.cfg (UEFI)"
-        stat:
-          path: "{{xtoph_deploy.deployhost.tmp_dir}}/iso/EFI/BOOT/grub.cfg"
-        register: uefi_grub
-
-      - name: "iso-fabrik : grub.cfg (UEFI) : change default timeout to 3 seconds"
-        replace:
-          path: "{{ uefi_grub.stat.path }}"
-          regexp: '^set timeout=.*$'
-          replace: 'set timeout=30'
-        when: uefi_grub.stat.exists
-
-      - name: "iso-fabrik : grub.cfg (UEFI) : change default menu option"
-        replace:
-          path: "{{ uefi_grub.stat.path }}"
-          regexp: '^set default=.*$'
-          replace: 'set default="0"'
-        when: uefi_grub.stat.exists
-
-
-
-      ##    
-      ##    NOTE:  
-      ##    
-      ##      Reference: 'man -7 dracut.cmdline', format for static ip= is as follows:
-      ##   
-      ##        ip=<client-IP>:[<peer>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off|dhcp|on|any|dhcp6|auto6|ibft}[:[<dns1>][:<dns2>]]   
-      ##   
-      ##      Reference: http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
-      ##
-      ##        interface names 'enoX = onboard', 'ensX = pci-express', 'enp2s0 = physical location', 'enxYYYYYYYYYYYY = macaddress'
-      ##
-      ##      More discussions:
-      ##      
-      ##        https://fedoraproject.org/wiki/Dracut/Options#Network      
-      ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
-      ##
-
-
-      - block:
-      
-            ##
-            ##    All tasks in this block are related to
-            ##    kernel parameter adjustments for
-            ##    the installation media
-            ##
-            ##    * NOTE * vars are defined once for the
-            ##             for the whole block at the end
-            ##             of the block
-            ##
-            ##    * NOTE * the use of single quotes to define t_ks_hd
-            ##             is required to avoid ansible behaviour
-            ##             handling escaped charaters which started
-            ##             with python38
-            ##             https://github.com/ansible/ansible/issues/52868
-            ##
-
-
-
-            - name: "iso-fabrik : isolinux.cfg kernel args (BIOS - cdrom install)"
+            - name: "iso-fabrik : isolinux.cfg change default timeout to 3 seconds"
               replace:
-                path:   "{{ bios_isolinux.stat.path }}"
-                regexp: '(\s+)append(\s+.*)?$'
-                replace: >
-                    \1append\2
-                    inst.text
-                    inst.ks={{ t_ks_hd }}
-                    ksdevice={{ t_net_dev }}
-                    ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                    nameserver={{ t_net_dns }}
-                    {{ t_krn_opts }}
-              when: 
-                - xtoph_deploy.kickstart_profile.method == "cdrom"
-                - bios_isolinux.stat.exists
+                path: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                regexp: '^timeout(\s+.*)?$'
+                replace: 'timeout 30'
+              when: bios_isolinux.stat.exists
+      
+            - name: "iso-fabrik : isolinux.cfg remove default menu option"
+              lineinfile:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                regexp: "^.*menu default.*$"
+                state:  absent
+              when: bios_isolinux.stat.exists
+      
+            - name: "iso-fabrik : isolinux.cfg set new default menu option"
+              lineinfile:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/isolinux/isolinux.cfg"
+                insertafter: "^.*label linux.*$"
+                line: "  menu default"
+                state: present
+              when: bios_isolinux.stat.exists
 
-            - name: "iso-fabrik : grub.cfg kernel args (BIOS - cdrom install)"
+
+
+            ##
+            ##    Adjust grub.cfg defaults (BIOS)
+            ##
+
+
+
+            - name: "iso-fabrik : stat grub.cfg (BIOS)"
+              stat:
+                path: "{{xtoph_deploy.deployhost.tmp_dir}}/iso/boot/grub2/grub.cfg"
+              register: bios_grub
+
+            - name: "iso-fabrik : grub.cfg (BIOS) : change default timeout to 3 seconds"
               replace:
                 path: "{{ bios_grub.stat.path }}"
-                regexp: '(\s+)linux(\s+.*)?$'
-                replace: >
-                    \1linux\2
-                    inst.text
-                    inst.ks={{ t_ks_hd }}
-                    ksdevice={{ t_net_dev }}
-                    ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                    nameserver={{ t_net_dns }}
-                    {{ t_krn_opts }}
-              when: 
-                - xtoph_deploy.kickstart_profile.method == "cdrom"
-                - bios_grub.stat.exists
+                regexp: '^set timeout=.*$'
+                replace: 'set timeout=30'
+              when: bios_grub.stat.exists
 
-            - name: "iso-fabrik : grub.cfg kernel args (UEFI - cdrom install)"
-              replace:
-                path: "{{ uefi_grub.stat.path }}"
-                regexp: '(\s+)linuxefi(\s+.*)?$'
-                replace: >
-                    \1linuxefi\2
-                    inst.text
-                    inst.ks={{ t_ks_hd }}
-                    ksdevice={{ t_net_dev }}
-                    ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                    nameserver={{ t_net_dns }}
-                    {{ t_krn_opts }}
-              when: 
-                - xtoph_deploy.kickstart_profile.method == "cdrom"
-                - uefi_grub.stat.exists
-
-
-
-            - name: "iso-fabrik : isolinux.cfg kernel args (BIOS - network install)"
-              replace:
-                path: "{{ bios_isolinux.stat.path }}"
-                regexp: '(\s+)append(\s+.*)?$'
-                replace: >
-                    \1append\2
-                    inst.text
-                    inst.ks={{ t_ks_hd }}
-                    inst.repo={{ t_ks_repo }}
-                    ksdevice={{ t_net_dev }}
-                    ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                    nameserver={{ t_net_dns }}
-                    {{ t_krn_opts }}
-              when: 
-                - xtoph_deploy.kickstart_profile.method == "network"
-                - bios_isolinux.stat.exists
-
-            - name: "iso-fabrik : grub.cfg kernel args (BIOS - network install)"
+            - name: "iso-fabrik : grub.cfg (BIOS) : change default menu option"
               replace:
                 path: "{{ bios_grub.stat.path }}"
-                regexp: '(\s+)linux(\s+.*)?$'
-                replace: >
-                    \1linux\2
-                    inst.text
-                    inst.ks={{ t_ks_hd }}
-                    inst.repo={{ t_ks_repo }}
-                    ksdevice={{ t_net_dev }}
-                    ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                    nameserver={{ t_net_dns }}
-                    {{ t_krn_opts }}
-              when: 
-                - xtoph_deploy.kickstart_profile.method == "network"
-                - bios_grub.stat.exists
+                regexp: '^set default=.*$'
+                replace: 'set default="0"'
+              when: bios_grub.stat.exists
 
-            - name: "iso-fabrik : grub.cfg kernel args (UEFI - network install)"
+
+      
+            ##
+            ##    Adjust grub.cfg defaults (UEFI)
+            ##
+
+
+
+            - name: "iso-fabrik : stat grub.cfg (UEFI)"
+              stat:
+                path: "{{xtoph_deploy.deployhost.tmp_dir}}/iso/EFI/BOOT/grub.cfg"
+              register: uefi_grub
+
+            - name: "iso-fabrik : grub.cfg (UEFI) : change default timeout to 3 seconds"
               replace:
                 path: "{{ uefi_grub.stat.path }}"
-                regexp: '(\s+)linuxefi(\s+.*)?$'
-                replace: >
-                    \1linuxefi\2
-                    inst.text
-                    inst.ks={{ t_ks_hd }}
-                    inst.repo={{ t_ks_repo }}
-                    ksdevice={{ t_net_dev }}
-                    ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
-                    nameserver={{ t_net_dns }}
-                    {{ t_krn_opts }}
-              when: 
-                - xtoph_deploy.kickstart_profile.method == "network"
+                regexp: '^set timeout=.*$'
+                replace: 'set timeout=30'
+              when: uefi_grub.stat.exists
+
+            - name: "iso-fabrik : grub.cfg (UEFI) : change default menu option"
+              replace:
+                path: "{{ uefi_grub.stat.path }}"
+                regexp: '^set default=.*$'
+                replace: 'set default="0"'
+              when: uefi_grub.stat.exists
+
+
+      
+            ##    
+            ##    NOTE:  
+            ##    
+            ##      Reference: 'man -7 dracut.cmdline', format for static ip= is as follows:
+            ##   
+            ##        ip=<client-IP>:[<peer>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off|dhcp|on|any|dhcp6|auto6|ibft}[:[<dns1>][:<dns2>]]   
+            ##   
+            ##      Reference: http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
+            ##
+            ##        interface names 'enoX = onboard', 'ensX = pci-express', 'enp2s0 = physical location', 'enxYYYYYYYYYYYY = macaddress'
+            ##
+            ##      More discussions:
+            ##      
+            ##        https://fedoraproject.org/wiki/Dracut/Options#Network      
+            ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
+            ##
+      
+      
+            - name: "iso-fabrik : customize kernel args for [isolinux|grub].cfg"
+              block:
+            
+                  ##
+                  ##    All tasks in this block are related to
+                  ##    kernel parameter adjustments for
+                  ##    the installation media
+                  ##
+                  ##    * NOTE * vars are defined once for the
+                  ##             for the whole block at the end
+                  ##             of the block
+                  ##
+                  ##    * NOTE * the use of single quotes to define t_ks_hd
+                  ##             is required to avoid ansible behaviour
+                  ##             handling escaped charaters which started
+                  ##             with python38
+                  ##             https://github.com/ansible/ansible/issues/52868
+                  ##
+      
+      
+      
+                  - name: "iso-fabrik : isolinux.cfg kernel args (BIOS - cdrom install)"
+                    replace:
+                      path:   "{{ bios_isolinux.stat.path }}"
+                      regexp: '(\s+)append(\s+.*)?$'
+                      replace: >
+                          \1append\2
+                          inst.text
+                          inst.ks={{ t_ks_hd }}
+                          ksdevice={{ t_net_dev }}
+                          ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
+                          nameserver={{ t_net_dns }}
+                          {{ t_krn_opts }}
+                    when: 
+                      - xtoph_deploy.kickstart_profile.method == "cdrom"
+                      - bios_isolinux.stat.exists
+      
+                  - name: "iso-fabrik : grub.cfg kernel args (BIOS - cdrom install)"
+                    replace:
+                      path: "{{ bios_grub.stat.path }}"
+                      regexp: '(\s+)linux(\s+.*)?$'
+                      replace: >
+                          \1linux\2
+                          inst.text
+                          inst.ks={{ t_ks_hd }}
+                          ksdevice={{ t_net_dev }}
+                          ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
+                          nameserver={{ t_net_dns }}
+                          {{ t_krn_opts }}
+                    when: 
+                      - xtoph_deploy.kickstart_profile.method == "cdrom"
+                      - bios_grub.stat.exists
+      
+                  - name: "iso-fabrik : grub.cfg kernel args (UEFI - cdrom install)"
+                    replace:
+                      path: "{{ uefi_grub.stat.path }}"
+                      regexp: '(\s+)linuxefi(\s+.*)?$'
+                      replace: >
+                          \1linuxefi\2
+                          inst.text
+                          inst.ks={{ t_ks_hd }}
+                          ksdevice={{ t_net_dev }}
+                          ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
+                          nameserver={{ t_net_dns }}
+                          {{ t_krn_opts }}
+                    when: 
+                      - xtoph_deploy.kickstart_profile.method == "cdrom"
+                      - uefi_grub.stat.exists
+      
+      
+      
+                  - name: "iso-fabrik : isolinux.cfg kernel args (BIOS - network install)"
+                    replace:
+                      path: "{{ bios_isolinux.stat.path }}"
+                      regexp: '(\s+)append(\s+.*)?$'
+                      replace: >
+                          \1append\2
+                          inst.text
+                          inst.ks={{ t_ks_hd }}
+                          inst.repo={{ t_ks_repo }}
+                          ksdevice={{ t_net_dev }}
+                          ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
+                          nameserver={{ t_net_dns }}
+                          {{ t_krn_opts }}
+                    when: 
+                      - xtoph_deploy.kickstart_profile.method == "network"
+                      - bios_isolinux.stat.exists
+      
+                  - name: "iso-fabrik : grub.cfg kernel args (BIOS - network install)"
+                    replace:
+                      path: "{{ bios_grub.stat.path }}"
+                      regexp: '(\s+)linux(\s+.*)?$'
+                      replace: >
+                          \1linux\2
+                          inst.text
+                          inst.ks={{ t_ks_hd }}
+                          inst.repo={{ t_ks_repo }}
+                          ksdevice={{ t_net_dev }}
+                          ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
+                          nameserver={{ t_net_dns }}
+                          {{ t_krn_opts }}
+                    when: 
+                      - xtoph_deploy.kickstart_profile.method == "network"
+                      - bios_grub.stat.exists
+      
+                  - name: "iso-fabrik : grub.cfg kernel args (UEFI - network install)"
+                    replace:
+                      path: "{{ uefi_grub.stat.path }}"
+                      regexp: '(\s+)linuxefi(\s+.*)?$'
+                      replace: >
+                          \1linuxefi\2
+                          inst.text
+                          inst.ks={{ t_ks_hd }}
+                          inst.repo={{ t_ks_repo }}
+                          ksdevice={{ t_net_dev }}
+                          ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
+                          nameserver={{ t_net_dns }}
+                          {{ t_krn_opts }}
+                    when: 
+                      - xtoph_deploy.kickstart_profile.method == "network"
+                      - uefi_grub.stat.exists
+      
+      
+      
+              vars:
+                t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
+                t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
+                t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
+                t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
+                t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
+                t_krn_opts: "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
+                t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+                t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
+                t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
+            
+              ## End-Of-Block
+
+
+
+            ##
+            ##    Preserve some files in the temp workspace
+            ##    artifacts directory for easy debugging
+            ##
+ 
+            - name: "iso-fabrik : copy isolinux (BIOS) files to temp workspace artifacts directory for preservation"
+              copy:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
+                src:  "{{ bios_isolinux.stat.path }}" 
+              when:
+                - bios_isolinux.stat.exists
+      
+            - name: "iso-fabrik : copy grub (BIOS) files to temp workspace artifacts directory for preservation"
+              copy:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/grub-bios.cfg"
+                src:  "{{ bios_grub.stat.path }}"
+              when:
+                - bios_grub.stat.exists
+
+            - name: "iso-fabrik : copy grub (UEFI) files to temp workspace artifacts directory for preservation"
+              copy:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/grub-uefi.cfg"
+                src:  "{{ uefi_grub.stat.path }}"
+              when:
                 - uefi_grub.stat.exists
 
+            - name: "iso-fabrik : copy kickstart files to temp workspace artifacts directory for preservation"
+              copy:
+                dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
+                src:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
 
 
-        vars:
-          t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
-          t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
-          t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
-          t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
-          t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
-          t_krn_opts: "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
-          t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-          t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
-          t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
-      
-        ## End-Of-Block
-
-
-
-      ##
-      ##    Preserve some files in the temp workspace
-      ##    artifacts directory for easy debugging
-      ##
- 
-      - name: "iso-fabrik : copy isolinux (BIOS) files to temp workspace artifacts directory for preservation"
-        copy:
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
-          src:  "{{ bios_isolinux.stat.path }}" 
-        when:
-          - bios_isolinux.stat.exists
-      
-      - name: "iso-fabrik : copy grub (BIOS) files to temp workspace artifacts directory for preservation"
-        copy:
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/grub-bios.cfg"
-          src:  "{{ bios_grub.stat.path }}"
-        when:
-          - bios_grub.stat.exists
-
-      - name: "iso-fabrik : copy grub (UEFI) files to temp workspace artifacts directory for preservation"
-        copy:
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/grub-uefi.cfg"
-          src:  "{{ uefi_grub.stat.path }}"
-        when:
-          - uefi_grub.stat.exists
-
-      - name: "iso-fabrik : copy kickstart files to temp workspace artifacts directory for preservation"
-        copy:
-          dest: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts"
-          src:  "{{ xtoph_deploy.deployhost.tmp_dir }}/iso/ks.cfg" 
-
-
-      
-      - block:
       
             ##
             ##    Generate the custom ISO image
@@ -374,12 +376,9 @@
 
 
 
-      - block:
+      - name: "iso-fabrik : when method == simple_cdrom just copy source ISO to tmp dir"
+        block:
 
-            ##
-            ##    If method == 'simple_cdrom' just copy specified ISO to tmp dir
-            ## 
-    
             - name: "iso-fabrik : stat simple_cdrom image"
               stat:
                 path: "{{xtoph_deploy.deployhost.tmp_dir}}/{{t_filename}}"
@@ -405,11 +404,8 @@
       
 
 
-      - block:
-
-            ##
-            ##    Put copy of ks.cfg in http share for PXE/NETWORK supported installs
-            ##
+      - name: "iso-fabrik : when method != cdrom, put copy of ks.cfg in http share for PXE | NETWORK installs"
+        block:
 
             - name: "iso-fabrik : create kickstart http dir '{{ xtoph_deploy.deployhost.kickstart.dir }}'"
               file: path="{{ xtoph_deploy.deployhost.kickstart.dir }}" mode="0755" state=directory
