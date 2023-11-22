@@ -21,14 +21,8 @@ kvm_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "eth0"
+            netdev: "enp1s0"
             kernel_opts: ""
-          rhel9:
-            blkdev: "vda"
-            netdev: "enp1s0"
-          rhel8:
-            blkdev: "vda"
-            netdev: "enp1s0"
           rhel7:
             blkdev: "vda"
             netdev: "eth0"
@@ -53,14 +47,8 @@ kvm_nest_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "eth0"
+            netdev: "enp1s0"
             kernel_opts: ""
-          rhel9:
-            blkdev: "vda"
-            netdev: "enp1s0"
-          rhel8:
-            blkdev: "vda"
-            netdev: "enp1s0"
           rhel7:
             blkdev: "vda"
             netdev: "eth0"
@@ -86,14 +74,8 @@ kvm_sda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "enp1s0"
             kernel_opts: ""
-          rhel9:
-            blkdev: "sda"
-            netdev: "enp1s0"
-          rhel8:
-            blkdev: "sda"
-            netdev: "enp1s0"
           rhel7:
             blkdev: "sda"
             netdev: "eth0"
@@ -126,17 +108,8 @@ ovirt_sda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "ens3"
             kernel_opts: ""
-          fedora38:
-            blkdev: "sda"
-            netdev: "ens3"
-          rhel9:
-            blkdev: "sda"
-            netdev: "ens3"
-          rhel8:
-            blkdev: "sda"
-            netdev: "ens3"
           rhel7:
             blkdev: "sda"
             netdev: "eth0"
@@ -162,17 +135,8 @@ ovirt_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "eth0"
+            netdev: "ens3"
             kernel_opts: ""
-          fedora38:
-            blkdev: "vda"
-            netdev: "ens3"
-          rhel9:
-            blkdev: "vda"
-            netdev: "ens3"
-          rhel8:
-            blkdev: "vda"
-            netdev: "ens3"
           rhel7:
             blkdev: "vda"
             netdev: "eth0"
