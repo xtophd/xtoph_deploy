@@ -148,14 +148,28 @@
             - "tftp"
       
       
+
+# DEPRECATED: firewalld module was pulled from ansible-core, using shell instead
+#        - name: "common-dhcp-preprocess : add firewalld ports and services"
+#          run_once: true
+#          firewalld:
+#            service: "{{ item }}"
+#            immediate: yes
+#            permanent: yes
+#            state: enabled
+#          with_items:
+#            - "dhcp"
+#            - "tftp"
+#          when: ansible_facts['services']['firewalld.service']['state'] == 'running'
+
+
       
         - name: "common-dhcp-preprocess : add firewalld ports and services"
           run_once: true
-          firewalld:
-            service: "{{ item }}"
-            immediate: yes
-            permanent: yes
-            state: enabled
+          shell:
+            cmd: |
+              firewall-cmd --add-service="{{ item }}"
+              firewall-cmd --add-service="{{ item }}" --permanent
           with_items:
             - "dhcp"
             - "tftp"

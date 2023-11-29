@@ -629,7 +629,7 @@ supermicro_x9drd_if:
 
 pc_nvme:
       platform: "baremetal"
-      description: "Generic PC with nvme"
+      description: "Generic (BIOS) PC with nvme"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -637,18 +637,12 @@ pc_nvme:
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
-            blkdev: "sda"
-            netdev: "eno0"
+            blkdev: "nvme0n1"
+            netdev: "eno1"
             kernel_opts: ""
           rhel7:
             blkdev: "nvme0n1"
-            netdev: "enp4s0"
-          rhel8:
-            blkdev: "nvme0n1"
-            netdev: "enp4s0"
-          rhel9:
-            blkdev: "nvme0n1"
-            netdev: "enp4s0"
+            netdev: "eno0"
       boot_mode: "bios"
       storage:
         default:
@@ -659,7 +653,7 @@ pc_nvme:
 
 pc_nvme_efi:
       platform: "baremetal"
-      description: "Generic PC with nvme"
+      description: "Generic (EFI) PC with nvme"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -667,18 +661,12 @@ pc_nvme_efi:
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
-            blkdev: "sda"
-            netdev: "eno0"
+            blkdev: "nvme0n1"
+            netdev: "eno1"
             kernel_opts: ""
           rhel7:
             blkdev: "nvme0n1"
-            netdev: "enp4s0"
-          rhel8:
-            blkdev: "nvme0n1"
-            netdev: "enp4s0"
-          rhel9:
-            blkdev: "nvme0n1"
-            netdev: "enp4s0"
+            netdev: "eno0"
       boot_mode: "efi"
       storage:
         default:
@@ -698,14 +686,11 @@ pc_sda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eno0"
+            netdev: "eno1"
             kernel_opts: ""
-          rhel8:
+          rhel7:
             blkdev: "sda"
-            netdev: "enp4s0"
-          rhel9:
-            blkdev: "sda"
-            netdev: "enp4s0"
+            netdev: "eno0"
       boot_mode: "bios"
       storage:
         default:
