@@ -53,6 +53,13 @@
     - ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
     - ansible_distribution_major_version == "9"
 
+- name: "deployer-setup : install supporting packages (FEDORA 38)"
+  yum: name=genisoimage,xorriso,syslinux,git,wget,yum-utils,net-tools,traceroute,nmap,python3,pip state=installed
+  when:
+    - ansible_distribution == "FEDORA"
+    - ansible_distribution_major_version == "38" or
+      ansible_distribution_major_version == "39"
+
 
 
 

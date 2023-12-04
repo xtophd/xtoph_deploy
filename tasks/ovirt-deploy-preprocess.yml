@@ -73,7 +73,7 @@
   
       - name: "ovirt-deploy-preprocess : Login to oVirt"
         throttle: 1
-        ovirt_auth:
+        ovirt.ovirt.ovirt_auth:
           hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
           #ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
           insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
@@ -91,7 +91,7 @@
       ##
   
       - name: "ovirt-deploy-preprocess : determine state of vm"
-        ovirt_vm_info:
+        ovirt.ovirt.ovirt_vm_info:
           pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
           auth: "{{ ovirt_auth }}"
         register: vminfo_result
@@ -134,7 +134,7 @@
 
       - name: Logout from oVirt
         throttle: 1
-        ovirt_auth:
+        ovirt.ovirt.ovirt_auth:
           state: absent
           ovirt_auth: "{{ ovirt_auth }}"
 
