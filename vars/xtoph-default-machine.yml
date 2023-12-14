@@ -108,7 +108,7 @@ ovirt_sda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "ens3"
+            netdev: "enp3s0"
             kernel_opts: ""
           rhel7:
             blkdev: "sda"
@@ -120,6 +120,33 @@ ovirt_sda:
       network:
         default:
           ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+   
+ovirt_sda_uefi:
+      description: "oVirt vm using disk bus = virtio-scsi (sda)"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "enp3s0"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "sda"
+            netdev: "eth0"
+      boot_mode: "uefi"
+      storage:
+        default:
+          bus: "virtio_scsi"
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
    
 
  
@@ -135,7 +162,7 @@ ovirt_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "ens3"
+            netdev: "enp3s0"
             kernel_opts: ""
           rhel7:
             blkdev: "vda"
@@ -149,6 +176,31 @@ ovirt_vda:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
 
+ovirt_vda_uefi:
+      description: "oVirt vm using disk bus = virtio (vda)"
+      platform: "ovirt"
+      default_os_type: "rhel_8x64"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "vda"
+            netdev: "enp3s0"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "vda"
+            netdev: "eth0"
+      boot_mode: "uefi"
+      storage:
+        default:
+          bus: "virtio"
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
 
 
 ##

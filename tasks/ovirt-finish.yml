@@ -1,0 +1,162 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+
+- delegate_to: localhost
+  throttle: 1
+  block:
+
+
+
+      ##
+      ##    NOTE: All tasks here are delegated to execute
+      ##          on the deployhost/localhost
+      ##
+  
+      ##
+      ##    Log in to the oVIRT API service
+      ##
+      ##    * NOTE * username and password should be in
+      ##             the encrypted credentials.yml file
+      ##
+
+
+
+      - name: "ovirt-finish : Login to oVirt"
+        run_once: true
+        ovirt_auth:
+          hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
+          ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
+          insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
+          username: "{{ t_uid }}"
+          password: "{{ t_pw  }}"
+          state:    present
+        vars:
+          t_uid: "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['username'] | default(ovirt_credentials['default']['username']) }}"
+          t_pw:  "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['password'] | default(ovirt_credentials['default']['password']) }}"
+  
+      - name: "ovirt-finish : wait for vm state == 'up'"
+        ovirt_vm_info:
+          pattern: "name={{ xtoph_deploy.platform_profile.vm.name }} cluster={{ xtoph_deploy.platform_profile.cluster_name }}"
+          auth: "{{ ovirt_auth }}"
+          current_cd: true
+        register: vminfo_result
+        until: vminfo_result.ovirt_vms[0].status == "up"
+        retries: 600
+        delay: 5
+  
+      - name: "ovirt-finish : DEBUG VM INFO"
+        debug:
+          var: vminfo_result
+        when: xtoph_deploy.debug == true
+  
+
+
+# THIS WAS COOL TO GET REPORTED IP DATA, BUT WOUND UP NOT SOLVING MY PROBLEM
+# I WILL PRESERVE THIS UNTIL I FIND A BETTER PLACE TO STORE THIS USEFUL BIT
+# OF INFO COLLECTOR
+#
+#    - name: "ovirt-finish : wait until nicinfo is repoted by vm"
+#      ovirt_nic_info:
+#        auth: "{{ ovirt_auth }}"
+#        vm: "{{ xtoph_deploy.platform_profile.vm.name }}"
+#        follow: "reported_devices"
+#        name: "*"
+#      register: nicinfo_result
+#      until: 
+#        - nicinfo_result.ovirt_nics[0].reported_devices is defined 
+#        - nicinfo_result.ovirt_nics[0].reported_devices | length
+#      retries: 600
+#      delay: 5
+#
+#    - debug:
+#        var: nicinfo_result
+#      when: xtoph_deploy.debug == true
+
+
+
+      - block:
+
+            ##
+            ##    oVirt SDK/Ansible cannot eject cdrom on running system (BUG?).  
+            ##    Attempting delete an image results in status=illegal
+            ##
+            ##    If cdrom was not successfully ejected earlier (ie: waitfor_shudown, waitfor_ssh)
+            ##    then attempt to shutdown node and eject/wipe
+            ##
+  
+            - name: "ovirt-finish : if cdrom still attached, issue vm stop"
+              ignore_errors: true
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                state: "stopped"
+              register: vmstop_result
+              when: 
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
+  
+            - name: "ovirt-finish: if cdrom still attached, wait for vm status == down | absent"
+              ovirt_vm_info:
+                pattern: "name={{ xtoph_deploy.platform_profile.vm.name }} cluster={{ xtoph_deploy.platform_profile.cluster_name }}"
+                auth: "{{ ovirt_auth }}"
+                current_cd: true
+              register: vminfo_result
+              until: vminfo_result.ovirt_vms[0].status == "down" or vminfo_result.ovirt_vms[0].status == "absent"
+              retries: 24
+              delay: 5
+              when: 
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
+  
+            - name: "ovirt-finish : if cdrom still attached, eject iso"
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                cd_iso: ""
+              when: 
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
+  
+            - name: "ovirt-finish : undeploy iso in storage domain"
+              ovirt_disk:
+                auth: '{{ ovirt_auth }}'
+                name: '{{ xtoph_deploy.platform_profile.vm.name }}.iso'
+                storage_domain: '{{ xtoph_deploy.machine_profile.storage.default.domain_name }}'
+                content_type: "iso"
+                state: absent
+                wait: yes
+  
+            - name: "ovirt-finish : if cdrom was attached,  issue vm start"
+              ignore_errors: true
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                state: "running"
+                wait: yes
+              register: vmstop_result
+              when: 
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
+  
+            - name: Logout from oVirt
+              run_once: true
+              ovirt_auth:
+                state: absent
+                ovirt_auth: "{{ ovirt_auth }}"
+  
+  
+        when:
+          - xtoph_deploy.kickstart_profile.method != "pxe"
+
+
+
+    ##
+    ##    Log out of the oVIRT API service
+    ##
+
+
+

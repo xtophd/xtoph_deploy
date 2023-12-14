@@ -14,7 +14,7 @@
       ##          on the deployhost/localhost
       ##
 
-      - name: "common-dhcp-preprocess : stop services"
+      - name: "common-dhcp-postprocess : stop services"
         throttle: 1
         service: name={{ item }} state=stopped enabled=no masked=no
         when: xtoph_deploy.deployhost.dhcp.enable
@@ -22,7 +22,7 @@
           - "dhcpd"
           - "tftp"
 
-      - name: "common-dhcp-preprocess : cleanup machine pxe configs for BIOS and EFI"
+      - name: "common-dhcp-postprocess : cleanup machine pxe configs for BIOS and EFI"
         vars:
 #          t_name: "{{ h_pubMAC | replace(':','-') }}"
           t_name: "{{ xtoph_deploy.machine_profile.network.default.mac | replace(':','-') }}"

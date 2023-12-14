@@ -12,172 +12,208 @@
 
 
 
-    ##
-    ##    NOTE: All tasks here are delegated to execute
-    ##          on the deployhost/localhost
-    ##
+      ##
+      ##    NOTE: All tasks here are delegated to execute
+      ##          on the deployhost/localhost
+      ##
 
-    ##
-    ##    Log in to the oVIRT API service
-    ##
-    ##    * NOTE * username and password should be in
-    ##             the encrypted credentials.yml file
-    ##
-
-
-
-    - name: "ovirt-deploy-monitor : Login to oVirt"
-      run_once: true
-      ovirt_auth:
-        hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
-        ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
-        insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
-        username: "{{ t_uid }}"
-        password: "{{ t_pw  }}"
-        state:    present
-      vars:
-        t_uid: "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['username'] | default(ovirt_credentials['default']['username']) }}"
-        t_pw:  "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['password'] | default(ovirt_credentials['default']['password']) }}"
-
-
-   
- 
-
-    ##
-    ##    This block groups tasks related to monitoring
-    ##    deployment progression and waiting for either
-    ##    power-off, ssh available, or both.
-    ##
+      ##
+      ##    Log in to the oVIRT API service
+      ##
+      ##    ** NOTE ** 
+      ##
+      ##            username and password should be in
+      ##            the encrypted credentials.yml file
+      ##
 
 
 
-    - block:
-    
-          ##
-          ##    In this block we are waiting for the vm to be
-          ##    in a power-off state.  Once down, we set the boot 
-          ##    device to the harddrive, unmount vmedia,
-          ##    and perform other clean up operations
-          ##
-
-          - name: "ovirt-deploy-monitor : wait for vm shutdown"
-            ovirt_vm_info:
-              pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
-              auth: "{{ ovirt_auth }}"
-            register: vminfo_result
-            until: vminfo_result.ovirt_vms[0].status == "down"
-            retries: 600
-            delay: 5
-      
-          - name: "ovirt-deploy-monitor : eject iso"
-            ovirt_vm:
-              auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
-              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
-              cd_iso: ""
-            when: xtoph_deploy.kickstart_profile.method != "pxe"
-      
-          - name: "ovirt-deploy-monitor : vm change boot device to hd"
-            ovirt_vm:
-              auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
-              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
-              boot_menu: "no"
-              boot_devices:
-                - hd
-            when: xtoph_deploy.kickstart_profile.method != "pxe"
-      
-          - name: "ovirt-deploy-monitor : undeploy iso in storage domain"
-            ovirt_disk:
-              auth: '{{ ovirt_auth }}'
-              name: '{{ xtoph_deploy.platform_profile.vm.name }}.iso'
-              storage_domain: '{{ xtoph_deploy.machine_profile.storage.default.domain_name }}'
-              state: absent
-              wait: yes
-            when: xtoph_deploy.kickstart_profile.method != "pxe"
-
-          - name: "ovirt-deploy-monitor : vm change state to RUNNING (BOOT)"
-            ovirt_vm:
-              auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
-              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
-              state: "running"
-              wait: yes
-            retries: 10
-            delay: 5
-      
-      when: 
-        - deploy_node == true
-        - xtoph_deploy.kickstart_profile.wait_for_shutdown is defined 
-        - xtoph_deploy.kickstart_profile.wait_for_shutdown == true
+      - name: "ovirt-deploy-monitor : Login to oVirt"
+        run_once: true
+        ovirt_auth:
+          hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
+          ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
+          insecure: "{{ xtoph_deploy.platform_profile.insecure |  default(true) }}"
+          username: "{{ t_uid }}"
+          password: "{{ t_pw  }}"
+          state:    present
+        vars:
+          t_uid: "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['username'] | default(ovirt_credentials['default']['username']) }}"
+          t_pw:  "{{ ovirt_credentials[xtoph_deploy.selected_profile.platform]['password'] | default(ovirt_credentials['default']['password']) }}"
 
 
 
-    - block:
+      ##
+      ##    This block groups tasks related to monitoring
+      ##    deployment progression and waiting for either
+      ##    power-off and/or ssh available
+      ##
+
+
+
+      - block:
+
+            ##
+            ##    In this block we are waiting for the vm to be
+            ##    in a power-off state.  Once down, we set the boot 
+            ##    device to the harddrive, unmount vmedia, perform 
+            ##    other clean up operations, and restart the vm
+            ##
+
+            - name: "ovirt-deploy-monitor : (wait_for_shutdown) wait until vm status == down"
+              ovirt_vm_info:
+                auth:       "{{ ovirt_auth }}"
+                pattern:    "name={{ xtoph_deploy.platform_profile.vm.name }} cluster={{ xtoph_deploy.platform_profile.cluster_name }}"
+                current_cd: true
+              register: vminfo_result
+              until: vminfo_result.ovirt_vms[0].status == "down"
+              retries: 600
+              delay: 5
+     
+            - name: "ovirt-deploy-monitor : (wait_for_shutdown) DEBUG VM INFO"
+              debug:
+                var: vminfo_result
+              when: xtoph_deploy.debug == true
+
+            - name: "ovirt-deploy-monitor : (wait_for_shutdown) eject iso"
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                cd_iso: ""
+                wait: yes
+              when: 
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
+
+            - name: "ovirt-deploy-monitor : (wait_for_shutdown) undeploy iso"
+              ovirt_disk:
+                auth: '{{ ovirt_auth }}'
+                name: '{{ xtoph_deploy.platform_profile.vm.name }}.iso'
+                storage_domain: '{{ xtoph_deploy.machine_profile.storage.default.domain_name }}'
+                content_type: "iso"
+                state: absent
+                wait: yes
+              when: 
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
+
+            - name: "ovirt-deploy-monitor : (wait_for_shutdown) update vm boot device"
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                boot_menu: "no"
+                boot_devices:
+                  - hd
+              when: xtoph_deploy.kickstart_profile.method != "pxe"
+
+            - name: "ovirt-deploy-monitor : (wait_for_shutdown) restart vm"
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                state: "running"
+                wait: yes
+              retries: 10
+              delay: 5
+
+        when: 
+          - deploy_node == true
+          - xtoph_deploy.kickstart_profile.wait_for_shutdown is defined 
+          - xtoph_deploy.kickstart_profile.wait_for_shutdown == true
+
+
+
+      - block:
          
-          ##
-          ##    In this block we are waiting for the ssh service
-          ##    to become available.  Although changing device boot
-          ##    order is not possible with a poweroff, we can still 
-          ##    unmount vmedia and perform other clean up operations
-          ##
+            ##
+            ##    In this block we are waiting for the host in a 
+            ##    'up' state and ssh service to become available.  
+            ##
 
-          - name: "ovirt-deploy-monitor : wait for ssh alive"
-            wait_for:
-              host: "{{ inventory_hostname }}"
-              connect_timeout: 5
-              port: 22
-              sleep: 15
-              state: started
-              timeout: 1800
-            when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
-                  xtoph_deploy.kickstart_profile.wait_for_ssh == true
+            - name: "ovirt-deploy-monitor : wait for vm state == 'up'"
+              ovirt_vm_info:
+                auth:       "{{ ovirt_auth }}"
+                pattern:    "name={{ xtoph_deploy.platform_profile.vm.name }} cluster={{ xtoph_deploy.platform_profile.cluster_name }}"
+                current_cd: true
+                pattern: "cluster={{ xtoph_deploy.platform_profile.cluster_name }} name={{ xtoph_deploy.platform_profile.vm.name }}" 
+              register: vminfo_result
+              until: vminfo_result.ovirt_vms[0].status == "up"
+              retries: 600
+              delay: 5
 
-          - name: "ovirt-deploy-monitor : eject iso"
-            ovirt_vm:
-              auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
-              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
-              cd_iso: ""
-            when: xtoph_deploy.kickstart_profile.method != "pxe"
-      
-          - name: "ovirt-deploy-monitor : undeploy iso in storage domain"
-            ovirt_disk:
-              auth: '{{ ovirt_auth }}'
-              name: '{{ xtoph_deploy.platform_profile.vm.name }}.iso'
-              storage_domain: '{{ xtoph_deploy.machine_profile.storage.default.domain_name }}'
-              state: absent
-              wait: yes
-            when: xtoph_deploy.kickstart_profile.method != "pxe"
+            - name: "ovirt-deploy-monitor : (wait_for_ssh) DEBUG VM INFO"
+              debug:
+                var: vminfo_result
+              when: xtoph_deploy.debug == true
 
-          - name: "ovirt-deploy-monitor : vm change boot device to hd"
-            ovirt_vm:
-              auth: "{{ ovirt_auth }}"
-              name: "{{ xtoph_deploy.platform_profile.vm.name }}"
-              cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
-              boot_menu: "no"
-              boot_devices:
-                - hd
-            when: xtoph_deploy.kickstart_profile.method != "pxe"
-      
-      when: 
-        - deploy_node == true
-        - xtoph_deploy.kickstart_profile.wait_for_ssh is defined 
-        - xtoph_deploy.kickstart_profile.wait_for_ssh == true
+            - name: "ovirt-deploy-monitor : (wait_for_ssh) wait until ssh service == started"
+              wait_for:
+                host: "{{ inventory_hostname }}"
+                connect_timeout: 5
+                port: 22
+                sleep: 15
+                state: started
+                timeout: 1800
+
+            - name: "ovirt-deploy-monitor : (wait_for_ssh) eject iso"
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                cd_iso: ""
+              when:
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+                - vminfo_result.ovirt_vms[0].current_cd.file is defined
+
+            ##
+            ##    ** NOTE **
+            ##
+            ##            probably a bug in ovirt module, but eject
+            ##            is not working as expected.  We can signal
+            ##            the eject (above), but need to wait for a reboot
+            ##            before deleting the image until ovirt-finish.
+            ##            Otherwise we get an error and the iso image
+            ##            status is set to illegal (status==illegal).
+            ##
+            ##    ** NOTE **
+            ##
+            ##            because we launched the vm with cloud_init (run-once)
+            ##            we can trigger a forced shutdown during client initiated
+            ##            reboot by setting new boot devices.
+            ##
+  
+            - name: "ovirt-deploy-monitor : (wait_for_ssh) update vm boot device"
+              ovirt_vm:
+                auth: "{{ ovirt_auth }}"
+                name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+                cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+                boot_menu: "no"
+                boot_devices:
+                  - hd
+              when: 
+                - xtoph_deploy.kickstart_profile.method != "pxe"
+                - vminfo_result.ovirt_vms[0].current_cd.file.id is defined
 
 
 
-    ##
-    ##    Log out of the oVIRT API service
-    ##
+        when: 
+          - deploy_node == true
+          - xtoph_deploy.kickstart_profile.wait_for_ssh is defined 
+          - xtoph_deploy.kickstart_profile.wait_for_ssh == true
 
 
 
-    - name: Logout from oVirt
-      ovirt_auth:
-        state: absent
-        ovirt_auth: "{{ ovirt_auth }}"
+      ##
+      ##    Log out of the oVIRT API service
+      ##
 
 
 
+      - name: Logout from oVirt
+        run_once: true
+        ovirt_auth:
+          state: absent
+          ovirt_auth: "{{ ovirt_auth }}"
 

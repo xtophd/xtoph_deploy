@@ -538,6 +538,47 @@
 
 
 ##
+##    FINISH
+##
+##        If action == 'finish' and the machine's hardware platform 
+##        is platform_item.platform, include the platform_item.tasks
+##
+
+
+
+- name: "main.yml : platform deployment finish"
+  include_tasks: "{{ platform_item.playbook }}"
+  when: 
+    - xtoph_deploy_action == "finish" 
+    - xtoph_deploy.machine_profile.platform == platform_item.platform
+  loop_control:
+    loop_var: platform_item
+  with_items:
+    - { platform: 'libvirt',   playbook: 'libvirt-finish.yml'   } 
+    - { platform: 'ovirt',     playbook: 'ovirt-finish.yml'     } 
+    - { platform: 'baremetal', playbook: 'baremetal-finish.yml' } 
+
+
+
+- name: "main.yml : common deployment finish"
+  include_tasks: "common-deploy-post.yml"
+  when: 
+    - xtoph_deploy_action == "finish" 
+
+
+
+- name: "main.yml : dhcp/pxe finish"
+  include_tasks: "common-dhcp-finish.yml"
+  when: 
+    - xtoph_deploy_action == "finish" 
+    - xtoph_deploy.deployhost.dhcp.enable
+    - xtoph_deploy.kickstart_profile.method   == "pxe"
+    - xtoph_deploy.kickstart_profile.repo_iso is defined
+    - xtoph_deploy.kickstart_profile.repo_iso != ""
+
+
+
+##
 ##    DEBUG OUTPUT
 ##
 

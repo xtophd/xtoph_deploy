@@ -25,6 +25,7 @@
 
     - name: "ovirt-deploy : Login to oVirt"
       throttle: 1
+      run_once: true
       ovirt_auth:
         hostname: "{{ xtoph_deploy.platform_profile.api.fqdn }}"
         ca_file:  "{{ xtoph_deploy.platform_profile.engine_cafile | default(omit) }}"
@@ -37,8 +38,6 @@
 
 
 
-
-
     ##
     ##    Stop and Delete Virtual Machine 
     ##
@@ -48,14 +47,14 @@
     - name: "ovirt-undeploy : issue vm stop"
       ignore_errors: true
       ovirt_vm:
-        auth:      "{{ ovirt_auth }}"
-        name:      "{{ xtoph_deploy.platform_profile.vm.name }}"
-        cluster:   "{{ xtoph_deploy.platform_profile.cluster_name }}"
-        state:     "stopped"
-        wait:      no
+        auth: "{{ ovirt_auth }}"
+        name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+        cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+        state: "stopped"
+        wait: yes
       register: vmstop_result
 
-    - name: "ovirt-undeploy : wait for vm to be down"
+    - name: "ovirt-undeploy : wait (ensure) vm to be down"
       ovirt_vm_info:
         pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
         auth: "{{ ovirt_auth }}"
@@ -65,18 +64,20 @@
       delay: 5
 
     - name: "ovirt-undeploy : undeploy vm" 
+      throttle: 1
       ovirt_vm:
-        auth:      "{{ ovirt_auth }}"
-        name:      "{{ xtoph_deploy.platform_profile.vm.name }}"
-        cluster:   "{{ xtoph_deploy.platform_profile.cluster_name }}"
-        state:     absent
-        wait:      yes
+        auth: "{{ ovirt_auth }}"
+        name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+        cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+        state: absent
+        wait: yes
 
     - name: "ovirt-undeploy : undeploy iso in oVIRT storage domain"
+      throttle: 1
       ovirt_disk:
-        auth: '{{ ovirt_auth }}'
-        name: '{{ xtoph_deploy.platform_profile.vm.name }}.iso'
-        storage_domain: '{{ xtoph_deploy.machine_profile.storage.default.domain_name }}'
+        auth: "{{ ovirt_auth }}"
+        name: "{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+        storage_domain: "{{ xtoph_deploy.machine_profile.storage.default.domain_name }}"
         state: absent
         wait: yes
 
@@ -88,9 +89,9 @@
 
 
 
-
     - name: "ovirt-undeploy : Logout from oVirt"
       throttle: 1
+      run_once: true
       ovirt_auth:
         state: absent
         ovirt_auth: "{{ ovirt_auth }}"

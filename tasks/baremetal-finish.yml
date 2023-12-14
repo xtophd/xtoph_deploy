@@ -1,0 +1,22 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+
+##
+##    Following block of tasks here are delegated to execute
+##    on the deployhost/localhost
+##
+
+
+
+- delegate_to: localhost
+  block:
+
+
+        - name: "baremetal-finish : platform finish tasks"
+          debug: msg="No special finish tasks"
+
