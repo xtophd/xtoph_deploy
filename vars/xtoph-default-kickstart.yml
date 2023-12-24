@@ -38,6 +38,7 @@ pxe_wait:
     name:              "pxe_wait"
     description:       "There is no kickstart or repo, just pxe boot"
     method:            "pxe"
+    wait_for_powerup:  true
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
 
@@ -53,6 +54,7 @@ pxe_nowait:
     name:              "pxe_nowait"
     description:       "There is no kickstart or repo, just pxe boot"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
     wait_for_ssh:      false
 
@@ -75,6 +77,7 @@ vmedia_wait:
     description:       "There is no kickstart or repo, just vmedia boot"
     method:            "simple_cdrom"
     iso_url:           "{{ h_isoURL | default('') }}"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
 
@@ -89,6 +92,7 @@ vmedia_nowait:
     description:       "There is no kickstart or repo, just vmedia boot"
     method:            "simple_cdrom"
     iso_url:           "{{ h_isoURL | default('') }}"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(false) }}"
     wait_for_ssh:      false
 
@@ -103,6 +107,7 @@ rhel90:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 DVD"
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -124,6 +129,7 @@ rhel90-bootiso:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -145,6 +151,7 @@ rhel90-pxe:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot PXE"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -166,6 +173,7 @@ rhel91:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.1 DVD"
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -187,6 +195,7 @@ rhel91-bootiso:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.1 Boot ISO"
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -208,6 +217,7 @@ rhel91-pxe:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.1 Boot PXE"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -229,6 +239,7 @@ rhel92:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.2 DVD"
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -250,6 +261,7 @@ rhel92-bootiso:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.2 Boot ISO"
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -271,6 +283,7 @@ rhel92-pxe:
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.2 Boot PXE"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -297,6 +310,7 @@ rhel88:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.8 DVD"
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -318,6 +332,7 @@ rhel88-bootiso:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.8 Boot ISO"
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -339,6 +354,7 @@ rhel88-pxe:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.8 PXE"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -360,6 +376,7 @@ rhel86:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.6 DVD"
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -381,6 +398,7 @@ rhel86-bootiso:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.6 Boot ISO"
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -402,6 +420,7 @@ rhel86-pxe:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.6 PXE"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -423,6 +442,7 @@ rhel84:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 DVD" 
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -444,6 +464,7 @@ rhel84-bootiso:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 Boot ISO" 
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -465,6 +486,7 @@ rhel84-pxe:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 PXE"
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -486,6 +508,7 @@ rhel82:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 DVD" 
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -507,6 +530,7 @@ rhel82-bootiso:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 Boot ISO" 
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -528,6 +552,7 @@ rhel82-pxe:
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 PXE" 
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -553,6 +578,7 @@ rhel79:
     family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 DVD" 
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -571,6 +597,7 @@ rhel79-bootiso:
     family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 Boot ISO" 
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -589,6 +616,7 @@ rhel79-pxe:
     family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 PXE" 
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -611,6 +639,7 @@ fedora38:
     family:            "fedora38"
     description:       "Fedora 38 DVD" 
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -629,6 +658,7 @@ fedora38-netinstall:
     family:            "fedora38"
     description:       "Fedora 38 NetInstall" 
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -647,6 +677,7 @@ fedora38-pxe:
     family:            "fedora38"
     description:       "Fedora 38 PXE Install" 
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
@@ -670,6 +701,7 @@ centos7:
     family:            "rhel7"
     description:       "CentOS 7 DVD" 
     method:            "cdrom"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -688,6 +720,7 @@ centos7-netinstall:
     family:            "rhel7"
     description:       "CentOS 7 NetInstall" 
     method:            "network"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
@@ -706,6 +739,7 @@ centos7-pxe:
     family:            "rhel7"
     description:       "CentOS 7 NetInstall" 
     method:            "pxe"
+    wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"

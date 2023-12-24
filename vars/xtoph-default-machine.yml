@@ -95,9 +95,8 @@ kvm_sda:
 ##
 
 
-    
 ovirt_sda:
-      description: "oVirt vm using disk bus = virtio-scsi (sda)"
+      description: "oVirt vm with virtio-scsi (sda) and bios_type bios"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
       kickstart:
@@ -123,7 +122,7 @@ ovirt_sda:
           mac: "{{ h_pubMAC| default('') }}"
    
 ovirt_sda_uefi:
-      description: "oVirt vm using disk bus = virtio-scsi (sda)"
+      description: "oVirt vm with virtio-scsi (sda) and  bios_type uefi"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
       kickstart:
@@ -147,11 +146,9 @@ ovirt_sda_uefi:
         default:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
-   
-
  
 ovirt_vda:
-      description: "oVirt vm using disk bus = virtio (vda)"
+      description: "oVirt vm using disk bus = virtio (vda) and bios_type bios"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
       kickstart:
@@ -177,7 +174,7 @@ ovirt_vda:
           mac: "{{ h_pubMAC| default('') }}"
 
 ovirt_vda_uefi:
-      description: "oVirt vm using disk bus = virtio (vda)"
+      description: "oVirt vm using disk bus = virtio (vda) and bios_type uefi"
       platform: "ovirt"
       default_os_type: "rhel_8x64"
       kickstart:

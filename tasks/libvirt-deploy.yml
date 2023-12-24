@@ -328,7 +328,7 @@
         script:
           cmd: "{{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/virtinstall.sh"
 
-      - name: "libvirt-deploy-monitor : wait for virtual machine running"
+      - name: "libvirt-deploy-monitor : wait for virtual machine running (wait_for_powerup)"
         delegate_to: "{{ xtoph_deploy.platform_profile.host_fqdn }}"
         shell:
           cmd: |
@@ -337,6 +337,10 @@
         until:  result.rc == 0
         retries: 600
         delay: 5
+        when:
+          - xtoph_deploy.kickstart_profile.wait_for_powerup is defined
+          - xtoph_deploy.kickstart_profile.wait_for_powerup == true
+
 
 
   ##

@@ -87,8 +87,7 @@
 
         when: xtoph_deploy.kickstart_profile is defined and
               xtoph_deploy.kickstart_profile.method != "pxe"
-
-
+      
 
       ##
       ##    Create virtual machine
@@ -100,7 +99,19 @@
       ##            provides easy customization of kvm
       ##            optimizations per OS
       ##
+
+      - name: "ovirt-deploy : (UEFI) use bios_type = q35_ovmf"
+        set_fact:
+          vm_bios_type: "q35_ovmf"
+        when:
+          - xtoph_deploy.machine_profile.boot_mode == "uefi"
   
+      - name: "ovirt-deploy : (BIOS) use bios_type = q35_sea_bios"
+        set_fact:
+          vm_bios_type: "q35_sea_bios"
+        when:
+          - xtoph_deploy.machine_profile.boot_mode != "uefi"
+
       - name: "ovirt-deploy : create vm with cpu, mem and nics"
         ovirt_vm:
           auth:      "{{ ovirt_auth }}"
@@ -108,6 +119,7 @@
           cluster:   "{{ xtoph_deploy.platform_profile.cluster_name }}"
           memory:    "{{ xtoph_deploy.resource_profile.memsize }} MiB"
           cpu_cores: "{{ xtoph_deploy.resource_profile.vcpus }}"
+          bios_type: "{{ vm_bios_type }}"
           nics:
             - name: "nic1"
               interface: "{{ xtoph_deploy.machine_profile.network.default.model }}"
@@ -180,10 +192,6 @@
           boot_devices:
             - hd
             - cdrom
-          cloud_init:
-            host_name:  "{{ xtoph_deploy.hostname }}"
-          state: running
-          wait: yes
         when:
           - xtoph_deploy.kickstart_profile is defined and
             xtoph_deploy.kickstart_profile.method != "pxe"
@@ -196,15 +204,21 @@
           boot_devices:
             - hd
             - network
-          cloud_init:
-            host_name:  "{{ xtoph_deploy.hostname }}"
-          state: running
-          wait: yes
         when:
           - xtoph_deploy.kickstart_profile is defined and
             xtoph_deploy.kickstart_profile.method == "pxe"
 
-      - name: "ovirt-deploy : wait for (ensure) vm state == 'up'"
+      - name: "ovirt-deploy : vm change status to running"
+        ovirt_vm:
+          auth:         "{{ ovirt_auth }}"
+          name:         "{{ xtoph_deploy.platform_profile.vm.name }}"
+          cluster:      "{{ xtoph_deploy.platform_profile.cluster_name }}"
+          cloud_init:
+            host_name:  "{{ xtoph_deploy.hostname }}"
+          state: running
+          wait: no
+
+      - name: "ovirt-deploy : wait for virtual machine running (wait_for_powerup)"
         ovirt_vm_info:
           pattern: name="{{ xtoph_deploy.platform_profile.vm.name }}" cluster="{{ xtoph_deploy.platform_profile.cluster_name }}"
           auth: "{{ ovirt_auth }}"
@@ -213,21 +227,43 @@
         until: vminfo_result.ovirt_vms[0].status == "up"
         retries: 600
         delay: 5
+        when:
+          - xtoph_deploy.kickstart_profile.wait_for_powerup is defined
+          - xtoph_deploy.kickstart_profile.wait_for_powerup == true
 
-      - debug:
-          var: vminfo_result
-        when: xtoph_deploy.debug == true
+#      - debug:
+#          var: vminfo_result
+#        when: xtoph_deploy.debug == true
+#
+#      - name: "ovirt-deploy : collect ovirt disk info"
+#        ovirt_disk_info:
+#          pattern: name={{ xtoph_deploy.platform_profile.vm.name }}*
+#          auth: "{{ ovirt_auth }}"
+#        register: diskinfo_result
+#
+#      - debug:
+#          var: diskinfo_result.ovirt_disks
+#        when: xtoph_deploy.debug == true
 
-      - name: "ovirt-deploy : collect ovirt disk info"
-        ovirt_disk_info:
-          pattern: name={{ xtoph_deploy.platform_profile.vm.name }}*
-          auth: "{{ ovirt_auth }}"
-        register: diskinfo_result
-
-      - debug:
-          var: diskinfo_result.ovirt_disks
-        when: xtoph_deploy.debug == true
-
+      #
+      # 20231219 - the intent was to force a an ovirt nextboot which should
+      #            power on/off the vm during client initiated reboot,
+      #            there-by removing the network device from the boot order
+      #            this has not panned out as expected, so commenting it out
+      #            for now.
+      #
+      #- name: "ovirt-deploy-monitor : (vm is up) remove network boot device for next boot"
+      #  ovirt_vm:
+      #    auth: "{{ ovirt_auth }}"
+      #    name: "{{ xtoph_deploy.platform_profile.vm.name }}"
+      #    cluster: "{{ xtoph_deploy.platform_profile.cluster_name }}"
+      #    boot_menu: "no"
+      #    boot_devices:
+      #      - hd
+      #  when:
+      #    - xtoph_deploy.kickstart_profile is defined and
+      #      xtoph_deploy.kickstart_profile.method == "pxe"
+      #
 
 
       ##
