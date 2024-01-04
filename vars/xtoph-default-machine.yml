@@ -217,14 +217,8 @@ dell_r630:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno1"
             kernel_opts: ""
-          rhel9:
-            blkdev: "sda"
-            netdev: "eno1"
-          rhel8:
-            blkdev: "sda"
-            netdev: "eno1"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -263,14 +257,8 @@ dell_r630_uefi:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno1"
             kernel_opts: ""
-          rhel9:
-            blkdev: "sda"
-            netdev: "eno1"
-          rhel8:
-            blkdev: "sda"
-            netdev: "eno1"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -310,14 +298,8 @@ dell_r740:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno1"
             kernel_opts: ""
-          rhel9:
-            blkdev: "sda"
-            netdev: "eno1"
-          rhel8:
-            blkdev: "sda"
-            netdev: "eno1"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -356,14 +338,8 @@ dell_r740_uefi:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno1"
             kernel_opts: ""
-          rhel9:
-            blkdev: "sda"
-            netdev: "eno1"
-          rhel8:
-            blkdev: "sda"
-            netdev: "eno1"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -402,14 +378,8 @@ dell_xr:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "nvme0n1"
-            netdev: "em1"
+            netdev: "eno8303np0"
             kernel_opts: ""
-          rhel9:
-            blkdev: "nvme0n1"
-            netdev: "eno8303np0"
-          rhel8:
-            blkdev: "nvme0n1"
-            netdev: "eno8303np0"
           rhel7:
             blkdev: "nvme0n1"
             netdev: "em1"
