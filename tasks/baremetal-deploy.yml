@@ -124,6 +124,11 @@
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
 
+            ##
+            ##    Having vMediea inserted can affect pxe installs,
+            ##    so we always clear virtual media
+            ##
+
             - name: "baremetal-deploy-post : (BMC) media-status"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.media_status }}
@@ -132,8 +137,6 @@
                   -i "{{ t_bmc }}"
                   --chomp
               register: bmc_result
-              when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
     
             - name: "baremetal-deploy : (BMC) media-eject"
               script: >
@@ -142,7 +145,6 @@
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
               when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
                 - bmc_result.stdout == "inserted"
     
             - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
@@ -157,7 +159,6 @@
               retries: 600
               delay: 5
               when:
-                - xtoph_deploy.kickstart_profile.method != "pxe"
                 - bmc_result.stdout == "inserted"
     
             - name: "baremetal-deploy : (BMC) custom-actions"
