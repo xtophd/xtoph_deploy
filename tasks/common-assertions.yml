@@ -55,6 +55,7 @@
     success_msg: "Assertion Passed"
   when:
     - xtoph_deploy.selected_profile.machine != ""
+    - inventory_hostname not in groups.myDeployhost
 
 
 ##

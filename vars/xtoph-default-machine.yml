@@ -58,6 +58,7 @@ kvm_nest_vda:
       storage:
         default:
           bus: "virtio"
+          sparse: "true"
       network:
         default:
           ip: "{{ h_pubIP | default('') }}"
@@ -83,6 +84,7 @@ kvm_sda:
       storage:
         default:
           bus: "virtio-scsi"
+          sparse: "true"
       network:
         default:
           ip: "{{ h_pubIP | default('') }}"
