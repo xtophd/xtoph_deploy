@@ -30,8 +30,11 @@
       - name: "common-repo-preprocess : DEBUG repo loopback details"
         debug:
           msg:
-           - "repo mnt = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
-           - "repo src = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+           - "########################################"
+           - "# COMMON-REPO-PREPROCESS"
+           - "#   deploy_node = {{ deploy_node }}"
+           - "#   repo mnt    = {{ xtoph_deploy.deployhost.repos.dir }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
+           - "#   repo src    = {{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
         when: xtoph_deploy.debug == true
 
       - name: "common-repo-preprocess : stat repo mount point"
@@ -59,6 +62,8 @@
 
 
 
-  when: xtoph_deploy.kickstart_profile is defined and
-        xtoph_deploy.kickstart_profile.repo_iso != ""
+  when: 
+    - xtoph_deploy.kickstart_profile is defined
+    - xtoph_deploy.kickstart_profile.repo_iso != ""
+    - deploy_node
 

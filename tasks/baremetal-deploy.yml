@@ -58,9 +58,11 @@
                   fi
               when: xtoph_deploy.cleanup == true
 
-        when: xtoph_deploy.kickstart_profile is defined and
-              xtoph_deploy.kickstart_profile.method != "pxe" and
-              xtoph_deploy.kickstart_profile.method != "simple_cdrom" 
+        when: 
+          - xtoph_deploy.kickstart_profile is defined 
+          - xtoph_deploy.kickstart_profile.method != "pxe" 
+          - xtoph_deploy.kickstart_profile.method != "simple_cdrom" 
+          - deploy_node
 
 
 

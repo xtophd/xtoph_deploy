@@ -46,8 +46,9 @@
 
 
 
-  when: xtoph_deploy.kickstart_profile.wait_for_ssh is defined and
-        xtoph_deploy.kickstart_profile.wait_for_ssh == true
+  when:
+    - xtoph_deploy.kickstart_profile.wait_for_ssh is defined 
+    - xtoph_deploy.kickstart_profile.wait_for_ssh == true
 
 
 ##
@@ -59,66 +60,70 @@
 ##   
 
 
-
-- name: "common-deploy-post : configure dns search (resolv.conf)"
-  shell:
-    cmd: |
-      nm_connection=$(nmcli -t con | grep {{ xtoph_deploy.machine_profile.kickstart.netdev }} | cut -d: -f1)
-      nmcli con modify "${nm_connection}" ipv4.dns-search {{ xtoph_deploy.machine_profile.network.default.fqdn }}
-  when:
-    - xtoph_deploy.kickstart_profile.family is defined
-    - xtoph_deploy.kickstart_profile.family == "rhel7" or
-      xtoph_deploy.kickstart_profile.family == "rhel8" or
-      xtoph_deploy.kickstart_profile.family == "rhel9"
+- block:
 
 
+      - name: "common-deploy-post : configure dns search (resolv.conf)"
+        shell:
+          cmd: |
+            nm_connection=$(nmcli -t con | grep {{ xtoph_deploy.machine_profile.kickstart.netdev }} | cut -d: -f1)
+            nmcli con modify "${nm_connection}" ipv4.dns-search {{ xtoph_deploy.machine_profile.network.default.fqdn }}
+        when:
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.kickstart_profile.family == "rhel7" or
+            xtoph_deploy.kickstart_profile.family == "rhel8" or
+            xtoph_deploy.kickstart_profile.family == "rhel9"
 
-- name: "common-deploy-post : configure hostname"
-  shell:
-    cmd: |
-      hostnamectl set-hostname {{ inventory_hostname }}
-  when: 
-    - xtoph_deploy.kickstart_profile.family is defined
-    - xtoph_deploy.kickstart_profile.family == "rhel7" or
-      xtoph_deploy.kickstart_profile.family == "rhel8" or
-      xtoph_deploy.kickstart_profile.family == "rhel9"
-
-
-
-- name: "common-deploy-post : DEBUG repo details"
-  debug:
-    msg:
-     - "repo name     = {{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
-     - "repo path     = {{ xtoph_deploy.kickstart_profile.mnt }}"
-     - "repo subpath  = {{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
-     - "repo url      = {{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
-  with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-  when: xtoph_deploy.debug == true and 
-        xtoph_deploy.kickstart_profile.repos is defined
-
-
-
-- name: "common-deploy-post : configure yum repositories"
-  yum_repository:
-    name:        "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
-    description: "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
-    baseurl:     "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
-    enabled:     "yes"
-    gpgcheck:    "no"
-  with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-  when: xtoph_deploy.kickstart_profile.repos is defined
-
-
-
-- name: "common-deploy-post : create admin user"
-  ansible.builtin.user:
-    create_home: true
-    state: present
-    groups: wheel
-    name: "{{ host_credentials[inventory_hostname].username }}"
-    password: "{{ host_credentials[inventory_hostname].password | password_hash('sha512') }}"
-  when:
-    - host_credentials[inventory_hostname].username is defined
-    - host_credentials[inventory_hostname].password is defined
+      
+      
+      - name: "common-deploy-post : configure hostname"
+        shell:
+          cmd: |
+            hostnamectl set-hostname {{ inventory_hostname }}
+        when: 
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.kickstart_profile.family == "rhel7" or
+            xtoph_deploy.kickstart_profile.family == "rhel8" or
+            xtoph_deploy.kickstart_profile.family == "rhel9"
+      
+      
+      
+      - name: "common-deploy-post : DEBUG repo details"
+        debug:
+          msg:
+           - "repo name     = {{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
+           - "repo path     = {{ xtoph_deploy.kickstart_profile.mnt }}"
+           - "repo subpath  = {{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
+           - "repo url      = {{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
+        with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
+        when: xtoph_deploy.debug == true and 
+              xtoph_deploy.kickstart_profile.repos is defined
+      
+      
+      
+      - name: "common-deploy-post : configure yum repositories"
+        yum_repository:
+          name:        "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
+          description: "{{ xtoph_deploy['kickstart_profile']['repos'][item]['name'] }}"
+          baseurl:     "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}{{ xtoph_deploy['kickstart_profile']['repos'][item]['subpath'] }}"
+          enabled:     "yes"
+          gpgcheck:    "no"
+        with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
+        when: xtoph_deploy.kickstart_profile.repos is defined
+      
+      
+      
+      - name: "common-deploy-post : create admin user"
+        ansible.builtin.user:
+          create_home: true
+          state: present
+          groups: wheel
+          name: "{{ host_credentials[inventory_hostname].username }}"
+          password: "{{ host_credentials[inventory_hostname].password | password_hash('sha512') }}"
+        when:
+          - host_credentials[inventory_hostname].username is defined
+          - host_credentials[inventory_hostname].password is defined
        
+  when:
+    - deploy_node
     

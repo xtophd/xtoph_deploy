@@ -429,3 +429,4 @@
           xtoph_deploy.kickstart_profile.method != "cdrom"
 
 
+  when: deploy_node 
