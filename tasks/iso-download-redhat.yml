@@ -86,6 +86,7 @@
 
               when: 
                 - iso_check.stat.exists == False
+                - xtoph_deploy.kickstart_profile.boot_iso is defined
                 - xtoph_deploy.kickstart_profile.boot_iso != ""
 
 
@@ -151,12 +152,14 @@
 
               when: 
                 - iso_check.stat.exists == False
+                - xtoph_deploy.kickstart_profile.repo_iso is defined
                 - xtoph_deploy.kickstart_profile.repo_iso != ""
       
               ## End-Of-Block
 
         when: 
           - xtoph_deploy.kickstart_profile.boot_iso is defined 
+          - xtoph_deploy.kickstart_profile.boot_iso != ""
           
 
         ## End-Of-Block
@@ -164,6 +167,7 @@
   when: 
     - deploy_node 
     - xtoph_deploy.kickstart_profile is defined 
+    - xtoph_deploy.kickstart_profile.vender is defined 
     - xtoph_deploy.kickstart_profile.vender == "redhat"
 
   ## End-Of-Block
