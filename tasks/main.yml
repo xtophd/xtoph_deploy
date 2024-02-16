@@ -426,14 +426,15 @@
     - { platform: 'ovirt',     playbook: 'ovirt-deploy-preprocess.yml'     } 
     - { platform: 'baremetal', playbook: 'baremetal-deploy-preprocess.yml' } 
 
-
+- name: "main.yml : include iso-download-redhat to retrieve ISO images"
+  include_tasks: "iso-download-redhat.yml"
+  when: 
+    - xtoph_deploy_action == "preprocess"
 
 - name: "main.yml : common deploy pre-processing"
   include_tasks: "common-deploy-preprocess.yml"
   when: 
     - xtoph_deploy_action == "preprocess" 
-
-
 
 - name: "main.yml : dhcp (pxe) pre-processing"
   include_tasks: "common-dhcp-preprocess.yml"

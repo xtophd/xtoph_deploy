@@ -1,0 +1,170 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+## Resources:
+##     https://access.redhat.com/articles/3626371#bgenerating-a-new-offline-tokenb-3
+##     https://access.redhat.com/management/api
+##     https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_a_standard_rhel_8_installation/downloading-beta-installation-images_installing-rhel
+##     https://github.com/redhat-cop/rhel-edge-automation-arch/blob/main/ansible/roles/redhat-image-downloader/tasks/main.yaml
+##
+
+
+- name: "iso-download-redhat : BEGIN"
+  delegate_to: localhost
+  block:
+
+      - set_fact:
+          redhat_api_url: "https://api.access.redhat.com/management/v1"
+          redhat_sso_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
+  
+      - name: "iso-download-redhat : when method != pxe attempt locate/download ISO"
+        block:
+
+            - name: "iso-download-redhat : looking for BOOT ISO"
+              stat:
+                path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.boot_iso }}"
+                get_checksum: False
+              register: iso_check
+
+            - debug:
+                msg: "BOOT ISO found"
+              when: iso_check.stat.exists
+
+            - block:
+
+                  - debug:
+                      msg: "BOOT ISO missing"
+
+                  - name: "iso-download-redhat : (re)fresh access token using offline token"
+                    ansible.builtin.uri:
+                      body:
+                        client_id: rhsm-api
+                        grant_type: refresh_token
+                        refresh_token: "{{ lookup('file', inventory_dir ~ '/api-token.txt') }}"
+                      body_format: form-urlencoded
+                      method: POST
+                      url: "{{ redhat_sso_url }}"
+                    register: access_token
+
+                  - name: "iso-download-redhat : generate list of BOOT ISO images"
+                    ansible.builtin.uri:
+                      follow_redirects: none
+                      headers:
+                        Authorization: "Bearer {{ access_token.json.access_token }}"
+                      status_code: 200
+                      url: "{{ redhat_api_url }}/images/rhel/{{ xtoph_deploy.kickstart_profile.version }}/{{ xtoph_deploy.kickstart_profile.arch }}"
+                    register: image_list
+
+                  - debug:
+                      msg: 
+                        - "{{ item.filename }}"
+                        - "{{ item.checksum }}"
+                        - "{{ item.downloadHref }}"
+                    loop: "{{ (image_list.json.body | selectattr('filename','equalto', xtoph_deploy.kickstart_profile.boot_iso) | list ) }}"
+
+                  - name: "iso-download-redhat : generate download URL"
+                    ansible.builtin.uri:
+                      follow_redirects: none
+                      headers:
+                        Authorization: "Bearer {{ access_token.json.access_token }}"
+                      status_code: 307
+                      url: "{{ item.downloadHref }}"
+                    register: image_urls
+                    loop: "{{ (image_list.json.body | selectattr('filename','equalto', xtoph_deploy.kickstart_profile.boot_iso) | list ) }}"
+
+                  - debug:
+                      var: image_urls
+
+                  - name: "iso-download-redhat : download image"
+                    ansible.builtin.get_url:
+                      checksum: "sha256:{{ item.item.checksum }}"
+                      dest: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ item.json.body.filename }}"
+                      url: "{{ item.json.body.href }}"
+                    loop: "{{ image_urls.results }}"
+
+              when: 
+                - iso_check.stat.exists == False
+                - xtoph_deploy.kickstart_profile.boot_iso != ""
+
+
+
+            - name: "iso-download-redhat : looking for REPO ISO"
+              stat:
+                path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ xtoph_deploy.kickstart_profile.repo_iso }}"
+                get_checksum: False
+              register: iso_check
+
+            - debug:
+                msg: "REPO ISO found"
+              when: iso_check.stat.exists
+
+            - block:
+
+                  - debug:
+                      msg: "REPO ISO missing"
+
+                  - name: "iso-download-redhat : (re)fresh access token using offline token"
+                    ansible.builtin.uri:
+                      body:
+                        client_id: rhsm-api
+                        grant_type: refresh_token
+                        refresh_token: "{{ lookup('file', inventory_dir ~ '/api-token.txt') }}"
+                      body_format: form-urlencoded
+                      method: POST
+                      url: "{{ redhat_sso_url }}"
+                    register: access_token
+
+                  - name: "iso-download-redhat : generate list of REPO ISO images"
+                    ansible.builtin.uri:
+                      follow_redirects: none
+                      headers:
+                        Authorization: "Bearer {{ access_token.json.access_token }}"
+                      status_code: 200
+                      url: "{{ redhat_api_url }}/images/rhel/{{ xtoph_deploy.kickstart_profile.version }}/{{ xtoph_deploy.kickstart_profile.arch }}"
+                    register: image_list
+
+                  - debug:
+                      msg:
+                        - "{{ item.filename }}"
+                        - "{{ item.checksum }}"
+                        - "{{ item.downloadHref }}"
+                    loop: "{{ (image_list.json.body | selectattr('filename','equalto', xtoph_deploy.kickstart_profile.repo_iso) | list ) }}"
+
+                  - name: "iso-download-redhat : generate download URL"
+                    ansible.builtin.uri:
+                      follow_redirects: none
+                      headers:
+                        Authorization: "Bearer {{ access_token.json.access_token }}"
+                      status_code: 307
+                      url: "{{ item.downloadHref }}"
+                    register: image_urls
+                    loop: "{{ (image_list.json.body | selectattr('filename','equalto', xtoph_deploy.kickstart_profile.repo_iso) | list ) }}"
+
+                  - name: "iso-download-redhat : download image"
+                    ansible.builtin.get_url:
+                      checksum: "sha256:{{ item.item.checksum }}"
+                      dest: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ item.json.body.filename }}"
+                      url: "{{ item.json.body.href }}"
+                    loop: "{{ image_urls.results }}"
+
+              when: 
+                - iso_check.stat.exists == False
+                - xtoph_deploy.kickstart_profile.repo_iso != ""
+      
+              ## End-Of-Block
+
+        when: 
+          - xtoph_deploy.kickstart_profile.boot_iso is defined 
+          
+
+        ## End-Of-Block
+
+  when: 
+    - deploy_node 
+    - xtoph_deploy.kickstart_profile is defined 
+    - xtoph_deploy.kickstart_profile.vender == "redhat"
+
+  ## End-Of-Block
+
