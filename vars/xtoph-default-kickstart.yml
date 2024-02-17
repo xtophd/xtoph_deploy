@@ -106,6 +106,9 @@ rhel90:
     name:              "rhel90"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.0"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -128,6 +131,9 @@ rhel90-bootiso:
     name:              "rhel90-bootiso"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.0"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -150,6 +156,9 @@ rhel90-pxe:
     name:              "rhel90-pxe"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.0 Boot PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.0"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -172,6 +181,9 @@ rhel91:
     name:              "rhel91"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.1 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.1"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -194,6 +206,9 @@ rhel91-bootiso:
     name:              "rhel91-bootiso"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.1 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.1"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -216,6 +231,9 @@ rhel91-pxe:
     name:              "rhel91-pxe"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.1 Boot PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.1"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -238,6 +256,9 @@ rhel92:
     name:              "rhel92"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.2 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.2"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -260,6 +281,9 @@ rhel92-bootiso:
     name:              "rhel92-bootiso"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.2 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.2"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -282,6 +306,9 @@ rhel92-pxe:
     name:              "rhel92-pxe"
     family:            "rhel9"
     description:       "Red Hat Enterprise Linux 9.2 Boot PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.2"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -309,6 +336,9 @@ rhel88:
     name:              "rhel88"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.8 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.8"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -331,6 +361,9 @@ rhel88-bootiso:
     name:              "rhel88-bootiso"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.8 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.8"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -353,6 +386,9 @@ rhel88-pxe:
     name:              "rhel88-pxe"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.8 PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.8"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -375,6 +411,9 @@ rhel86:
     name:              "rhel86"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.6 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.6"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -397,6 +436,9 @@ rhel86-bootiso:
     name:              "rhel86-bootiso"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.6 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.6"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -419,6 +461,9 @@ rhel86-pxe:
     name:              "rhel86-pxe"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.6 PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.6"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -441,6 +486,9 @@ rhel84:
     name:              "rhel84"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 DVD" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.4"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -463,6 +511,9 @@ rhel84-bootiso:
     name:              "rhel84-bootiso"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 Boot ISO" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.4"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -485,6 +536,9 @@ rhel84-pxe:
     name:              "rhel84-pxe"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.4 PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.4"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -507,6 +561,9 @@ rhel82:
     name:              "rhel82"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 DVD" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.2"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -529,6 +586,9 @@ rhel82-bootiso:
     name:              "rhel82-bootiso"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 Boot ISO" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.2"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -551,6 +611,9 @@ rhel82-pxe:
     name:              "rhel82-pxe"
     family:            "rhel8"
     description:       "Red Hat Enterprise Linux 8.2 PXE" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "8.2"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -577,6 +640,9 @@ rhel79:
     name:              "rhel79"
     family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 DVD" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "7.9"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -596,6 +662,9 @@ rhel79-bootiso:
     name:              "rhel79-bootiso"
     family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 Boot ISO" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "7.9"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -615,6 +684,9 @@ rhel79-pxe:
     name:              "rhel79-pxe"
     family:            "rhel7"
     description:       "Red Hat Enterprise Linux 7.9 PXE" 
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "7.9"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -638,6 +710,9 @@ fedora38:
     name:              "fedora38"
     family:            "fedora38"
     description:       "Fedora 38 DVD" 
+    vender:            "fedora"
+    arch:              "x86_64"
+    version:           "38"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -658,6 +733,9 @@ fedora38-netinstall:
     family:            "fedora38"
     description:       "Fedora 38 NetInstall" 
     method:            "network"
+    vender:            "fedora"
+    arch:              "x86_64"
+    version:           "38"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
@@ -676,7 +754,10 @@ fedora38-pxe:
     name:              "fedora38-pxe"
     family:            "fedora38"
     description:       "Fedora 38 PXE Install" 
+    vender:            "fedora"
     method:            "pxe"
+    arch:              "x86_64"
+    version:           "38"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
@@ -700,6 +781,9 @@ centos7:
     name:              "centos7"
     family:            "rhel7"
     description:       "CentOS 7 DVD" 
+    vender:            "centos"
+    arch:              "x86_64"
+    version:           "7"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
@@ -720,6 +804,9 @@ centos7-netinstall:
     family:            "rhel7"
     description:       "CentOS 7 NetInstall" 
     method:            "network"
+    vender:            "centos"
+    arch:              "x86_64"
+    version:           "7"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
@@ -738,6 +825,9 @@ centos7-pxe:
     name:              "centos7-netinstall"
     family:            "rhel7"
     description:       "CentOS 7 NetInstall" 
+    vender:            "centos"
+    arch:              "x86_64"
+    version:           "7"
     method:            "pxe"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
