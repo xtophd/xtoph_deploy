@@ -1,0 +1,164 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+            ##
+            ##    ISO Download Red Hat is throttled to 1 host at
+            ##    time to avoid concurency problems with downloading
+            ##    too much at one time, or downloading the same content
+            ##    at the same time.
+            ##
+
+            - debug:
+                msg:
+                  - "ISO Filename: {{ iso_detail.filename }} "
+                  - "ISO Checksum: {{ iso_detail.checksum }}"
+                  - "ISO Vender:   {{ iso_detail.vender }}"
+                  - "ISO Version:  {{ iso_detail.version }}"
+                  - "ISO Arch:     {{ iso_detail.arch }}"
+
+            - name: "iso-download-redhat : clear facts"
+              set_fact:
+                download_url: ""
+                download_checksum: ""
+
+            - debug:
+                msg: "ISO filename is empty"
+              when: 
+                - iso_detail.filename == ""
+
+            - name: "iso-download-redhat : looking for ISO"
+              stat:
+                path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+                get_checksum: False
+              register: iso_check
+              when: iso_detail.filename != ""
+
+            - debug:
+                msg: "ISO found: {{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+              when: 
+                - iso_detail.filename != ""
+                - iso_check.stat.exists == True 
+
+
+
+            - block:
+
+                  - debug:
+                      msg: "ISO missing: {{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+
+                  - name: "iso-download-redhat : (re)fresh access token using offline token"
+                    ansible.builtin.uri:
+                      body:
+                        client_id: rhsm-api
+                        grant_type: refresh_token
+                        refresh_token: "{{ lookup('file', inventory_dir ~ '/api-token.txt') }}"
+                      body_format: form-urlencoded
+                      method: POST
+                      url: "{{ redhat_sso_url }}"
+                    register: access_token
+
+                  ##
+                  ##    If we have the checksum for the image
+                  ##    we can use that to get a download url
+                  ##
+
+                  - block:
+
+                        - name: "iso-download-redhat : generate download URL by-checksum"
+                          ansible.builtin.uri:
+                            follow_redirects: none
+                            headers:
+                              Authorization: "Bearer {{ access_token.json.access_token }}"
+                            status_code: 307
+                            url: "{{ redhat_api_url }}/images/{{ iso_detail.checksum }}/download"
+                          register: image_list
+
+                        - debug:
+                            msg: 
+                              - "Search By-Checksum Result:"
+                              - "  ISO Filename:      {{ image_list.json.body.filename }}"
+                              - "  ISO Checksum:      {{ iso_detail.checksum }}"
+                              - "  ISO Download Href: {{ image_list.json.body.href }}"
+
+                        - name: "iso-download-redhat : generate download URL by-checksum : set facts"
+                          set_fact:
+                            download_url: "{{ image_list.json.body.href }}"
+                            download_checksum: "{{ iso_detail.checksum }}"
+
+                    when:
+                      - iso_detail.checksum != ""
+
+
+
+                  ##
+                  ##    If we DO NOT have the checksum for the image
+                  ##    we can attempt to find it by version and architecture
+                  ##   
+                  ##    NOTE: this does not appear to work for RHEL 7
+                  ##
+
+                  - block:             
+
+                        - name: "iso-download-redhat : generate download URL by-version : get image list"
+                          ansible.builtin.uri:
+                            follow_redirects: none
+                            headers:
+                              Authorization: "Bearer {{ access_token.json.access_token }}"
+                            status_code: 200
+                            url: "{{ redhat_api_url }}/images/rhel/{{ iso_detail.version }}/{{ iso_detail.arch }}"
+                          register: image_list
+ 
+                        - debug: var=image_list
+
+                        - name: "iso-download-redhat : generate download URL by-version : match iso name & get URL"
+                          ansible.builtin.uri:
+                            follow_redirects: none
+                            headers:
+                              Authorization: "Bearer {{ access_token.json.access_token }}"
+                            status_code: 307
+                            url: "{{ item.downloadHref }}"
+                          register: image_url
+                          loop: "{{ (image_list.json.body | selectattr('filename','equalto', iso_detail.filename  ) | list ) }}"
+
+                        - debug:
+                            msg: 
+                              - "Search By-Version Result:"
+                              - "  ISO Filename:     {{ item.json.body.filename }}"
+                              - "  ISO Checksum:     {{ item.item.checksum }}"
+                              - "  ISO Download URL: {{ item.json.body.href }}"
+                          loop: "{{ (image_url.results | selectattr('json.body.filename','equalto', iso_detail.filename ) | list ) }}"
+      
+                        - name: "iso-download-redhat : generate download URL by-version : set facts"
+                          set_fact:
+                            download_url: "{{ item.json.body.href }}"
+                            download_checksum: "{{ item.item.checksum }}"
+                          loop: "{{ (image_url.results | selectattr('json.body.filename','equalto', iso_detail.filename ) | list ) }}"
+
+                    when: iso_detail.checksum == ""
+
+
+
+                  - debug:
+                      msg:
+                        - "Final Results:"
+                        - "  ISO Filename: {{ iso_detail.filename }}"
+                        - "  ISO Vender:   {{ iso_detail.vender }}"
+                        - "  ISO Version:  {{ iso_detail.version }}"
+                        - "  ISO Arch:     {{ iso_detail.arch }}"
+                        - "  ISO Checksum: {{ download_checksum }}"
+                        - "  ISO Download: {{ download_url }}"
+
+                  - name: "iso-download-redhat : download ISO"
+                    ansible.builtin.get_url:
+                      checksum: "sha256:{{ download_checksum }}"
+                      url:      "{{ download_url }}"
+                      dest:     "{{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+
+              when: 
+                - iso_detail.filename != ""
+                - iso_check.stat.exists == False
+
