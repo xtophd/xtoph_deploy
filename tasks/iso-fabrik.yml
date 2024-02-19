@@ -82,7 +82,7 @@
        
             - name: "iso-fabrik : stat BIOS isolinux"
               stat:
-                path: "{{xtoph_deploy.deployhost.tmp_dir}}//iso/isolinux/isolinux.cfg"
+                path: "{{xtoph_deploy.deployhost.tmp_dir}}/iso/isolinux/isolinux.cfg"
               register: bios_isolinux
       
             - name: "iso-fabrik : isolinux.cfg change default timeout to 3 seconds"
@@ -366,6 +366,7 @@
                 mode: 0755
 
             - name: "iso-fabrik : execute mkiso-xorriso.sh script"
+              throttle: 1
               shell:
                 cmd: |
                   {{ xtoph_deploy.deployhost.tmp_dir }}/artifacts/mkiso-xorriso.sh
