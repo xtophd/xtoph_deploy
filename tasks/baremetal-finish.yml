@@ -10,13 +10,73 @@
 ##    Following block of tasks here are delegated to execute
 ##    on the deployhost/localhost
 ##
+##
+##    NOTE: when using iDRAC/iLO with virtual media, we
+##          can eject the media in three places: 
+##
+##            during baremetal-deploy-monitor when (if) we
+##            are waiting for a shutdown
+##
+##            during baremetal-deploy-post (if) we 
+##            are waiting for a shh alive
+##
+##            during baremetal-finish, which checks if media 
+##            is mounted and if so ejects it.
+##
+##          common-deploy-post has another wait_for_ssh
+##          but that preludes the final phase of deployment
+##          tasks that are common to all platforms
+##
 
 
 
 - delegate_to: localhost
   block:
 
+      - name: "baremetal-deploy-post : (BMC) media-status"
+        script: >
+            {{ xtoph_deploy.machine_profile.bmc.media_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: bmc_result
+        when:
+          - xtoph_deploy.kickstart_profile.method != "pxe"
 
-        - name: "baremetal-finish : platform finish tasks"
-          debug: msg="No special finish tasks"
+      - name: "baremetal-deploy-post : (BMC) media-eject"
+        script: >
+            {{ xtoph_deploy.machine_profile.bmc.media_eject }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+        when:
+          - xtoph_deploy.kickstart_profile.method != "pxe"
+          - bmc_result.stdout == "inserted"
+
+      - name: "baremetal-deploy-post : (BMC) wait for media-status = ejected"
+        script: >
+            {{ xtoph_deploy.machine_profile.bmc.media_status }}
+            -u {{ t_user }}
+            -p {{ t_pass }}
+            -i {{ t_bmc }}
+            --chomp
+        register: local_result
+        until: local_result.stdout == "ejected"
+        retries: 600
+        delay: 5
+        when:
+          - xtoph_deploy.kickstart_profile.method != "pxe"
+          - bmc_result.stdout == "inserted"
+
+
+
+  vars:
+    t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
+    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
+  when:
+    - xtoph_deploy.machine_profile.bmc.fqdn is defined
+    - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
+    - deploy_node
 
