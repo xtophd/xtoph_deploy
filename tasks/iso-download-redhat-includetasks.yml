@@ -157,6 +157,7 @@
                       checksum: "sha256:{{ download_checksum }}"
                       url:      "{{ download_url }}"
                       dest:     "{{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+                      tmp_dest: "{{ xtoph_deploy.deployhost.iso.dir }}"
 
               when: 
                 - iso_detail.filename != ""
