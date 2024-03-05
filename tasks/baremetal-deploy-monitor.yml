@@ -12,13 +12,15 @@
 ##
 ##
 ##    NOTE: when using iDRAC/iLO with virtual media, we
-##          can eject the media in two places:
+##          can eject the media in three places:
 ##
 ##            during baremetal-deploy-monitor when (if) we
 ##            are waiting for a shutdown
 ##
 ##            during baremetal-deploy-post (if) we
 ##            are waiting for a shh alive
+##
+##            during baremetal-finish 
 ##
 ##          common-deploy-post has another wait_for_ssh
 ##          but that preludes the final phase of deployment
