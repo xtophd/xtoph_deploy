@@ -404,7 +404,48 @@ dell_xr:
         bootonce_media:  "redfish-dell-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
         #bootonce_clear:  "racadm-bootonce-clear.sh"
-        bootonce_clear:  "redfish-noop.py"
+        bootonce_clear:  "redfish-dell-bootonce-clear.py"
+        custom_actions:  "redfish-dell-custom-actions.py"
+
+
+
+dell_c6617:
+      platform: "baremetal"
+      description: "DELL C6617 with redfish support"
+      usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eth0"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "sda"
+            netdev: "eth0"
+      boot_mode: "uefi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
+        #bootonce_clear:  "racadm-bootonce-clear.sh"
+        bootonce_clear:  "redfish-dell-bootonce-clear.py"
         custom_actions:  "redfish-dell-custom-actions.py"
 
 
@@ -562,7 +603,7 @@ hp_dl380_g9_560flr:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno49"
             kernel_opts: ""
           rhel9:
             blkdev: "sda"
