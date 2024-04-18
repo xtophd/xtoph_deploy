@@ -409,9 +409,9 @@ dell_xr:
 
 
 
-dell_c6617:
+dell_c6615:
       platform: "baremetal"
-      description: "DELL C6617 with redfish support"
+      description: "DELL C6615 with redfish support"
       usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
