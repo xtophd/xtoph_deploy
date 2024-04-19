@@ -421,7 +421,7 @@ dell_c6615:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno8303"
             kernel_opts: ""
           rhel7:
             blkdev: "sda"
