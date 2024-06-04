@@ -511,7 +511,7 @@ hp_dl360_g8_560flr:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno1"
             kernel_opts: ""
           rhel9:
             blkdev: "sda"
@@ -523,7 +523,7 @@ hp_dl360_g8_560flr:
             kernel_opts: "intel_iommu=off intremap=off"
           rhel7:
             blkdev: "sda"
-            netdev: "eno1"
+            netdev: "eth0"
             kernel_opts: ""
       usb_storage_delay: "10"
       boot_mode: "bios"
@@ -559,7 +559,7 @@ hp_dl380_g9:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "eth0"
+            netdev: "eno1"
             kernel_opts: ""
           rhel9:
             blkdev: "sda"
@@ -569,7 +569,7 @@ hp_dl380_g9:
             netdev: "eno1"
           rhel7:
             blkdev: "sda"
-            netdev: "eno1"
+            netdev: "eth0"
       boot_mode: "bios"
       storage:
         default:
