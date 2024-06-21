@@ -367,6 +367,44 @@ dell_r740_uefi:
         custom_actions:  "redfish-dell-custom-actions.py"
 
 
+dell_r750_uefi:
+      platform: "baremetal"
+      description: "DELL r750 in UEFI mode (uses mostly redfish)"
+      usb_storage_delay: "10"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eno12399"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
+      boot_mode: "uefi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
+        bootonce_clear:  "redfish-dell-bootonce-clear.py"
+        custom_actions:  "redfish-dell-custom-actions.py"
+
 
 dell_xr:
       platform: "baremetal"
