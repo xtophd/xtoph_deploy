@@ -213,6 +213,7 @@
                           ksdevice={{ t_net_dev }}
                           ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                           nameserver={{ t_net_dns }}
+                          usb-storage.delay_use={{t_usbdelay}}
                           {{ t_krn_opts }}
                     when: 
                       - xtoph_deploy.kickstart_profile.method == "cdrom"
@@ -229,6 +230,7 @@
                           ksdevice={{ t_net_dev }}
                           ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                           nameserver={{ t_net_dns }}
+                          usb-storage.delay_use={{t_usbdelay}}
                           {{ t_krn_opts }}
                     when: 
                       - xtoph_deploy.kickstart_profile.method == "cdrom"
@@ -245,6 +247,7 @@
                           ksdevice={{ t_net_dev }}
                           ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                           nameserver={{ t_net_dns }}
+                          usb-storage.delay_use={{t_usbdelay}}
                           {{ t_krn_opts }}
                     when: 
                       - xtoph_deploy.kickstart_profile.method == "cdrom"
@@ -264,6 +267,7 @@
                           ksdevice={{ t_net_dev }}
                           ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                           nameserver={{ t_net_dns }}
+                          usb-storage.delay_use={{t_usbdelay}}
                           {{ t_krn_opts }}
                     when: 
                       - xtoph_deploy.kickstart_profile.method == "network"
@@ -281,6 +285,7 @@
                           ksdevice={{ t_net_dev }}
                           ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                           nameserver={{ t_net_dns }}
+                          usb-storage.delay_use={{t_usbdelay}}
                           {{ t_krn_opts }}
                     when: 
                       - xtoph_deploy.kickstart_profile.method == "network"
@@ -298,6 +303,7 @@
                           ksdevice={{ t_net_dev }}
                           ip={{ t_net_ip }}::{{ t_net_gw }}:{{ t_net_nm }}:{{ xtoph_deploy.hostname }}:{{ t_net_dev }}:none
                           nameserver={{ t_net_dns }}
+                          usb-storage.delay_use={{t_usbdelay}}
                           {{ t_krn_opts }}
                     when: 
                       - xtoph_deploy.kickstart_profile.method == "network"
@@ -306,15 +312,16 @@
       
       
               vars:
-                t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
+                t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev        }}"
                 t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
                 t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
                 t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
                 t_net_dns:  "{{ xtoph_deploy.deployhost.ip if xtoph_deploy.deployhost.dnsmasq_asprimary == true else xtoph_deploy.machine_profile.network.default.nameserver }}"
-                t_krn_opts: "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts }}"
+                t_krn_opts: "{{ xtoph_deploy.machine_profile.kickstart.kernel_opts   }}"
                 t_ks_repo:  "{{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_profile.mnt }}"
                 t_ks_hd:    'hd:LABEL={{ isoinfo_volume_id.stdout | replace(" ","\\x20") }}'
                 t_ks_url:   "{{ xtoph_deploy.deployhost.kickstart.url }}/{{ xtoph_deploy.projectname }}-{{ inventory_hostname }}.cfg"
+                t_usbdelay: "{{ xtoph_deploy.machine_profile.usb_storage_delay | default('0') }}"
             
               ## End-Of-Block
 
