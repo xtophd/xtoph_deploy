@@ -426,6 +426,87 @@ rhel93-pxe:
             name:      "my-rhel9-appstream-rpms"
             subpath:   "/AppStream"
 
+rhel94:
+    name:              "rhel94"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.4 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.4"
+    method:            "cdrom"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9.j2"
+    boot_iso:          "rhel-9.4-x86_64-dvd.iso"
+    repo_iso:          "rhel-9.4-x86_64-dvd.iso"
+    boot_iso_chksum:   ""
+    repo_iso_chksum:   ""
+    mnt:               "rhel-9.4"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel94-bootiso:
+    name:              "rhel94-bootiso"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.4 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.4"
+    method:            "network"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-9.4-x86_64-boot.iso"
+    repo_iso:          "rhel-9.4-x86_64-dvd.iso"
+    boot_iso_chksum:   ""
+    repo_iso_chksum:   ""
+    mnt:               "rhel-9.4"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel94-pxe:
+    name:              "rhel94-pxe"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.4 Boot PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.4"
+    method:            "pxe"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-baseos-9.4-x86_64-boot.iso"
+    repo_iso:          "rhel-baseos-9.4-x86_64-dvd.iso"
+    boot_iso_chksum:   ""
+    repo_iso_chksum:   ""
+    mnt:               "rhel-9.4"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
 
 
 ##
