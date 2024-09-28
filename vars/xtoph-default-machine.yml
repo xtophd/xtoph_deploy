@@ -764,6 +764,10 @@ pc_nvme_efi:
             blkdev: "nvme0n1"
             netdev: "eno1"
             kernel_opts: ""
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+            kernel_opts: ""
           rhel7:
             blkdev: "nvme0n1"
             netdev: "eno0"

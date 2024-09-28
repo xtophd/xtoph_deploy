@@ -412,8 +412,8 @@ rhel93-pxe:
     wait_for_ssh:      true
     netcfg_override:   "static"
     template:          "ks-rhel9-bootiso.j2"
-    boot_iso:          "rhel-baseos-9.3-x86_64-boot.iso"
-    repo_iso:          "rhel-baseos-9.3-x86_64-dvd.iso"
+    boot_iso:          "rhel-9.3-x86_64-boot.iso"
+    repo_iso:          "rhel-9.3-x86_64-dvd.iso"
     boot_iso_chksum:   ""
     repo_iso_chksum:   ""
     mnt:               "rhel-9.3"

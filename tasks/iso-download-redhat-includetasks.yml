@@ -12,7 +12,8 @@
             ##    at the same time.
             ##
 
-            - debug:
+            - name: "iso-download-redhat : debug iso_detail"
+              debug:
                 msg:
                   - "ISO Filename: {{ iso_detail.filename }} "
                   - "ISO Checksum: {{ iso_detail.checksum }}"
@@ -37,7 +38,8 @@
               register: iso_check
               when: iso_detail.filename != ""
 
-            - debug:
+            - name: "iso-download-redhat : debug search results"
+              debug:
                 msg: "ISO found: {{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
               when: 
                 - iso_detail.filename != ""
@@ -68,7 +70,7 @@
 
                   - block:
 
-                        - name: "iso-download-redhat : generate download URL by-checksum"
+                        - name: "iso-download-redhat : generate image_list BY_CHECKSUM"
                           ansible.builtin.uri:
                             follow_redirects: none
                             headers:
@@ -77,14 +79,15 @@
                             url: "{{ redhat_api_url }}/images/{{ iso_detail.checksum }}/download"
                           register: image_list
 
-                        - debug:
+                        - name: "iso-download-redhat : debug image_list BY_CHECKSUM"
+                          debug:
                             msg: 
                               - "Search By-Checksum Result:"
                               - "  ISO Filename:      {{ image_list.json.body.filename }}"
                               - "  ISO Checksum:      {{ iso_detail.checksum }}"
                               - "  ISO Download Href: {{ image_list.json.body.href }}"
 
-                        - name: "iso-download-redhat : generate download URL by-checksum : set facts"
+                        - name: "iso-download-redhat : set facts for url BY_CHECKSUM"
                           set_fact:
                             download_url: "{{ image_list.json.body.href }}"
                             download_checksum: "{{ iso_detail.checksum }}"
@@ -103,7 +106,7 @@
 
                   - block:             
 
-                        - name: "iso-download-redhat : generate download URL by-version : get image list"
+                        - name: "iso-download-redhat : generate image_list BY-VERSION"
                           ansible.builtin.uri:
                             follow_redirects: none
                             headers:
@@ -112,9 +115,11 @@
                             url: "{{ redhat_api_url }}/images/rhel/{{ iso_detail.version }}/{{ iso_detail.arch }}"
                           register: image_list
  
-                        - debug: var=image_list
+                        - name: "iso-download-redhat : debug image_list returned BY-VERSION"
+                          debug: 
+                            var: image_list
 
-                        - name: "iso-download-redhat : generate download URL by-version : match iso name & get URL"
+                        - name: "iso-download-redhat : isolate image BY-VERSION"
                           ansible.builtin.uri:
                             follow_redirects: none
                             headers:
@@ -122,9 +127,16 @@
                             status_code: 307
                             url: "{{ item.downloadHref }}"
                           register: image_url
-                          loop: "{{ (image_list.json.body | selectattr('filename','equalto', iso_detail.filename  ) | list ) }}"
+                          loop: "{{ (image_list.json.body | selectattr('filename','equalto',iso_detail.filename) | list ) }}"
 
-                        - debug:
+
+                        - name: "iso-download-redhat : debug image_url BY-VERSION"
+                          debug: 
+                            var: image_url
+
+
+                        - name: "iso-download-redhat : debug isolated image details BY-VERSION"
+                          debug:
                             msg: 
                               - "Search By-Version Result:"
                               - "  ISO Filename:     {{ item.json.body.filename }}"
@@ -132,7 +144,7 @@
                               - "  ISO Download URL: {{ item.json.body.href }}"
                           loop: "{{ (image_url.results | selectattr('json.body.filename','equalto', iso_detail.filename ) | list ) }}"
       
-                        - name: "iso-download-redhat : generate download URL by-version : set facts"
+                        - name: "iso-download-redhat : set facts for url BY-VERSION"
                           set_fact:
                             download_url: "{{ item.json.body.href }}"
                             download_checksum: "{{ item.item.checksum }}"
@@ -141,8 +153,8 @@
                     when: iso_detail.checksum == ""
 
 
-
-                  - debug:
+                  - name: "iso-download-redhat : debug final image details"
+                    debug:
                       msg:
                         - "Final Results:"
                         - "  ISO Filename: {{ iso_detail.filename }}"

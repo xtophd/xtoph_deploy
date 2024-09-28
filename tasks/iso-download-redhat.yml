@@ -20,7 +20,7 @@
           redhat_api_url: "https://api.access.redhat.com/management/v1"
           redhat_sso_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
   
-      - name: "iso-download-redhat : when method != pxe attempt locate/download ISO"
+      - name: "iso-download-redhat : attempt locate/download ISO(s)"
         include_tasks:
           file: iso-download-redhat-includetasks.yml
 
@@ -39,7 +39,7 @@
           loop_var: iso_detail
 
   when: 
-    - deploy_node 
+#    - deploy_node 
     - xtoph_deploy.kickstart_profile is defined 
     - xtoph_deploy.kickstart_profile.vender is defined 
     - xtoph_deploy.kickstart_profile.vender == "redhat"
