@@ -47,9 +47,14 @@
           loop:
             - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}"
             - "{{ xtoph_deploy.deployhost.dhcp.tmp_dir }}/cfg-fragments"
-      
-      
-      
+
+        - name: "common-dhcp-preprocess : calculate boot-size of shimx64.efi"
+          shell: 
+            cmd: du -B 512 /var/lib/tftpboot/efi/shimx64.efi | cut -f1
+          register: bootsize
+  
+     
+ 
         - block:
       
                 ##
@@ -110,6 +115,7 @@
           vars:
             - p_item:      "{{ item }}"
             - p_name:      "{{ inventory_hostname_short }}"
+            - p_bootsize:  "{{ bootsize.stdout }}"
 #            - p_addr:      "{{ h_pubIP  }}"
 #            - p_mac:       "{{ h_pubMAC }}"
             - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"

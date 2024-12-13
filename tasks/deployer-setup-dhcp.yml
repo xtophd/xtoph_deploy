@@ -39,6 +39,28 @@
 
 
 
+- name: "deployer-setup-dhcp : create tftpd systemd override directory"
+  file:
+    path: "/etc/systemd/system/tftp.service.d"
+    mode: "0755"
+    owner: "root"
+    group: "root"
+    state: directory
+
+- name: "deployer-setup-dhcp : deploy tftpd systemd custom configuration"
+  template:
+    src:  "tftp-systemd-override.j2"
+    dest: "/etc/systemd/system/tftp.service.d/override.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "deployer-setup-dhcp : reload systemd to ingest tftp override"
+  systemd:
+    daemon-reload: true
+
+
+
 - name: "deployer-setup-dhcp : create tftpboot directories"
   file:
     path: "{{ item }}"
@@ -47,8 +69,6 @@
   with_items:
     - "/var/lib/tftpboot/bios"
     - "/var/lib/tftpboot/efi"
-
-
 
 - name: "deployer-setup-dhcp : clean-up temp workspaces"
   shell:

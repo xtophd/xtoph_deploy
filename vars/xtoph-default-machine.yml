@@ -21,11 +21,20 @@ kvm_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "enp1s0"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel9:
+            blkdev: "vda"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel8:
+            blkdev: "vda"
+            netdev: "ens3"
             kernel_opts: ""
           rhel7:
             blkdev: "vda"
             netdev: "eth0"
+            kernel_opts: ""
       boot_mode: "bios"
       storage:
         default:
@@ -47,7 +56,15 @@ kvm_nest_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "enp1s0"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel9:
+            blkdev: "vda"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel8:
+            blkdev: "vda"
+            netdev: "ens3"
             kernel_opts: ""
           rhel7:
             blkdev: "vda"
@@ -75,7 +92,15 @@ kvm_sda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "enp1s0"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel9:
+            blkdev: "vda"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel8:
+            blkdev: "sda"
+            netdev: "ens3"
             kernel_opts: ""
           rhel7:
             blkdev: "sda"
@@ -796,6 +821,34 @@ pc_sda:
             blkdev: "sda"
             netdev: "eno0"
       boot_mode: "bios"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+
+qotom_q20331g9:
+      platform: "baremetal"
+      description: "QOTOM C3758R 4xSFP+ 5x2.5G nvme"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0"
+            kernel_opts: ""
+          fedora41:
+            blkdev: "nvme0n1"
+            netdev: "eno1"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "eno0"
+      boot_mode: "efi"
       storage:
         default:
       network:

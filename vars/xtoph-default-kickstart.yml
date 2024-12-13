@@ -102,6 +102,92 @@ vmedia_nowait:
 ##
 ##
 
+rhel10-beta:
+    name:              "rhel10.0"
+    family:            "rhel10"
+    description:       "Red Hat Enterprise Linux 10 (BETA) ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "10.0-beta"
+    method:            "cdrom"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel10.j2"
+    boot_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+    repo_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+    mnt:               "rhel-10.0"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-10-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-10-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel10-beta-bootiso:
+    name:              "rhel10.0-bootiso"
+    family:            "rhel10"
+    description:       "Red Hat Enterprise Linux 10 (BETA) Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "10.0-beta"
+    method:            "network"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel10.j2"
+    boot_iso:          "rhel-10.0-beta-x86_64-boot.iso"
+    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+    repo_iso_chksum:   "6fa5fb47bd569147150852e872a65ba0bda94e5ebad5e2014ce62a7ec92d3dc5"
+    mnt:               "rhel-10.0"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel10-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel10-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel10-beta-pxe:
+    name:              "rhel10.0-pxe"
+    family:            "rhel10"
+    description:       "Red Hat Enterprise Linux 10 (BETA) PXE"
+    vender:            "redhat"
+    method:            "pxe"
+    arch:              "x86_64"
+    version:           "10.0-beta"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel10.j2"
+    boot_iso:          "rhel-10.0-beta-x86_64-boot.iso"
+    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+    repo_iso_chksum:   "6fa5fb47bd569147150852e872a65ba0bda94e5ebad5e2014ce62a7ec92d3dc5"
+    mnt:               "rhel-10.0"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel10-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel10-appstream-rpms"
+            subpath:   "/AppStream"
+
+
+##
+##
+##
+
 rhel90:
     name:              "rhel90"
     family:            "rhel9"
@@ -493,8 +579,8 @@ rhel94-pxe:
     wait_for_ssh:      true
     netcfg_override:   "static"
     template:          "ks-rhel9-bootiso.j2"
-    boot_iso:          "rhel-baseos-9.4-x86_64-boot.iso"
-    repo_iso:          "rhel-baseos-9.4-x86_64-dvd.iso"
+    boot_iso:          "rhel-9.4-x86_64-boot.iso"
+    repo_iso:          "rhel-9.4-x86_64-dvd.iso"
     boot_iso_chksum:   ""
     repo_iso_chksum:   ""
     mnt:               "rhel-9.4"
@@ -507,7 +593,59 @@ rhel94-pxe:
             name:      "my-rhel9-appstream-rpms"
             subpath:   "/AppStream"
 
+rhel-ai-amd-pxe-1.2:
+    name:              "rhel-ai-amd-pxe"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux AI 1.2 (AMD)"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "1.2"
+    method:            "pxe"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel-ai-amd-bootiso.j2"
+    boot_iso:          "rhel-ai-amd-1.2-1728670957-x86_64-boot.iso"
+    repo_iso:          "rhel-ai-amd-1.2-1728670957-x86_64-boot.iso"
+    boot_iso_chksum:   "e6f3c17c3a4cb37aeddf2fa51c69138e06c2e2fbc671e73cffc25b1ac5fee041"
+    repo_iso_chksum:   "e6f3c17c3a4cb37aeddf2fa51c69138e06c2e2fbc671e73cffc25b1ac5fee041"
+    mnt:               "rhelai-amd-1.2"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      ""
+            subpath:   ""
+        appstream:
+            name:      ""
+            subpath:   ""
 
+rhel-ai-nvidia-pxe-1.2:
+    name:              "rhel-ai-nvidia-pxe"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux AI 1.2 (NVidia)"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "1.2"
+    method:            "pxe"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel-ai-nvidia-bootiso.j2"
+    boot_iso:          "rhel-ai-nvidia-1.2-1728670452-x86_64-boot.iso"
+    repo_iso:          "rhel-ai-nvidia-1.2-1728670452-x86_64-boot.iso"
+    boot_iso_chksum:   "a679c7de566b896c48096a877088caac3a37d8e07e06bac7eb2a591674745ca2"
+    repo_iso_chksum:   "a679c7de566b896c48096a877088caac3a37d8e07e06bac7eb2a591674745ca2"
+    mnt:               "rhelai-nvidia-1.2"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      ""
+            subpath:   ""
+        appstream:
+            name:      ""
+            subpath:   ""
 
 ##
 ##
@@ -983,6 +1121,84 @@ fedora38-pxe:
             name:      "my-fedora-38-rpms"
             subpath:   ""
 
+##
+## Fedora 41
+##
+
+fedora41:
+    name:              "fedora41"
+    family:            "fedora41"
+    description:       "Fedora 41 DVD"
+    vender:            "fedora"
+    arch:              "x86_64"
+    version:           "41"
+    method:            "cdrom"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-fedora41.j2"
+    url_iso:           "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Server/x86_64/iso"
+    boot_iso:          "Fedora-Server-dvd-x86_64-41-1.4.iso"
+    repo_iso:          "Fedora-Server-dvd-x86_64-41-1.4.iso"
+    boot_iso_chksum:   "6037e489103401a6ad4e54a4bcb2df7525693bdc3f2ce4aa895838b65647e551"
+    repo_iso_chksum:   "6037e489103401a6ad4e54a4bcb2df7525693bdc3f2ce4aa895838b65647e551"
+    mnt:               "fedora-41"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-fedora-41-rpms"
+            subpath:   ""
+
+fedora41-netinstall:
+    name:              "fedora41-netinstall"
+    family:            "fedora41"
+    description:       "Fedora 41 NetInstall"
+    method:            "network"
+    vender:            "fedora"
+    arch:              "x86_64"
+    version:           "41"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-fedora38-netinstall.j2"
+    url_iso:           "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Server/x86_64/iso"
+    boot_iso:          "Fedora-Server-netinst-x86_64-41-1.4.iso"
+    repo_iso:          "Fedora-Server-dvd-x86_64-41-1.4.iso"
+    boot_iso_chksum:   "630c52ba9e7a7f229b026e241ba74b9bc105e60ba5bf7b222693ae0e25f05c97"
+    repo_iso_chksum:   "6037e489103401a6ad4e54a4bcb2df7525693bdc3f2ce4aa895838b65647e551"
+    mnt:               "fedora-41"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-fedora-41-rpms"
+            subpath:   ""
+
+fedora41-pxe:
+    name:              "fedora41-pxe"
+    family:            "fedora41"
+    description:       "Fedora 41 PXE Install"
+    vender:            "fedora"
+    method:            "pxe"
+    arch:              "x86_64"
+    version:           "41"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-fedora41-netinstall.j2"
+    url_iso:           "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Server/x86_64/iso"
+    boot_iso:          "Fedora-Server-netinst-x86_64-41-1.4.iso"
+    repo_iso:          "Fedora-Server-dvd-x86_64-41-1.4.iso"
+    boot_iso_chksum:   "630c52ba9e7a7f229b026e241ba74b9bc105e60ba5bf7b222693ae0e25f05c97"
+    repo_iso_chksum:   "6037e489103401a6ad4e54a4bcb2df7525693bdc3f2ce4aa895838b65647e551"
+    mnt:               "fedora-41"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-fedora-41-rpms"
+            subpath:   ""
 
 ##
 ## CentOS 7

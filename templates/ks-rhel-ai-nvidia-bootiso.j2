@@ -1,0 +1,173 @@
+
+## 101424: use rhel-ai container image from local registry
+ostreecontainer --transport registry --url=192.168.100.34:5000/rhelai1/bootc-nvidia-rhel9:1.2
+
+## 101324: DEFAULT EXAMPLE FROM DOCS using the embedded container image in ISO
+#  ostreecontainer --url=/run/install/repo/container --transport=oci --no-signature-verification
+## 101624: (WORKS): use rhel9 container image from registry
+#ostreecontainer --transport registry --url=registry.redhat.io/rhel9/rhel-bootc:latest
+
+## NETWORK CONFIGURATION
+{% if xtoph_deploy.kickstart_profile.netcfg_override == "static" %}
+# Custom: Override kernel level network args with a static kickstart config
+network --bootproto=static --device={{ xtoph_deploy.machine_profile.kickstart.netdev }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machine_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }} --hostname={{ xtoph_deploy.hostname }} 
+{% else %}
+# Default: dhcp on interface with link
+network --bootproto=dhcp --device=link --activate
+{% endif %}
+
+# customize this for your target system desired disk partitioning
+zerombr
+clearpart --all --initlabel --disklabel=gpt
+reqpart --add-boot
+part / --grow --fstype xfs
+
+# services can also be customized via Kickstart
+firewall --disabled
+services --enabled=sshd
+
+# optionally add a user
+
+#rootpw {{ p_rootpw }} --iscrypted locked
+rootpw --iscrypted locked
+
+{% if p_ssh_key is defined and p_ssh_key|length %}
+## Authorized SSH Key
+sshkey --username root "{{ p_ssh_key }}"
+{% endif %}
+
+
+
+
+########################################
+##
+## Pre Install
+##
+
+%pre
+
+( echo -e "... begin %pre \r") > dev/tty1
+
+( echo -e "... storing auth token for registry.redhat.io \r") > dev/tty1
+
+mkdir -p /etc/ostree
+cat > /etc/ostree/auth.json << 'EOF'
+{
+        "auths": {
+                "registry.redhat.io": {
+                        "auth": "ZG9lcmJlY2s6Q0JybXc0MW4="
+                }
+        }
+}
+EOF
+
+sleep 3 
+
+
+
+( echo -e "... disable tls for local lab registry \r") > dev/tty1
+
+# REF: https://docs.fedoraproject.org/en-US/bootc/bare-metal
+
+mkdir -p /etc/containers/registries.conf.d/
+cat > /etc/containers/registries.conf.d/local-registry.conf << 'EOF'
+[[registry]]
+location = "192.168.100.34:5000"
+insecure = true
+EOF
+
+sleep 3 
+
+
+
+( echo -e "... remove upgrade-message in /etc/motd.d \r") > dev/tty1
+
+[[ -f /etc/motd.d/upgrade-message ]] && rm -f /etc/motd.d/upgrade-message
+
+
+
+sleep 3 
+
+( echo -e "... end %pre \r") > dev/tty1
+
+%end
+
+
+
+
+########################################
+##
+## Post Install
+##
+
+%post
+
+( echo -e "... begin %post \n\r") > dev/tty1
+
+sleep 3 
+
+
+
+( echo -e "... storing auth token for registry.redhat.io ...\n\r") > dev/tty1
+
+mkdir -p /etc/ostree
+cat > /etc/ostree/auth.json << 'EOF'
+{
+        "auths": {
+                "registry.redhat.io": {
+                        "auth": "ZG9lcmJlY2s6Q0JybXc0MW4="
+                }
+        }
+}
+EOF
+
+sleep 3 
+
+
+
+( echo -e "... bootc switch from local registry to registry.redhat.io \r") > dev/tty1
+
+bootc switch --mutate-in-place --transport registry registry.redhat.io/rhelai1/bootc-nvidia-rhel9:1.2
+
+sleep 3 
+
+
+
+( echo -e "... bootc update \r") > dev/tty1
+
+bootc update
+
+sleep 3 
+
+
+( echo -e "... bootc remove upgrade-message in motd \r") > dev/tty1
+
+[[ -f /etc/motd.d/upgrade-message ]] && rm -f /etc/motd.d/upgrade-message
+
+sleep 3 
+
+
+
+( echo -e "... disable cloud-init \r") > dev/tty1
+
+touch /etc/cloud/cloud-init.disabled
+
+sleep 120
+
+( echo -e "... end %post \r") > dev/tty1
+%end
+
+
+
+
+########################################
+##
+## How to end installation (shutdown, reboot, halt)
+##
+
+{% if (xtoph_deploy.kickstart_profile.wait_for_shutdown) %}
+shutdown
+{% else %}
+reboot
+{% endif %}
+

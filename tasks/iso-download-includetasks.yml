@@ -1,0 +1,64 @@
+## Authors: 
+##   Christoph Doerbeck
+##
+## Summary:
+##
+
+
+            ##
+            ##    ISO Download is throttled to 1 host at
+            ##    time to avoid concurency problems with downloading
+            ##    too much at one time, or downloading the same content
+            ##    at the same time.
+            ##
+
+            - name: "iso-download : debug iso_detail"
+              debug:
+                msg:
+                  - "ISO Filename: {{ iso_detail.filename }} "
+                  - "ISO Checksum: {{ iso_detail.checksum }}"
+                  - "ISO Vender:   {{ iso_detail.vender }}"
+                  - "ISO Version:  {{ iso_detail.version }}"
+                  - "ISO Arch:     {{ iso_detail.arch }}"
+                  - "ISO URL:      {{ iso_detail.url_iso }}"
+
+            - name: "iso-download : clear facts"
+              set_fact:
+                download_url: ""
+                download_checksum: ""
+
+            - debug:
+                msg: "ISO filename is empty"
+              when: 
+                - iso_detail.filename == ""
+
+            - name: "iso-download : looking for ISO"
+              stat:
+                path: "{{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+                get_checksum: False
+              register: iso_check
+              when: iso_detail.filename != ""
+
+            - name: "iso-download : debug search results"
+              debug:
+                msg: "ISO found: {{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+              when: 
+                - iso_detail.filename != ""
+                - iso_check.stat.exists == True 
+
+            - block:
+
+                  - debug:
+                      msg: "ISO missing: {{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+
+                  - name: "iso-download : download ISO"
+                    ansible.builtin.get_url:
+                      checksum: "sha256:{{ iso_detail.checksum }}"
+                      url:      "{{ iso_detail.url_iso }}/{{ iso_detail.filename }}"
+                      dest:     "{{ xtoph_deploy.deployhost.iso.dir }}/{{ iso_detail.filename }}"
+                      tmp_dest: "{{ xtoph_deploy.deployhost.iso.dir }}"
+
+              when: 
+                - iso_detail.filename != ""
+                - iso_check.stat.exists == False
+

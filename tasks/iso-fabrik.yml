@@ -61,6 +61,7 @@
                 p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
                 p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
                 p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
+                p_netDevice:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
               template:
                 src:   "{{ xtoph_deploy.kickstart_profile.template }}"
                 dest:  "{{ item }}"
@@ -178,6 +179,25 @@
             ##      
             ##        https://fedoraproject.org/wiki/Dracut/Options#Network      
             ##        https://bugzilla.redhat.com/show_bug.cgi?id=836039
+            ##
+            ##      From https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/
+            ##
+            ##          Names incorporating Firmware/BIOS provided index numbers for on-board devices (example: eno1)
+            ##          Names incorporating Firmware/BIOS provided PCI Express hotplug slot index numbers (example: ens1)
+            ##          Names incorporating physical/geographical location of the connector of the hardware (example: enp2s0)
+            ##          Names incorporating the interfaces's MAC address (example: enx78e7d1ea46da)
+            ##          Classic, unpredictable kernel-native ethX naming (example: eth0)
+            ##
+            ##          By default, systemd v197 will now name interfaces following policy 
+            ##              1) if that information from the firmware is applicable and available, falling back to 
+            ##              2) if that information from the firmware is applicable and available, falling back to 
+            ##              3) if applicable, falling back to 
+            ##              5) in all other cases. 
+            ##              Policy 4) is not used by default, but is available if the user chooses so.
+            ##
+            ##          This combined policy is only applied as last resort. That means, if the system has biosdevname installed, 
+            ##          it will take precedence. If the user has added udev rules which change the name of the kernel devices 
+            ##          these will take precedence too. Also, any distribution specific naming schemes generally take precedence.
             ##
       
       
@@ -312,7 +332,7 @@
       
       
               vars:
-                t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev        }}"
+                t_net_dev:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
                 t_net_ip:   "{{ xtoph_deploy.machine_profile.network.default.ip      }}"
                 t_net_nm:   "{{ xtoph_deploy.machine_profile.network.default.netmask }}"
                 t_net_gw:   "{{ xtoph_deploy.machine_profile.network.default.gateway }}"
@@ -423,6 +443,7 @@
                 p_ssh_key:    "{{ lookup('file','/root/.ssh/id_rsa.pub') }}"
                 p_diskDevice: "{{ xtoph_deploy.machine_profile.kickstart.blkdev }}"
                 p_rootpw:     "{{ ( xtoph_deploy_root_passwd | default( lookup('password', '/dev/null length=32 chars=ascii_letters,digits,punctuation'))) | password_hash('sha512') }}"
+                p_netDevice:  "{{ xtoph_deploy.machine_profile.kickstart.netdev }}"
               template:
                 src:   "{{ xtoph_deploy.kickstart_profile.template }}"
                 dest:  "{{ item }}"

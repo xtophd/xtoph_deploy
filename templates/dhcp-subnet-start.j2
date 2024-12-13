@@ -11,9 +11,13 @@ subnet {{ p_network }} netmask {{ p_netmask }} {
 {% endif %}
 
     if known {
-       log (info, concat ("dhcpd-debug: CLIENT HOSTNAME: ", host-decl-name ));
-       log (info, concat ("dhcpd-debug: CLIENT IP: ",       binary-to-ascii (10, 8, ".", leased-address)));
-       log (info, concat ("dhcpd-debug: CLIENT MAC: ",      binary-to-ascii (16, 8, ":", substring (hardware, 1, 6))));
+       log (info, concat ("dhcpd-debug: CLIENT HOSTNAME: ",   host-decl-name ));
+       log (info, concat ("dhcpd-debug: CLIENT DOMAINNAME: ", config-option domain-name ));
+       log (info, concat ("dhcpd-debug: CLIENT IP: ",         binary-to-ascii (10, 8, ".", leased-address)));
+       log (info, concat ("dhcpd-debug: CLIENT GATEWAY: ",    binary-to-ascii (10, 8, ".", routers)));
+       log (info, concat ("dhcpd-debug: CLIENT NETMASK: ",    binary-to-ascii (10, 8, ".", config-option subnet-mask)));
+       log (info, concat ("dhcpd-debug: CLIENT BROADCAST: ",  binary-to-ascii (10, 8, ".", config-option broadcast-address)));
+       log (info, concat ("dhcpd-debug: CLIENT MAC: ",        binary-to-ascii (16, 8, ":", substring (hardware, 1, 6))));
     }
 
   class "pxeclients" {	
@@ -27,6 +31,10 @@ subnet {{ p_network }} netmask {{ p_netmask }} {
     if option client-system-arch = 00:07 or option client-system-arch = 00:09 {
 
       log (info, "dhcpd-debug: CLIENT FILENAME: shimx64.efi");
+      log (info, "dhcpd-debug: CLIENT BOOTSIZE: {{ p_bootsize }}");
+
+      option boot-size {{ p_bootsize }};
+
       filename "/efi/shimx64.efi";
 
     } else {

@@ -59,6 +59,8 @@
 ##          Reminder that gather_facts was NOT executed
 ##   
 
+- debug:
+    var: deploy_node
 
 - block:
 
@@ -109,7 +111,9 @@
           enabled:     "yes"
           gpgcheck:    "no"
         with_items: "{{ xtoph_deploy.kickstart_profile.repos }}"
-        when: xtoph_deploy.kickstart_profile.repos is defined
+        when:
+          - xtoph_deploy.kickstart_profile.repos is defined
+          - xtoph_deploy['kickstart_profile']['repos'][item]['name'] != ""
       
       
       
@@ -124,6 +128,3 @@
           - host_credentials[inventory_hostname].username is defined
           - host_credentials[inventory_hostname].password is defined
        
-  when:
-    - deploy_node
-    

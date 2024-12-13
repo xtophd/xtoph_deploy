@@ -1,0 +1,49 @@
+#!/bin/bash
+
+##
+##    This script is intended to be used with
+##    the xtoph_deploy ansible role.  It combines
+##    all steps to create a network macvtap suitable 
+##    for use with 'mknet-libvirt.sh' which comes
+##    next.
+##
+##    The intent is to provide one command for
+##    an ansible shell-task which can be throttled.
+##    Thus all the steps from detection to creation,
+##    need to be provided in one atomic command.
+##
+
+##
+##    Test for macvtap
+##
+
+
+
+if ! nmcli dev show "{{ xtoph_deploy.machine_profile.network.default.bridge_netdev }}" >/dev/null ; then
+   
+
+ 
+    ##
+    ##    Create the macvtap / vlan
+    ##
+    
+    
+    
+    nmcli con add type vlan \
+          con-name "VLAN{{ xtoph_deploy.machine_profile.network.default.macvtap_vlan_id }}" \
+          dev      "{{ xtoph_deploy.machine_profile.network.default.macvtap_device }}" \
+          id       "{{ xtoph_deploy.machine_profile.network.default.macvtap_vlan_id }}" \
+          ifname "{{ xtoph_deploy.machine_profile.network.default.bridge_netdev }}" \
+          connection.autoconnect yes \
+          ipv4.method disabled \
+          ipv6.method disabled
+    
+    
+    
+    echo "network CHANGED : bridge {{ xtoph_deploy.machine_profile.network.default.network_name }} created"
+
+else
+
+    echo "network unmodified : bridge {{ xtoph_deploy.machine_profile.network.default.network_name }} already exists"
+
+fi

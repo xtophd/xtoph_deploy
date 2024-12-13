@@ -17,7 +17,7 @@ url --url={{ xtoph_deploy.deployhost.repos.url }}/{{ xtoph_deploy.kickstart_prof
 
 {%if xtoph_deploy.kickstart_profile.netcfg_override == "static" %}
 ## Override kernel level network args with a static kickstart config
-network --bootproto=static --device={{ p_netDevice }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machine_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }} --hostname={{ xtoph_deploy.hostname }}
+network --bootproto=static --device={{ xtoph_deploy.machine_profile.kickstart.netdev }} --ip={{ xtoph_deploy.machine_profile.network.default.ip }} --netmask={{ xtoph_deploy.machine_profile.network.default.netmask }} --gateway={{ xtoph_deploy.machine_profile.network.default.gateway }} --nameserver={{ xtoph_deploy.machine_profile.network.default.nameserver }} --hostname={{ xtoph_deploy.hostname }}
 {% endif %}
 
 {% for key in xtoph_deploy.kickstart_profile.repos %}
@@ -46,15 +46,18 @@ sshkey --username=root "{{ p_ssh_key }}"
 
 zerombr
 clearpart --drives={{ p_diskDevice }} --all --initlabel
-part /boot --fstype=ext2 --size=512 --ondisk={{ p_diskDevice }} --asprimary
-part /boot/efi --fstype=efi --size=512 --ondisk={{ p_diskDevice }} --asprimary
-part pv.01 --size=16000 --grow --ondisk={{ p_diskDevice }} --asprimary
-volgroup vg_rhel pv.01
-logvol /     --fstype=ext4  --vgname=vg_rhel --name=root   --size=6000 --grow
-logvol /tmp  --fstype=ext4  --vgname=vg_rhel --name=tmp    --size=2000
-logvol swap  --fstype=swap  --vgname=vg_rhel --name=swap01 --size=2000
+autopart --type=lvm
 
-auth --passalgo=sha512 --useshadow
+#part /boot --fstype=biosboot --size=512 --ondisk={{ p_diskDevice }} --asprimary
+#part /boot/efi --fstype=efi --size=512 --ondisk={{ p_diskDevice }} --asprimary
+#part pv.01 --size=16000 --grow --ondisk={{ p_diskDevice }} --asprimary
+#volgroup vg_rhel pv.01
+#logvol /     --fstype=ext4  --vgname=vg_rhel --name=root   --size=6000 --grow
+#logvol /tmp  --fstype=ext4  --vgname=vg_rhel --name=tmp    --size=2000
+#logvol swap  --fstype=swap  --vgname=vg_rhel --name=swap01 --size=2000
+
+#authselect --passalgo=sha512 --useshadow
+
 selinux --enforcing
 firewall --enabled
 skipx
@@ -63,12 +66,13 @@ firstboot --disable
 %packages
 @Core
 #redhat-lsb-core
-rhel-system-roles
+#rhel-system-roles
+fedora-repos
 dhclient
 bind-utils
 wget
-git
-cloud-init
+#git
+#cloud-init
 %end
 
 ########################################
@@ -80,6 +84,9 @@ cloud-init
 
 ##- Preserve kernel kickstart args
 cat /proc/cmdline >> /root/anaconda-cmdline.txt
+
+##- Install software that was not available from the local DVD repo
+dnf install -y git
 
 %end
 

@@ -426,8 +426,8 @@
     - { platform: 'ovirt',     playbook: 'ovirt-deploy-preprocess.yml'     } 
     - { platform: 'baremetal', playbook: 'baremetal-deploy-preprocess.yml' } 
 
-- name: "main.yml : include iso-download-redhat to retrieve ISO images"
-  include_tasks: "iso-download-redhat.yml"
+- name: "main.yml : include iso-download to retrieve ISO images"
+  include_tasks: "iso-download.yml"
   when: 
     - xtoph_deploy_action == "preprocess"
 

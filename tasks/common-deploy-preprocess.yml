@@ -177,7 +177,6 @@
   when: 
     - xtoph_deploy.kickstart_profile.repo_iso is defined 
     - xtoph_deploy.kickstart_profile.repo_iso != ""
-#    - deploy_node
 
 
 

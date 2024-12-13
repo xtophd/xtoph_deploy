@@ -134,7 +134,7 @@
       ##      this section is blocked primarily to follow the
       ##      flow of other platforms, although here we do
       ##      NOT test for 'node_deploy'.  Some baremetal
-      ##      deployuments are manual and we cannot always test
+      ##      deployments are manual and we cannot always test
       ##      the machine status with ipmi.
       ##
       ##      so we always prepare media, kickstart configs, etc...
@@ -143,7 +143,6 @@
       ##      available)
       ##
       ##
-
 
       ##
       ##      If power state was determined above, then deploy_node
