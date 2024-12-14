@@ -61,6 +61,22 @@
 
 
       ##
+      ##    One exception to never touch xtoph_deploy outside of main.yml
+      ##    is the handling of h_pubMAC which may be calculated during preprocess 
+      ##    and now needs to be amended into xtoph_deploy dictionary
+      ##
+      
+      - name: "libvirt-deploy-preprocess : special handling for generated mac addresses"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {'mac': h_pubMAC}}}}, recursive=True ) }}"
+        when:
+          - h_pubMAC is defined
+          - h_pubMAC|length >= 0
+          - xtoph_deploy.machine_profile.network.default.mac|length == 0
+      
+
+
+      ##
       ##    Determine state of the vm
       ##
 
