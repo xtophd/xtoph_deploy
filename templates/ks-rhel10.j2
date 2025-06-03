@@ -8,7 +8,8 @@
 
 lang en_US
 keyboard us
-timezone America/New_York --isUtc
+#timezone America/New_York --isUtc
+timezone America/New_York 
 rootpw {{ p_rootpw }} --iscrypted
 reboot
 text
@@ -64,12 +65,7 @@ firstboot --disable
 
 %packages
 @Core
-redhat-lsb-core
-rhel-system-roles
-#fedora-repos
-dhclient
-bind-utils
-wget
+ansible-core
 git
 #cloud-init
 %end
