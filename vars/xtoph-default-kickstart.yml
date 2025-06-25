@@ -102,23 +102,23 @@ vmedia_nowait:
 ##
 ##
 
-rhel10-beta:
+rhel100:
     name:              "rhel10.0"
     family:            "rhel10"
-    description:       "Red Hat Enterprise Linux 10 (BETA) ISO"
+    description:       "Red Hat Enterprise Linux 10 ISO"
     vender:            "redhat"
     arch:              "x86_64"
-    version:           "10.0-beta"
+    version:           "10.0"
     method:            "cdrom"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
     template:          "ks-rhel10.j2"
-    boot_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
-    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
-    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
-    repo_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+    boot_iso:          "rhel-10.0-x86_64-dvd.iso"
+    repo_iso:          "rhel-10.0-x86_64-dvd.iso"
+    boot_iso_chksum:   "edce2dd6f8e1d1b2ff0b204f89b0659bc9e320d175beb7caad60712957a19608"
+    repo_iso_chksum:   "edce2dd6f8e1d1b2ff0b204f89b0659bc9e320d175beb7caad60712957a19608"
     mnt:               "rhel-10.0"
     kvm_os_type:       "rhel_8x64"
     repos:
@@ -129,23 +129,23 @@ rhel10-beta:
             name:      "my-rhel-10-appstream-rpms"
             subpath:   "/AppStream"
 
-rhel10-beta-bootiso:
+rhel100-bootiso:
     name:              "rhel10.0-bootiso"
     family:            "rhel10"
-    description:       "Red Hat Enterprise Linux 10 (BETA) Boot ISO"
+    description:       "Red Hat Enterprise Linux 10 Boot ISO"
     vender:            "redhat"
     arch:              "x86_64"
-    version:           "10.0-beta"
+    version:           "10.0"
     method:            "network"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "none"
     template:          "ks-rhel10.j2"
-    boot_iso:          "rhel-10.0-beta-x86_64-boot.iso"
-    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
-    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
-    repo_iso_chksum:   "6fa5fb47bd569147150852e872a65ba0bda94e5ebad5e2014ce62a7ec92d3dc5"
+    boot_iso:          "rhel-10.0-x86_64-boot.iso"
+    repo_iso:          "rhel-10.0-x86_64-dvd.iso"
+    boot_iso_chksum:   "008eff6d005e0e418da2dc06ad323f099e02749f32d8074593abdeae4763a0fb"
+    repo_iso_chksum:   "edce2dd6f8e1d1b2ff0b204f89b0659bc9e320d175beb7caad60712957a19608"
     mnt:               "rhel-10.0"
     kvm_os_type:       "rhel_8x64"
     repos:
@@ -156,23 +156,23 @@ rhel10-beta-bootiso:
             name:      "my-rhel10-appstream-rpms"
             subpath:   "/AppStream"
 
-rhel10-beta-pxe:
+rhel100-pxe:
     name:              "rhel10.0-pxe"
     family:            "rhel10"
-    description:       "Red Hat Enterprise Linux 10 (BETA) PXE"
+    description:       "Red Hat Enterprise Linux 10 PXE"
     vender:            "redhat"
     method:            "pxe"
     arch:              "x86_64"
-    version:           "10.0-beta"
+    version:           "10.0"
     wait_for_powerup:  false
     wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
     wait_for_ssh:      true
     netcfg_override:   "static"
     template:          "ks-rhel10.j2"
-    boot_iso:          "rhel-10.0-beta-x86_64-boot.iso"
-    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
-    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
-    repo_iso_chksum:   "6fa5fb47bd569147150852e872a65ba0bda94e5ebad5e2014ce62a7ec92d3dc5"
+    boot_iso:          "rhel-10.0-x86_64-boot.iso"
+    repo_iso:          "rhel-10.0-x86_64-dvd.iso"
+    boot_iso_chksum:   "008eff6d005e0e418da2dc06ad323f099e02749f32d8074593abdeae4763a0fb"
+    repo_iso_chksum:   "edce2dd6f8e1d1b2ff0b204f89b0659bc9e320d175beb7caad60712957a19608"
     mnt:               "rhel-10.0"
     kvm_os_type:       "rhel_8x64"
     repos:
@@ -182,6 +182,89 @@ rhel10-beta-pxe:
         appstream:
             name:      "my-rhel10-appstream-rpms"
             subpath:   "/AppStream"
+
+
+
+#rhel10-beta:
+#    name:              "rhel10.0"
+#    family:            "rhel10"
+#    description:       "Red Hat Enterprise Linux 10 (BETA) ISO"
+#    vender:            "redhat"
+#    arch:              "x86_64"
+#    version:           "10.0-beta"
+#    method:            "cdrom"
+#    wait_for_powerup:  false
+#    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+#    wait_for_ssh:      true
+#    netcfg_override:   "none"
+#    template:          "ks-rhel10.j2"
+#    boot_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+#    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+#    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+#    repo_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+#    mnt:               "rhel-10.0"
+#    kvm_os_type:       "rhel_8x64"
+#    repos:
+#        baseos:
+#            name:      "my-rhel-10-baseos-rpms"
+#            subpath:   "/BaseOS"
+#        appstream:
+#            name:      "my-rhel-10-appstream-rpms"
+#            subpath:   "/AppStream"
+
+#rhel10-beta-bootiso:
+#    name:              "rhel10.0-bootiso"
+#    family:            "rhel10"
+#    description:       "Red Hat Enterprise Linux 10 (BETA) Boot ISO"
+#    vender:            "redhat"
+#    arch:              "x86_64"
+#    version:           "10.0-beta"
+#    method:            "network"
+#    wait_for_powerup:  false
+#    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+#    wait_for_ssh:      true
+#    netcfg_override:   "none"
+#    template:          "ks-rhel10.j2"
+#    boot_iso:          "rhel-10.0-beta-x86_64-boot.iso"
+#    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+#    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+#    repo_iso_chksum:   "6fa5fb47bd569147150852e872a65ba0bda94e5ebad5e2014ce62a7ec92d3dc5"
+#    mnt:               "rhel-10.0"
+#    kvm_os_type:       "rhel_8x64"
+#    repos:
+#        baseos:
+#            name:      "my-rhel10-baseos-rpms"
+#            subpath:   "/BaseOS"
+#        appstream:
+#            name:      "my-rhel10-appstream-rpms"
+#            subpath:   "/AppStream"
+
+#rhel10-beta-pxe:
+#    name:              "rhel10.0-pxe"
+#    family:            "rhel10"
+#    description:       "Red Hat Enterprise Linux 10 (BETA) PXE"
+#    vender:            "redhat"
+#    method:            "pxe"
+#    arch:              "x86_64"
+#    version:           "10.0-beta"
+#    wait_for_powerup:  false
+#    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+#    wait_for_ssh:      true
+#    netcfg_override:   "static"
+#    template:          "ks-rhel10.j2"
+#    boot_iso:          "rhel-10.0-beta-x86_64-boot.iso"
+#    repo_iso:          "rhel-10.0-beta-x86_64-dvd.iso"
+#    boot_iso_chksum:   "f837ceb4e481aa630f83b2151bb41c9fa5043b1460305d52a0e00646466ed4ac"
+#    repo_iso_chksum:   "6fa5fb47bd569147150852e872a65ba0bda94e5ebad5e2014ce62a7ec92d3dc5"
+#    mnt:               "rhel-10.0"
+#    kvm_os_type:       "rhel_8x64"
+#    repos:
+#        baseos:
+#            name:      "my-rhel10-baseos-rpms"
+#            subpath:   "/BaseOS"
+#        appstream:
+#            name:      "my-rhel10-appstream-rpms"
+#            subpath:   "/AppStream"
 
 
 ##
@@ -592,6 +675,88 @@ rhel94-pxe:
         appstream:
             name:      "my-rhel9-appstream-rpms"
             subpath:   "/AppStream"
+
+rhel96:
+    name:              "rhel96"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.6 DVD"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.6"
+    method:            "cdrom"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9.j2"
+    boot_iso:          "rhel-9.6-x86_64-dvd.iso"
+    repo_iso:          "rhel-9.6-x86_64-dvd.iso"
+    boot_iso_chksum:   ""
+    repo_iso_chksum:   ""
+    mnt:               "rhel-9.6"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel-9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel-9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel96-bootiso:
+    name:              "rhel96-bootiso"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.6 Boot ISO"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.6"
+    method:            "network"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "none"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-9.6-x86_64-boot.iso"
+    repo_iso:          "rhel-9.6-x86_64-dvd.iso"
+    boot_iso_chksum:   ""
+    repo_iso_chksum:   ""
+    mnt:               "rhel-9.6"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
+rhel96-pxe:
+    name:              "rhel96-pxe"
+    family:            "rhel9"
+    description:       "Red Hat Enterprise Linux 9.6 Boot PXE"
+    vender:            "redhat"
+    arch:              "x86_64"
+    version:           "9.6"
+    method:            "pxe"
+    wait_for_powerup:  false
+    wait_for_shutdown: "{{ h_pwrOFF | default(true) }}"
+    wait_for_ssh:      true
+    netcfg_override:   "static"
+    template:          "ks-rhel9-bootiso.j2"
+    boot_iso:          "rhel-9.6-x86_64-boot.iso"
+    repo_iso:          "rhel-9.6-x86_64-dvd.iso"
+    boot_iso_chksum:   ""
+    repo_iso_chksum:   ""
+    mnt:               "rhel-9.6"
+    kvm_os_type:       "rhel_8x64"
+    repos:
+        baseos:
+            name:      "my-rhel9-baseos-rpms"
+            subpath:   "/BaseOS"
+        appstream:
+            name:      "my-rhel9-appstream-rpms"
+            subpath:   "/AppStream"
+
 
 rhel-ai-amd-pxe-1.2:
     name:              "rhel-ai-amd-pxe"

@@ -11,9 +11,10 @@
 ##
 
 
-- name: "iso-download : BEGIN"
+- name: "iso-download : BEGIN Red Hat Downloads"
   delegate_to: localhost
   throttle: 1
+
   block:
 
       - set_fact:
@@ -23,7 +24,6 @@
       - name: "iso-download : attempt locate/download RED HAT ISO(s)"
         include_tasks:
           file: iso-download-redhat-includetasks.yml
-
         with_items:
           - { filename: "{{ xtoph_deploy.kickstart_profile.boot_iso | default('') }}",
               checksum: "{{ xtoph_deploy.kickstart_profile.boot_iso_chksum | default('') }}",
@@ -39,45 +39,48 @@
           loop_var: iso_detail
 
   when: 
-#    - deploy_node 
-    - xtoph_deploy.kickstart_profile is defined 
-    - xtoph_deploy.kickstart_profile.vender is defined 
-    - xtoph_deploy.kickstart_profile.vender == "redhat"
+      - xtoph_deploy.kickstart_profile is defined 
+      - xtoph_deploy.kickstart_profile.vender is defined 
+      - xtoph_deploy.kickstart_profile.vender == "redhat"
 
+  ## End-Of-Block
+
+
+- name: "iso-download : BEGIN Generic Downloads"
+  delegate_to: localhost
+  throttle: 1
 
 
   block:
 
-      - set_fact:
-          redhat_api_url: "https://api.access.redhat.com/management/v1"
-          redhat_sso_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
-
-      - name: "iso-download : attempt locate/download publically accessible ISO(s)"
-        include_tasks:
-          file: iso-download-includetasks.yml
-
-        with_items:
-          - { filename: "{{ xtoph_deploy.kickstart_profile.boot_iso | default('') }}",
-              checksum: "{{ xtoph_deploy.kickstart_profile.boot_iso_chksum | default('') }}",
-              version:  "{{ xtoph_deploy.kickstart_profile.version | default('') }}",
-              arch:     "{{ xtoph_deploy.kickstart_profile.arch | default('') }}",
-              url_iso:  "{{ xtoph_deploy.kickstart_profile.url_iso | default('') }}",
-              vender:   "{{ xtoph_deploy.kickstart_profile.vender  }}" }
-          - { filename: "{{ xtoph_deploy.kickstart_profile.repo_iso | default('') }}",
-              checksum: "{{ xtoph_deploy.kickstart_profile.repo_iso_chksum | default('') }}",
-              version:  "{{ xtoph_deploy.kickstart_profile.version | default('') }}",
-              arch:     "{{ xtoph_deploy.kickstart_profile.arch | default('') }}",
-              url_iso:  "{{ xtoph_deploy.kickstart_profile.url_iso | default('') }}",
-              vender:   "{{ xtoph_deploy.kickstart_profile.vender }}" }
-        loop_control:
-          loop_var: iso_detail
+        - set_fact:
+            redhat_api_url: "https://api.access.redhat.com/management/v1"
+            redhat_sso_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
+  
+        - name: "iso-download : attempt locate/download publically accessible ISO(s)"
+          include_tasks:
+            file: iso-download-includetasks.yml
+          with_items:
+            - { filename: "{{ xtoph_deploy.kickstart_profile.boot_iso | default('') }}",
+                checksum: "{{ xtoph_deploy.kickstart_profile.boot_iso_chksum | default('') }}",
+                version:  "{{ xtoph_deploy.kickstart_profile.version | default('') }}",
+                arch:     "{{ xtoph_deploy.kickstart_profile.arch | default('') }}",
+                url_iso:  "{{ xtoph_deploy.kickstart_profile.url_iso | default('') }}",
+                vender:   "{{ xtoph_deploy.kickstart_profile.vender  }}" }
+            - { filename: "{{ xtoph_deploy.kickstart_profile.repo_iso | default('') }}",
+                checksum: "{{ xtoph_deploy.kickstart_profile.repo_iso_chksum | default('') }}",
+                version:  "{{ xtoph_deploy.kickstart_profile.version | default('') }}",
+                arch:     "{{ xtoph_deploy.kickstart_profile.arch | default('') }}",
+                url_iso:  "{{ xtoph_deploy.kickstart_profile.url_iso | default('') }}",
+                vender:   "{{ xtoph_deploy.kickstart_profile.vender }}" }
+          loop_control:
+            loop_var: iso_detail
 
   when:
-#    - deploy_node
-    - xtoph_deploy.kickstart_profile is defined
-    - xtoph_deploy.kickstart_profile.vender is defined
-    - xtoph_deploy.kickstart_profile.vender != "redhat"
-    - xtoph_deploy.kickstart_profile.url_iso != ""
+      - xtoph_deploy.kickstart_profile is defined
+      - xtoph_deploy.kickstart_profile.vender is defined
+      - xtoph_deploy.kickstart_profile.vender != "redhat"
+      - xtoph_deploy.kickstart_profile.url_iso != ""
 
   ## End-Of-Block
 

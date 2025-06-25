@@ -839,7 +839,8 @@ qotom_q20331g9:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "nvme0n1"
-            netdev: "enp4s0"
+#            netdev: "enp4s0"
+            netdev: "eno1"
             kernel_opts: ""
           fedora41:
             blkdev: "nvme0n1"
