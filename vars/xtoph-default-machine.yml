@@ -857,3 +857,31 @@ qotom_q20331g9:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
 
+ms01:
+      platform: "baremetal"
+      description: "MinisForum MS-01 nvme"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "kickstart_profile.family hints: Nic with PXE/VPro, NVME boot/root"
+          default:
+            blkdev: "nvme0n1"
+            netdev: "enp87s0"
+            kernel_opts: ""
+          fedora41:
+            blkdev: "nvme0n1"
+            netdev: "enp87s0"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "eno1"
+      boot_mode: "efi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+
