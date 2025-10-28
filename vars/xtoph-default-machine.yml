@@ -78,6 +78,41 @@ kvm_vda:
           ip: "{{ h_pubIP | default('') }}"
           mac: "{{ h_pubMAC| default('') }}"
     
+kvm_vda_bridge:
+      description: "KVM VM: bridged nic, sparse virtio storage"
+      platform: "libvirt"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "vda"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel9:
+            blkdev: "vda"
+            netdev: "enp1s0"
+            kernel_opts: ""
+          rhel8:
+            blkdev: "vda"
+            netdev: "ens3"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "vda"
+            netdev: "eth0"
+            kernel_opts: ""
+      boot_mode: "bios"
+      storage:
+        default:
+          bus: "virtio"
+          sparse: "true"
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+    
 kvm_nest_vda:
       description: "KVM vm with nested-virt and virtio disks"
       platform: "libvirt"
