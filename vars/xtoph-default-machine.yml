@@ -296,6 +296,50 @@ ovirt_vda_uefi:
 
 
 ##
+## KEYTUS ENTRIES
+##
+
+
+keytus-kr2280:
+      platform: "baremetal"
+      description: "KEYTUS KR2280-X3-A0-R0-00 using IPMI"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "sda"
+            netdev: "eno1"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
+      boot_mode: "uefi"
+      usb_storage_delay: "10"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_pubIP | default('') }}"
+          mac: "{{ h_pubMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "ipmi-login-status.sh"
+        power_status:    "ipmi-power-status.sh"
+        power_on:        "ipmi-power-on.sh"
+        power_off:       "ipmi-power-off.sh"
+        media_status:    ""
+        media_eject:     ""
+        media_insert:    ""
+        bootonce_media:  ""
+        bootonce_pxe:    "ipmi-bootonce-pxe.sh"
+        bootonce_clear:  "ipmi-bootonce-clear.sh"
+        custom_actions:  "ipmi-custom-actions.sh"
+
+
+##
 ## DELL ENTRIES
 ##
 
