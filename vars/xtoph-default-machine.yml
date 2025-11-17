@@ -296,13 +296,13 @@ ovirt_vda_uefi:
 
 
 ##
-## KEYTUS ENTRIES
+## KAYTUS ENTRIES
 ##
 
 
-keytus-kr2280:
+kaytus-kr2280:
       platform: "baremetal"
-      description: "KEYTUS KR2280-X3-A0-R0-00 using IPMI"
+      description: "KEYTUS KR2280-X3-A0-R0-00"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -310,9 +310,9 @@ keytus-kr2280:
         dev_hints:
           description: "Hints to devices based on kickstart_profile.family"
           default:
-            blkdev: "sda"
-            netdev: "eno1"
-            kernel_opts: ""
+            blkdev: "nvme0n1"
+            netdev: "ens3f0"
+            kernel_opts: "module_blacklist=iaa_crypto,intel_qat"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -330,10 +330,10 @@ keytus-kr2280:
         power_status:    "ipmi-power-status.sh"
         power_on:        "ipmi-power-on.sh"
         power_off:       "ipmi-power-off.sh"
-        media_status:    ""
-        media_eject:     ""
-        media_insert:    ""
-        bootonce_media:  ""
+        media_status:    "ipmi-noop.sh"
+        media_eject:     "ipmi-noop.sh"
+        media_insert:    "ipmi-noop.sh"
+        bootonce_media:  "ipmi-noop.sh"
         bootonce_pxe:    "ipmi-bootonce-pxe.sh"
         bootonce_clear:  "ipmi-bootonce-clear.sh"
         custom_actions:  "ipmi-custom-actions.sh"
