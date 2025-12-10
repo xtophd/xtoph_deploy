@@ -980,11 +980,11 @@ ms01:
           description: "kickstart_profile.family hints: Nic with PXE/VPro, NVME boot/root"
           default:
             blkdev: "nvme0n1"
-            netdev: "enp87s0"
+            netdev: "enp89s0"
             kernel_opts: ""
           fedora41:
             blkdev: "nvme0n1"
-            netdev: "enp87s0"
+            netdev: "enp89s0"
             kernel_opts: ""
           rhel7:
             blkdev: "nvme0n1"
