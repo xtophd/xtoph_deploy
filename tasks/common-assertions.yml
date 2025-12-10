@@ -43,7 +43,7 @@
 
 
 
-- name: "common-assertions : xtoph_deploy highlevel validation "
+- name: "common-assertions : xtoph_deploy highlevel validation"
   any_errors_fatal: true
   assert:
     that:
@@ -56,6 +56,22 @@
   when:
     - xtoph_deploy.selected_profile.machine != ""
     - inventory_hostname not in groups.myDeployhost
+
+
+##
+##    Dig into machine HW if defined, does it exist?
+##
+
+
+- name: "common-assertions : assert valid machine_profile by testing machine_profile.platform"
+  any_errors_fatal: true
+  assert:
+    that:
+      - xtoph_deploy.machine_profile.platform is defined 
+    fail_msg: "CONFIG ERROR: machine_profile.platform not defined (CHECK YOUR CONFIGS FOR CORRECT MACHINE DEFINITION)"
+    success_msg: "Assertion Passed"
+  when:
+    - xtoph_deploy.selected_profile.machine != ""
 
 
 ##
