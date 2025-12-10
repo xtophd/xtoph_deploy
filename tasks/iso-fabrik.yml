@@ -383,6 +383,7 @@
             ##
             ##    Generate the custom ISO image
             ##
+
     
             - name: "iso-fabrik : create script to generate iso (xorriso)"
               template:
@@ -392,7 +393,12 @@
                 group: root
                 mode: 0755
 
-            - name: "iso-fabrik : execute mkiso-xorriso.sh script"
+            - name: "iso-fabrik : destination ISO image should be absent"
+              file: 
+                path: "{{xtoph_deploy.deployhost.tmp_dir}}/{{ xtoph_deploy.platform_profile.vm.name }}.iso"
+                state: absent
+
+            - name: "iso-fabrik : execute mkiso-xorriso.sh to create destination ISO image"
               throttle: 1
               shell:
                 cmd: |
