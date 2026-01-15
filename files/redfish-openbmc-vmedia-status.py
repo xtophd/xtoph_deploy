@@ -27,7 +27,7 @@ warnings.filterwarnings("ignore")
 ##    Load commandline arguments
 ##
 
-parser = argparse.ArgumentParser(description="redfish utility for dell: get virtualmedia state and return 'inserted' or 'ejected'")
+parser = argparse.ArgumentParser(description="redfish utility for openbmc: get virtualmedia state and return 'inserted' or 'ejected'")
 
 parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
@@ -52,6 +52,8 @@ url      = 'https://%s/redfish/v1/Managers/1/VirtualMedia/CD' % bmc_ip
 response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 
 data = response.json()
+
+print (data)
 
 if ( data['Inserted'] ):
     result = "inserted"

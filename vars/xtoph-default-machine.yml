@@ -330,13 +330,14 @@ kaytus-kr2280:
         power_status:    "ipmi-power-status.sh"
         power_on:        "ipmi-power-on.sh"
         power_off:       "ipmi-power-off.sh"
-        media_status:    "ipmi-noop.sh"
-        media_eject:     "ipmi-noop.sh"
-        media_insert:    "ipmi-noop.sh"
-        bootonce_media:  "ipmi-noop.sh"
+        media_status:    "manual"
+        media_eject:     "manual"
+        media_insert:    "manual"
+        bootonce_media:  "manual"
         bootonce_pxe:    "ipmi-bootonce-pxe.sh"
         bootonce_clear:  "ipmi-bootonce-clear.sh"
         custom_actions:  "ipmi-custom-actions.sh"
+
 
 
 ##
@@ -971,7 +972,7 @@ qotom_q20331g9:
 
 ms01:
       platform: "baremetal"
-      description: "MinisForum MS-01 nvme"
+      description: "MinisForum MS-01 nvme / 2x2.5G Intel [vPro LOM: enp89s0] /  2x Intel SFP+"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"

@@ -49,6 +49,7 @@
             --chomp
         register: bmc_result
         when:
+          - xtoph_deploy.machine_profile.bmc.media_status != "manual"
           - xtoph_deploy.kickstart_profile.method != "pxe"
 
       - name: "baremetal-deploy-post : (BMC) media-eject"
@@ -58,6 +59,7 @@
             -p {{ t_pass }}
             -i {{ t_bmc }}
         when:
+          - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - bmc_result.stdout == "inserted"
 
@@ -73,8 +75,16 @@
         retries: 600
         delay: 5
         when:
+          - xtoph_deploy.machine_profile.bmc.media_status != "manual"
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - bmc_result.stdout == "inserted"
+
+      - name: "baremetal-deploy : (BMC) Manual Check Point"
+        pause:
+          prompt: "Press ENTER to confirm ALL VIRTUAL MEDIA IS EJECTED"
+        when:
+          - xtoph_deploy.machine_profile.bmc.media_status == "manual"
+
 
 
 
