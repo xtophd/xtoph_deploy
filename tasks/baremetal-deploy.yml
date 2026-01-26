@@ -116,6 +116,7 @@
                   - "BMC VMedia URL Path : {{ t_url }}"
                   - "BMC VMedia NFS Path : {{ t_nfs }}"
                   - "BMC Custom Actions  : {{ xtoph_deploy.machine_profile.bmc.custom_actions }}"
+                  - "BMC Reset           : {{ xtoph_deploy.machine_profile.bmc.reset }}"
               when:
                 - xtoph_deploy.debug == true
     

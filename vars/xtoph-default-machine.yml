@@ -317,7 +317,6 @@ kaytus-kr2280:
             blkdev: "sda"
             netdev: "em1"
       boot_mode: "uefi"
-      usb_storage_delay: "10"
       storage:
         default:
       network:
@@ -337,6 +336,7 @@ kaytus-kr2280:
         bootonce_pxe:    "ipmi-bootonce-pxe.sh"
         bootonce_clear:  "ipmi-bootonce-clear.sh"
         custom_actions:  "ipmi-custom-actions.sh"
+        reset:           ""
 
 
 
@@ -358,12 +358,11 @@ dell_r630:
           default:
             blkdev: "sda"
             netdev: "eno1"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
       boot_mode: "bios"
-      usb_storage_delay: "10"
       storage:
         default:
       network:
@@ -383,6 +382,7 @@ dell_r630:
         bootonce_pxe:    "racadm-bootonce-pxe.sh"
         bootonce_clear:  "racadm-bootonce-clear.sh"
         custom_actions:  "racadm-custom-actions.sh"
+        reset:           "racadm-reset.sh"
 
 
 
@@ -398,12 +398,11 @@ dell_r630_uefi:
           default:
             blkdev: "sda"
             netdev: "eno1"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
       boot_mode: "uefi"
-      usb_storage_delay: "10"
       storage:
         default:
       network:
@@ -423,13 +422,13 @@ dell_r630_uefi:
         bootonce_pxe:    "racadm-bootonce-pxe.sh"
         bootonce_clear:  "racadm-bootonce-clear.sh"
         custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
 
 
 
 dell_r740:
       platform: "baremetal"
       description: "DELL r740 in BIOS mode (uses mostly redfish)"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -439,7 +438,7 @@ dell_r740:
           default:
             blkdev: "sda"
             netdev: "eno1"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -463,13 +462,13 @@ dell_r740:
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
         bootonce_clear:  "racadm-bootonce-clear.sh"
         custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
 
 
 
 dell_r740_uefi:
       platform: "baremetal"
       description: "DELL r740 in UEFI mode (uses mostly redfish)"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -479,7 +478,7 @@ dell_r740_uefi:
           default:
             blkdev: "sda"
             netdev: "eno1"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -503,12 +502,12 @@ dell_r740_uefi:
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
         bootonce_clear:  "redfish-dell-bootonce-clear.py"
         custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
 
 
 dell_r750_uefi:
       platform: "baremetal"
       description: "DELL r750 in UEFI mode (uses mostly redfish)"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -518,7 +517,7 @@ dell_r750_uefi:
           default:
             blkdev: "sda"
             netdev: "eno12399"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "sda"
             netdev: "em1"
@@ -542,12 +541,12 @@ dell_r750_uefi:
         bootonce_pxe:    "redfish-dell-bootonce-pxe.py"
         bootonce_clear:  "redfish-dell-bootonce-clear.py"
         custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
 
 
 dell_xr:
       platform: "baremetal"
       description: "DELL XXXXXX with redfish support"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -557,7 +556,7 @@ dell_xr:
           default:
             blkdev: "nvme0n1"
             netdev: "eno8303np0"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "nvme0n1"
             netdev: "em1"
@@ -582,13 +581,13 @@ dell_xr:
         #bootonce_clear:  "racadm-bootonce-clear.sh"
         bootonce_clear:  "redfish-dell-bootonce-clear.py"
         custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
 
 
 
 dell_c6615:
       platform: "baremetal"
       description: "DELL C6615 with redfish support"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -598,7 +597,7 @@ dell_c6615:
           default:
             blkdev: "sda"
             netdev: "eno8303"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel7:
             blkdev: "sda"
             netdev: "eth0"
@@ -623,6 +622,7 @@ dell_c6615:
         #bootonce_clear:  "racadm-bootonce-clear.sh"
         bootonce_clear:  "redfish-dell-bootonce-clear.py"
         custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
 
 
 
@@ -644,7 +644,7 @@ hp_dl360_g8:
           default:
             blkdev: "sda"
             netdev: "eth0"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel9:
             blkdev: "sda"
             netdev: "eno1"
@@ -654,7 +654,6 @@ hp_dl360_g8:
           rhel7:
             blkdev: "sda"
             netdev: "eno1"
-      usb_storage_delay: "10"
       boot_mode: "bios"
       storage:
         default:
@@ -675,6 +674,7 @@ hp_dl360_g8:
         bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
+        reset:           ""
     
 hp_dl360_g8_560flr:
       platform: "baremetal"
@@ -688,7 +688,7 @@ hp_dl360_g8_560flr:
           default:
             blkdev: "sda"
             netdev: "eno1"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel9:
             blkdev: "sda"
             netdev: "eno1"
@@ -701,7 +701,6 @@ hp_dl360_g8_560flr:
             blkdev: "sda"
             netdev: "eth0"
             kernel_opts: ""
-      usb_storage_delay: "10"
       boot_mode: "bios"
       storage:
         default:
@@ -722,11 +721,11 @@ hp_dl360_g8_560flr:
         bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
+        reset:           ""
 
 hp_dl380_g9:
       platform: "baremetal"
       description: "HP DL380"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -736,7 +735,7 @@ hp_dl380_g9:
           default:
             blkdev: "sda"
             netdev: "eno1"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel9:
             blkdev: "sda"
             netdev: "eno1"
@@ -766,11 +765,11 @@ hp_dl380_g9:
         bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
+        reset:           ""
 
 hp_dl380_g9_560flr:
       platform: "baremetal"
       description: "HP DL380 with 560FLR-SFP+ FlexLOM"
-      usb_storage_delay: "10"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -780,7 +779,7 @@ hp_dl380_g9_560flr:
           default:
             blkdev: "sda"
             netdev: "eno49"
-            kernel_opts: ""
+            kernel_opts: "usb-storage.delay_use=10"
           rhel9:
             blkdev: "sda"
             netdev: "eno49"
@@ -810,6 +809,7 @@ hp_dl380_g9_560flr:
         bootonce_pxe:    "redfish-hp-bootonce-pxe.py"
         bootonce_clear:  "redfish-hp-bootonce-clear.py"
         custom_actions:  "redfish-hp-custom-actions.py"
+        reset:           ""
 
 
 
