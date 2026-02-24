@@ -1,7 +1,7 @@
 #!/bin/bash
 
 virt-install --name "{{ xtoph_deploy.platform_profile.vm.name }}" \
-    --ram "{{ xtoph_deploy.resource_profile.memsize }}" \
+    --memory memory={{ (xtoph_deploy.resource_profile.memsize * 1.5)|int }},currentMemory={{ xtoph_deploy.resource_profile.memsize }} \
     --check disk_size=off \
     --graphics vnc \
     --vcpus {{ xtoph_deploy.resource_profile.vcpus }} \

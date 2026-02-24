@@ -54,6 +54,7 @@
           - { varname: 'xtoph_config_resource',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-resource.yml") }}' }
           - { varname: 'xtoph_config_platform',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-platform.yml") }}' }
           - { varname: 'xtoph_config_kickstart', filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-kickstart.yml") }}' }
+          - { varname: 'xtoph_config_identity',  filename: '{{ lookup("fileglob","../../../config/xtoph-deploy-identity.yml") }}' }
       
       
       
@@ -68,6 +69,7 @@
           - { varname: 'xtoph_default_machine',   filename: 'xtoph-default-machine.yml' }
           - { varname: 'xtoph_default_resource',  filename: 'xtoph-default-resource.yml' }
           - { varname: 'xtoph_default_platform',  filename: 'xtoph-default-platform.yml' }
+          - { varname: 'xtoph_default_identity',  filename: 'xtoph-default-identity.yml' }
 
 
 
@@ -123,6 +125,11 @@
           xtoph_deploy: "{{ xtoph_deploy | combine({'kickstart_profile': xtoph_default_kickstart[xtoph_deploy.selected_profile.kickstart] }, recursive=true) }}"
         when: xtoph_default_kickstart[xtoph_deploy.selected_profile.kickstart] is defined
 
+      - name: "main.yml : graft default_identity => xtoph_deploy.identity_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'identity_profile': xtoph_default_identity[xtoph_deploy.selected_profile.identity] }, recursive=true) }}"
+        when: xtoph_default_kickstart[xtoph_deploy.selected_profile.identity] is defined
+
 
 
       ##
@@ -163,6 +170,12 @@
           xtoph_deploy: "{{ xtoph_deploy | combine({'kickstart_profile': {item.key: item.value}}, recursive=true) }}"
         loop: "{{ lookup('dict', xtoph_config_kickstart[xtoph_deploy.selected_profile.kickstart] | default({}) ) }}"
         when: xtoph_config_kickstart[xtoph_deploy.selected_profile.kickstart] is defined
+      
+      - name: "main.yml : apply config_identity profile => xtoph_deploy.identity_profile"
+        set_fact:
+          xtoph_deploy: "{{ xtoph_deploy | combine({'identity_profile': {item.key: item.value}}, recursive=true) }}"
+        loop: "{{ lookup('dict', xtoph_config_identity[xtoph_deploy.selected_profile.identity] | default({}) ) }}"
+        when: xtoph_config_identity[xtoph_deploy.selected_profile.identity] is defined
       
       
       

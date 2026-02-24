@@ -10,6 +10,7 @@ hostname: "{{ inventory_hostname }}"
 projectname: "{{ xtoph_vars.projectname }}"
 
 selected_profile:
+  identity:        "{{ h_idPROF  | default ('') }}"
   kickstart:       "{{ h_ksPROF  | default ('') }}"
   machine:         "{{ h_hwPROF  | default ('') }}"
   platform:        "{{ h_plPROF  | default ('') }}"
