@@ -33,12 +33,25 @@
           state: started
           timeout: 1800
 
-
+      - name: "common-deploy-post : cleanup ssh keys in knownhosts"
+        throttle: 1
+        vars:
+          - p_item:      "{{ inventory_hostname }}"
+          - p_name:      "{{ inventory_hostname_short }}"
+          - p_addr:      "{{ xtoph_deploy.machine_profile.network.ip }}"
+          - p_fqdn:      "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
+        shell:
+          cmd: |
+            ssh-keygen -R "{{ p_item }}" | true
+            ssh-keygen -R "{{ p_name }}" | true
+            ssh-keygen -R "{{ p_fqdn }}" | true
+            ssh-keygen -R "{{ p_addr }}" | true
+        ignore_errors: yes
 
       - name: "common-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
-          p_fqdn:   "{{ inventory_hostname }}"
+          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
         shell:
           cmd: |
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
@@ -69,7 +82,7 @@
         shell:
           cmd: |
             nm_connection=$(nmcli -t con | grep {{ xtoph_deploy.machine_profile.kickstart.netdev }} | cut -d: -f1)
-            nmcli con modify "${nm_connection}" ipv4.dns-search {{ xtoph_deploy.machine_profile.network.default.fqdn }}
+            nmcli con modify "${nm_connection}" ipv4.dns-search {{ xtoph_deploy.machine_profile.network.default.subdomain }}
         when:
           - xtoph_deploy.kickstart_profile.family is defined
           - xtoph_deploy.kickstart_profile.family == "rhel7" or
@@ -114,17 +127,27 @@
         when:
           - xtoph_deploy.kickstart_profile.repos is defined
           - xtoph_deploy['kickstart_profile']['repos'][item]['name'] != ""
+
       
-      
-      
+
       - name: "common-deploy-post : create admin user"
         ansible.builtin.user:
           create_home: true
           state: present
           groups: wheel
-          name: "{{ host_credentials[inventory_hostname].username }}"
-          password: "{{ host_credentials[inventory_hostname].password | password_hash('sha512') }}"
+          name: "{{ workshop_admin_uid }}"
+          password: "{{ workshop_admin_password | password_hash('sha512') }}"
         when:
-          - host_credentials[inventory_hostname].username is defined
-          - host_credentials[inventory_hostname].password is defined
+          - workshop_admin_uid is defined and workshop_admin_uid |length
+          - workshop_admin_password is defined and workshop_admin_password|length
+ 
+      - name: "common-deploy-post : create student user"
+        ansible.builtin.user:
+          create_home: true
+          state: present
+          name: "{{ workshop_student_uid }}"
+          password: "{{ workshop_student_password | password_hash('sha512') }}"
+        when:
+          - workshop_student_uid is defined and workshop_student_uid|length
+          - workshop_student_password is defined and workshop_student_password|length
        

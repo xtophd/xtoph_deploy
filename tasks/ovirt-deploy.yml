@@ -124,7 +124,7 @@
             - name: "nic1"
               interface: "{{ xtoph_deploy.machine_profile.network.default.model }}"
               profile_name: "{{ xtoph_deploy.machine_profile.network.default.network_name }}"
-              mac_address: "{{ h_pubMAC }}"
+              mac_address: "{{ h_netMAC }}"
           graphical_console:
              protocol:
                - vnc

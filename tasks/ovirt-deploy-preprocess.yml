@@ -36,19 +36,19 @@
       - name: "ovirt-deploy-preprocess : generate random MAC "
         script: macgen.py
         register: macgen_output
-        when: h_pubMAC is undefined
+        when: h_netMAC is undefined
     
       - name: "ovirt-deploy-preprocess : store random MAC in host_vars"
         lineinfile:
           dest:   "{{ lookup('env', 'PWD') }}/config/host_vars/{{ inventory_hostname }}"
-          line:   "h_pubMAC: '{{ macgen_output.stdout }}'"
+          line:   "h_netMAC: '{{ macgen_output.stdout }}'"
           state:  present
-        when: h_pubMAC is undefined
+        when: h_netMAC is undefined
         register: makeupmac
     
       - name: "ovirt-deploy-preprocess : set fact to preserve MAC for this run"
         set_fact:
-          h_pubMAC: '{{ macgen_output.stdout }}'
+          h_netMAC: '{{ macgen_output.stdout }}'
         when: makeupmac.changed
 
       - name: "ovirt-deploy-preprocess: ensure dictionary is rebuilt with the new MAC (_xtoph_deploy_dict_processed = false)"
@@ -60,16 +60,16 @@
 
       ##
       ##    One exception to never touch xtoph_deploy outside of main.yml
-      ##    is the handling of h_pubMAC which may be calculated during preprocess
+      ##    is the handling of h_netMAC which may be calculated during preprocess
       ##    and now needs to be amended into xtoph_deploy dictionary
       ##
 
       - name: "libvirt-deploy-preprocess : special handling for generated mac addresses"
         set_fact:
-          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {'mac': h_pubMAC}}}}, recursive=True ) }}"
+          xtoph_deploy: "{{ xtoph_deploy | combine( {'machine_profile': {'network': {'default': {'mac': h_netMAC}}}}, recursive=True ) }}"
         when:
-          - h_pubMAC is defined
-          - h_pubMAC|length >= 0
+          - h_netMAC is defined
+          - h_netMAC|length >= 0
           - xtoph_deploy.machine_profile.network.default.mac|length == 0
 
 

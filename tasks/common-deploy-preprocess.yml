@@ -67,7 +67,7 @@
           cmd: |
             ssh-keygen -R "{{ inventory_hostname }}"
             ssh-keygen -R "{{ inventory_hostname_short }}"
-            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}"
+            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
             ssh-keygen -R "{{ xtoph_deploy.machine_profile.network.default.ip }}"
         ignore_errors: yes
 
@@ -91,21 +91,21 @@
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-          regexp: "{{ h_pubIP }} .*$"
+          regexp: "{{ h_netIP }} .*$"
           state:  absent
 
       - name: "common-deploy-preprocess: cleanup conflicting name in /etc/hosts"
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-          regexp: ".*{{ inventory_hostname }}.{{ xtoph_deploy.machine_profile.network.default.fqdn }}.*"
+          regexp: ".*{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}.*"
           state:  absent
 
       - name: "common-deploy-preprocess: add entry in /etc/hosts"
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-          line:   "{{ h_pubIP }} {{ inventory_hostname }}"
+          line:   "{{ h_netIP }} {{ inventory_hostname }}"
           state:  present
 
       ##

@@ -116,8 +116,8 @@
             - p_item:      "{{ item }}"
             - p_name:      "{{ inventory_hostname_short }}"
             - p_bootsize:  "{{ bootsize.stdout }}"
-#            - p_addr:      "{{ h_pubIP  }}"
-#            - p_mac:       "{{ h_pubMAC }}"
+#            - p_addr:      "{{ h_netIP  }}"
+#            - p_mac:       "{{ h_netMAC }}"
             - p_nextsvr:   "{{ xtoph_deploy.deployhost.ip }}"
             - p_ip:        "{{ xtoph_deploy.machine_profile.network.default.ip }}"
             - p_mac:       "{{ xtoph_deploy.machine_profile.network.default.mac }}"
@@ -245,7 +245,7 @@
         #
         #          We use: ../pxelinux.cfg/01-{{ MAC-ADDRESS }}
         #
-        #                  "{{ h_pubMAC | replace(':','-') }}"
+        #                  "{{ h_netMAC | replace(':','-') }}"
         #
         #          the efi shim64.efi also uses this mechanism
         #          looking for: ../grub.cfg-01-aa-bb-cc-dd-ee-ff
@@ -278,7 +278,7 @@
 
         - name: "common-dhcp-preprocess : deploy machine pxe configs for BIOS and EFI"
           vars:
-#            t_name: "{{ h_pubMAC | lower | replace(':','-') }}"
+#            t_name: "{{ h_netMAC | lower | replace(':','-') }}"
             t_name: "{{ xtoph_deploy.machine_profile.network.default.mac | lower | replace(':','-') }}"
           template:
             src:  "{{ item.src  }}"
