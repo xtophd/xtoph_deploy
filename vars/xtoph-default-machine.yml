@@ -40,8 +40,8 @@ kvm_vda_q35:
           sparse: "true"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 kvm_vda:
       description: "KVM vm using sparse virtio storage"
@@ -75,8 +75,8 @@ kvm_vda:
           sparse: "true"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
     
 kvm_vda_bridge:
       description: "KVM VM: bridged nic, sparse virtio storage"
@@ -110,8 +110,8 @@ kvm_vda_bridge:
           sparse: "true"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
     
 kvm_nest_vda:
       description: "KVM vm with nested-virt and virtio disks"
@@ -146,8 +146,8 @@ kvm_nest_vda:
           sparse: "true"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
     
 kvm_sda:
       description: "KVM vm with virtio-scsi disks"
@@ -180,8 +180,8 @@ kvm_sda:
           sparse: "true"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
     
 
 
@@ -213,8 +213,8 @@ ovirt_sda:
           bus: "virtio_scsi"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
    
 ovirt_sda_uefi:
       description: "oVirt vm with virtio-scsi (sda) and  bios_type uefi"
@@ -239,8 +239,8 @@ ovirt_sda_uefi:
           bus: "virtio_scsi"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
  
 ovirt_vda:
       description: "oVirt vm using disk bus = virtio (vda) and bios_type bios"
@@ -265,8 +265,8 @@ ovirt_vda:
           bus: "virtio"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 ovirt_vda_uefi:
       description: "oVirt vm using disk bus = virtio (vda) and bios_type uefi"
@@ -291,8 +291,8 @@ ovirt_vda_uefi:
           bus: "virtio"
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 
 ##
@@ -321,8 +321,8 @@ kaytus-kr2280:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "ipmi-login-status.sh"
@@ -367,8 +367,8 @@ dell_r630:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "racadm-login-status.sh"
@@ -407,8 +407,8 @@ dell_r630_uefi:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -447,8 +447,8 @@ dell_r740:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -487,8 +487,8 @@ dell_r740_uefi:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -526,8 +526,8 @@ dell_r750_uefi:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -565,8 +565,8 @@ dell_xr:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -606,8 +606,8 @@ dell_c6615:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-dell-login-status.py"
@@ -659,8 +659,8 @@ hp_dl360_g8:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-hp-login-status.py"
@@ -706,8 +706,8 @@ hp_dl360_g8_560flr:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-hp-login-status.py"
@@ -750,8 +750,8 @@ hp_dl380_g9:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-hp-login-status.py"
@@ -794,8 +794,8 @@ hp_dl380_g9_560flr:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       bmc:
         fqdn:            "{{ bmc_fqdn | default('') }}"
         login_status:    "redfish-hp-login-status.py"
@@ -846,8 +846,8 @@ supermicro_x9drd_if:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
       ipmi:
         fqdn:         "{{ ipmi_fqdn | default('') }}"
         get_power:    "-I lanplus chassis power status | awk '{ print $NF }'"
@@ -886,8 +886,8 @@ pc_nvme:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 pc_nvme_efi:
       platform: "baremetal"
@@ -914,8 +914,8 @@ pc_nvme_efi:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 pc_sda:
       platform: "baremetal"
@@ -938,8 +938,8 @@ pc_sda:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 qotom_q20331g9:
       platform: "baremetal"
@@ -967,8 +967,8 @@ qotom_q20331g9:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
 ms01:
       platform: "baremetal"
@@ -995,6 +995,6 @@ ms01:
         default:
       network:
         default:
-          ip: "{{ h_pubIP | default('') }}"
-          mac: "{{ h_pubMAC| default('') }}"
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
 
