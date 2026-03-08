@@ -38,7 +38,7 @@
         vars:
           - p_item:      "{{ inventory_hostname }}"
           - p_name:      "{{ inventory_hostname_short }}"
-          - p_addr:      "{{ xtoph_deploy.machine_profile.network.ip }}"
+          - p_addr:      "{{ xtoph_deploy.machine_profile.network.default.ip }}"
           - p_fqdn:      "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
         shell:
           cmd: |
@@ -87,7 +87,8 @@
           - xtoph_deploy.kickstart_profile.family is defined
           - xtoph_deploy.kickstart_profile.family == "rhel7" or
             xtoph_deploy.kickstart_profile.family == "rhel8" or
-            xtoph_deploy.kickstart_profile.family == "rhel9"
+            xtoph_deploy.kickstart_profile.family == "rhel9" or
+            xtoph_deploy.kickstart_profile.family == "rhel10"
 
       
       
@@ -99,7 +100,8 @@
           - xtoph_deploy.kickstart_profile.family is defined
           - xtoph_deploy.kickstart_profile.family == "rhel7" or
             xtoph_deploy.kickstart_profile.family == "rhel8" or
-            xtoph_deploy.kickstart_profile.family == "rhel9"
+            xtoph_deploy.kickstart_profile.family == "rhel9" or
+            xtoph_deploy.kickstart_profile.family == "rhel10"
       
       
       
@@ -140,6 +142,11 @@
         when:
           - workshop_admin_uid is defined and workshop_admin_uid |length
           - workshop_admin_password is defined and workshop_admin_password|length
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.kickstart_profile.family == "rhel7" or
+            xtoph_deploy.kickstart_profile.family == "rhel8" or
+            xtoph_deploy.kickstart_profile.family == "rhel9" or
+            xtoph_deploy.kickstart_profile.family == "rhel10"
  
       - name: "common-deploy-post : create student user"
         ansible.builtin.user:
@@ -150,4 +157,9 @@
         when:
           - workshop_student_uid is defined and workshop_student_uid|length
           - workshop_student_password is defined and workshop_student_password|length
+          - xtoph_deploy.kickstart_profile.family is defined
+          - xtoph_deploy.kickstart_profile.family == "rhel7" or
+            xtoph_deploy.kickstart_profile.family == "rhel8" or
+            xtoph_deploy.kickstart_profile.family == "rhel9" or
+            xtoph_deploy.kickstart_profile.family == "rhel10"
        

@@ -67,7 +67,6 @@
           cmd: |
             ssh-keygen -R "{{ inventory_hostname }}"
             ssh-keygen -R "{{ inventory_hostname_short }}"
-            ssh-keygen -R "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
             ssh-keygen -R "{{ xtoph_deploy.machine_profile.network.default.ip }}"
         ignore_errors: yes
 
@@ -98,7 +97,7 @@
         throttle: 1
         lineinfile:
           dest:   "/etc/hosts"
-          regexp: ".*{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}.*"
+          regexp: ".*{{ inventory_hostname }}.*"
           state:  absent
 
       - name: "common-deploy-preprocess: add entry in /etc/hosts"
