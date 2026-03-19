@@ -38,6 +38,7 @@ parser = argparse.ArgumentParser(description="redfish utility for dell: eject vi
 parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
 parser.add_argument('-p', help='password', required=True)
+parser.add_argument('-m', help='media image url', required=False)
 
 args = vars(parser.parse_args())
 

@@ -103,6 +103,7 @@
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
+                  -m {{ t_url }}
                   --chomp
               register: bmc_result
               when:
@@ -116,6 +117,7 @@
                   -u {{ t_user }}
                   -p {{ t_pass }}
                   -i {{ t_bmc }}
+                  -m {{ t_url }}
               when:
                 - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
                 - xtoph_deploy.kickstart_profile.method != "pxe"
@@ -147,6 +149,7 @@
   
         vars:
           t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
+          t_url:    "{{ xtoph_deploy.machine_profile.kickstart.iso_url }}"
           t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
           t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
         when:

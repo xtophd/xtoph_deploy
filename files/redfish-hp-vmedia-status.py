@@ -32,6 +32,7 @@ parser = argparse.ArgumentParser(description="redfish utility for hp: get virtua
 parser.add_argument('-i', help='ilo ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
 parser.add_argument('-p', help='password', required=True)
+parser.add_argument('-m', help='media image url', required=False)
 parser.add_argument('--chomp', help='chomp linefeed from output', dest="chomp", default=False, action='store_true')
 
 args = vars(parser.parse_args())

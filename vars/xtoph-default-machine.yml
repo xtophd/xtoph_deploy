@@ -8,9 +8,18 @@
 ## LIBVIRT/KVM ENTRIES
 ##
 
+##     <machine>.osinfo    ... used by virt-install by-pass auto selected optimized VM machine type/parms
+##                             assists PXE installs which cannot predetermine (auto detect) os info
+##                             running `osinfo-query os` on libvirt host can provide available values
+##
+##     <machine>.dev_hints ... combined with kickstart.family to provide hints to device paths
+##                             used by kickstart config / kernel arg templates to specifiy devices
+##
+
 kvm_vda_q35:
       description: "KVM vm / pc-q35 / sparse virtio storage"
       platform: "libvirt"
+      osinfo: "{{ h_osINFO | default('rhel9-unknown') }}"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -46,6 +55,7 @@ kvm_vda_q35:
 kvm_vda:
       description: "KVM vm using sparse virtio storage"
       platform: "libvirt"
+      osinfo: "{{ h_osINFO | default('rhel7-unknown') }}"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -81,6 +91,7 @@ kvm_vda:
 kvm_vda_bridge:
       description: "KVM VM: bridged nic, sparse virtio storage"
       platform: "libvirt"
+      osinfo: "{{ h_osINFO | default('rhel9-unknown') }}"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -89,7 +100,7 @@ kvm_vda_bridge:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "ens3"
+            netdev: "enp1s0"
             kernel_opts: ""
           rhel9:
             blkdev: "vda"
@@ -116,6 +127,7 @@ kvm_vda_bridge:
 kvm_nest_vda:
       description: "KVM vm with nested-virt and virtio disks"
       platform: "libvirt"
+      osinfo: "{{ h_osINFO | default('rhel9-unknown') }}"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -124,11 +136,11 @@ kvm_nest_vda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "vda"
-            netdev: "ens3"
+            netdev: "enp1s0"
             kernel_opts: ""
           rhel9:
             blkdev: "vda"
-            netdev: "ens3"
+            netdev: "enp1s0"
             kernel_opts: ""
           rhel8:
             blkdev: "vda"
@@ -152,6 +164,7 @@ kvm_nest_vda:
 kvm_sda:
       description: "KVM vm with virtio-scsi disks"
       platform: "libvirt"
+      osinfo: "{{ h_osINFO | default('rhel9-unknown') }}"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -160,7 +173,7 @@ kvm_sda:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "sda"
-            netdev: "ens3"
+            netdev: "enp1s0"
             kernel_opts: ""
           rhel9:
             blkdev: "vda"
@@ -900,7 +913,7 @@ pc_nvme_efi:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "nvme0n1"
-            netdev: "eno1"
+            netdev: "enp4s0"
             kernel_opts: ""
           rhel9:
             blkdev: "nvme0n1"
@@ -916,6 +929,50 @@ pc_nvme_efi:
         default:
           ip: "{{ h_netIP | default('') }}"
           mac: "{{ h_netMAC| default('') }}"
+
+x570pro:
+      platform: "baremetal"
+      description: "ASUS X570 PRO / AMD (EFI) / Intel 2x10GB PCI"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "nvme0n1"
+            netdev: "enp5s0"
+            #netdev: "enp4s0f0"
+            kernel_opts: ""
+          rhel9:
+            blkdev: "nvme0n1"
+            netdev: "enp4s0f0"
+            kernel_opts: ""
+          rhel7:
+            blkdev: "nvme0n1"
+            netdev: "eno0"
+      boot_mode: "efi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "pikvm-login-status.sh"
+        power_status:    "pikvm-power-status.sh"
+        power_on:        "pikvm-power-on.sh"
+        power_off:       "pikvm-power-off.sh"
+        media_status:    "pikvm-vmedia-status.sh"
+        media_eject:     "pikvm-vmedia-eject.sh"
+        media_insert:    "pikvm-vmedia-insert.sh"
+        bootonce_media:  "manual"
+        bootonce_pxe:    "manual"
+        bootonce_clear:  "manual"
+        custom_actions:  ""
+        reset:           ""
+
 
 pc_sda:
       platform: "baremetal"

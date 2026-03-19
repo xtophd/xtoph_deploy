@@ -20,7 +20,7 @@
 ##    Parse the commandline options
 ##
 
-options=$( getopt -o "u:p:i:" -l "chomp" -- "$@")
+options=$( getopt -o "u:p:i:m:" -l "chomp" -- "$@")
 
 eval set -- "$options"
 
@@ -29,6 +29,7 @@ while true; do
         '-u' ) bmc_username="$2" ; shift 2 ;;
         '-p' ) bmc_password="$2" ; shift 2 ;;
         '-i' ) bmc_ip="$2"       ; shift 2 ;;
+        '-m' ) bmc_image="$2"    ; shift 2 ;;
 
         '--chomp' ) chomp_output="yes" ; shift ;;
 

@@ -29,6 +29,7 @@ while true; do
         '-u' ) bmc_username="$2" ; shift 2 ;;
         '-p' ) bmc_password="$2" ; shift 2 ;;
         '-i' ) bmc_ip="$2"       ; shift 2 ;;
+        '-m' ) bmc_media="$2"    ; shift 2 ;;
 
         --)
             shift

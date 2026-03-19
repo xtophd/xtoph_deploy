@@ -126,6 +126,8 @@
                   -u "{{ t_user }}" 
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
+              when:
+                - xtoph_deploy.machine_profile.bmc.bootonce_clear != "manual"
 
             ##
             ##    Having vMedia inserted can affect pxe installs,
@@ -138,6 +140,7 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
+                  -m "{{ t_url }}"
                   --chomp
               register: bmc_result
               when:
@@ -149,6 +152,7 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
+                  -m "{{ t_url }}"
               when:
                 - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
                 - bmc_result.stdout == "inserted"
@@ -159,6 +163,7 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
+                  -m "{{ t_url }}"
                   --chomp
               register: local_result
               until: local_result.stdout == "ejected"
@@ -181,6 +186,8 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}" 
                   -i "{{ t_bmc }}" 
+              when:
+                - xtoph_deploy.machine_profile.bmc.custom_actions | length
     
             - name: "baremetal-deploy : (BMC) media-insert"
               script: >
@@ -218,6 +225,7 @@
                 prompt: "Press ENTER to confirm VIRTUAL MEDIA IS INSERTED"
               when:
                 - xtoph_deploy.machine_profile.bmc.media_insert == "manual"
+                - xtoph_deploy.kickstart_profile.method != "pxe"
    
     
     
