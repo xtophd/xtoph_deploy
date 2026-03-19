@@ -7,7 +7,11 @@ virt-install --name "{{ xtoph_deploy.platform_profile.vm.name }}" \
     --vcpus {{ xtoph_deploy.resource_profile.vcpus }} \
     --cpu {{ xtoph_deploy.machine_profile.cpu.type | default ('host-model') }} \
     --boot hd,network,menu=yes \
+{% if xtoph_deploy.machine_profile.osinfo is defined and xtoph_deploy.machine_profile.osinfo|length %}
+    --osinfo {{ xtoph_deploy.machine_profile.osinfo }} \
+{% else %}
     --osinfo detect=on,require=off \
+{% endif %}
     --disk "{{ xtoph_deploy.machine_profile.storage.default.qcow_dir }}/{{ xtoph_deploy.platform_profile.vm.name }}.qcow2,bus={{ xtoph_deploy.machine_profile.storage.default.bus }},sparse={{ xtoph_deploy.machine_profile.storage.default.sparse }},size={{ xtoph_deploy.resource_profile.storage.root.size }}" \
     --network "network={{ xtoph_deploy.machine_profile.network.default.network_name }},mac={{ h_netMAC }},model={{ xtoph_deploy.machine_profile.network.default.model }}" \
     --noreboot \
