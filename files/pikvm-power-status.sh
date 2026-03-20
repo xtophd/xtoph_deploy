@@ -46,25 +46,59 @@ done
 ##    Use curl to fetch or set state
 ##
 
-RESPONSE=$( curl --insecure -s -u $bmc_username:$bmc_password https://$bmc_ip/api/atx | jq -r '.result.power' | tr [:upper:] [:lower:] )
+##
+##    NOTE:
+##
+##        So I've noticed that the API does not report power
+##        accurately/consistently.  Thus I needed to implement
+##        3-times-confirmation status collector and only upon 3 
+##        consistent readings does this script report the result
+##
+
+LAST_RESULT=""
+
+for (( i = 0; i < 3 ; i++ )); do
+
+    RESPONSE=$( curl --insecure -s -u $bmc_username:$bmc_password https://$bmc_ip/api/atx )
+    RESULT=$( echo $RESPONSE | jq -r '.result.power' | tr [:upper:] [:lower:] )
+
+    ## echo "$RESPONSE"
+
+
+
+    ##    NOTE: This syntax provides the length of a string ${#LAST_RESULT}
+
+    if [[ ${#LAST_RESULT} > 0 ]]; then
+      if [[ "${RESULT}" != "$LAST_RESULT" ]]; then
+        echo "Restarting the confirmation count..." >&2
+        LAST_RESULT=""
+        i=0
+      fi 
+    else 
+      LAST_RESULT=$RESULT
+    fi
+
+    sleep 2
+    
+done
 
 ##
 ##    Chomp the output to purge CR/LF
 ##
 
-RESPONSE=${RESPONSE//[$'\n\r']}
+RESULT=${RESULT//[$'\n\r']}
 
 ##
 ##    Output the results to stdout
 ##
 
-if [[ "${RESPONSE}" == "off" ]]; then
+if [[ "${RESULT}" == "off" ]]; then
 
     ( [[ "${chomp_output}" == "yes" ]] && echo -n "off" ) || echo "off" 
 
     exit 0
 
-elif [[ "${RESPONSE}" == "on" ]]; then
+elif [[ "${RESULT}" == "on" ]]; then
 
     ( [[ "${chomp_output}" == "yes" ]] && echo -n "on" ) || echo "on" 
 
