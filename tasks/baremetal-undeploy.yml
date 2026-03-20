@@ -75,6 +75,9 @@
                   --chomp
               register: bmc_result
 
+            - debug:
+                msg: "BMC Power Status        : {{ bmc_result.stdout }}"
+
             - name: "baremetal-undeploy : (BMC) power-off"
               script: >
                   {{ xtoph_deploy.machine_profile.bmc.power_off }}
