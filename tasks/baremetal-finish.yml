@@ -37,7 +37,6 @@
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
-            -m {{ t_url }}
             --chomp
         register: bmc_result
         when:
@@ -50,7 +49,6 @@
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
-            -m {{ t_url }}
         when:
           - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
           - xtoph_deploy.kickstart_profile.method != "pxe"
@@ -62,7 +60,6 @@
             -u {{ t_user }}
             -p {{ t_pass }}
             -i {{ t_bmc }}
-            -m {{ t_url }}
             --chomp
         register: local_result
         until: local_result.stdout == "ejected"

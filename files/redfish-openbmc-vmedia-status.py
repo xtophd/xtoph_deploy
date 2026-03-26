@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 #
-# redfish-dell-virtualmedia-status.py
 #
 #   The curl equivalent:
 #
@@ -32,7 +31,6 @@ parser = argparse.ArgumentParser(description="redfish utility for openbmc: get v
 parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
 parser.add_argument('-p', help='password', required=True)
-parser.add_argument('-m', help='media image url', required=True)
 parser.add_argument('--chomp', help='chomp linefeed from output', dest="chomp", default=False, action='store_true')
 
 args = vars(parser.parse_args())
@@ -41,9 +39,11 @@ bmc_ip       = args["i"]
 bmc_username = args["u"]
 bmc_password = args["p"]
 
+vmedia_image = ""
+vmedia_state = ""
+vmedia_type  = ""
 
-
-## 
+##
 ##    Get virtualmedia status
 ##
 ##    NOTE: the value we want is a boolean, so simple evaluation works
@@ -54,9 +54,20 @@ response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 
 data = response.json()
 
-print (data)
+override_etag    = response.headers.get('ETag')
+if 'Image' in data:
+    vmedia_image     = data['Image']
+if 'Inserted' in data:
+    vmedia_state     = data['Inserted']
+if 'TransferProtocolType' in data:
+    vmedia_type      = data['TransferProtocolType']
 
-if ( data['Inserted'] ):
+
+print("Current Image: %s" % vmedia_image, file=sys.stderr)
+print("Current Inserted State: %s" % vmedia_state, file=sys.stderr)
+print("Current TransferProtocolType: %s" % vmedia_type, file=sys.stderr)
+
+if ( vmedia_state == True ):
     result = "inserted"
 else:
     result = "ejected"

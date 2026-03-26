@@ -140,7 +140,6 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
-                  -m "{{ t_url }}"
                   --chomp
               register: bmc_result
               when:
@@ -152,7 +151,6 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
-                  -m "{{ t_url }}"
               when:
                 - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
                 - bmc_result.stdout == "inserted"
@@ -163,7 +161,6 @@
                   -u "{{ t_user }}"
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
-                  -m "{{ t_url }}"
                   --chomp
               register: local_result
               until: local_result.stdout == "ejected"
@@ -188,6 +185,18 @@
                   -i "{{ t_bmc }}" 
               when:
                 - xtoph_deploy.machine_profile.bmc.custom_actions | length
+
+            - name: "baremetal-deploy : (BMC) debug - media insert"
+              debug:
+                msg: >
+                  {{ xtoph_deploy.machine_profile.bmc.media_insert }}
+                  -u "{{ t_user }}"
+                  -p "************" 
+                  -i "{{ t_bmc  }}" 
+                  -m "{{ t_url  }}"
+                  -n "{{ t_nfs  }}"
+              when:
+                - xtoph_deploy.debug == true
     
             - name: "baremetal-deploy : (BMC) media-insert"
               script: >
