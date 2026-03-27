@@ -13,6 +13,7 @@ import json
 import requests
 import sys
 import warnings
+from time import sleep
 
 
 
@@ -44,14 +45,28 @@ bmc_password = args["p"]
 
 
 ## 
-##    Get power status
+##    Get power status - need 3 consecutive consistenct results
 ## 
 
-url       = 'https://%s/redfish/v1/Chassis/1' % bmc_ip
-response  = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
+url         = 'https://%s/redfish/v1/Chassis/1' % bmc_ip
+last_result = ""
+i           = 1
 
-data      = response.json()
+while i < 4:
 
+    response  = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
+    data      = response.json()
+
+    if last_result != "" and last_result != data['PowerState']:
+        print("Restarting the confirmation count...",file=sys.stderr)
+        last_result=""
+        i = 1
+        next
+
+    print("Confirmation %s/3" % i,file=sys.stderr)
+    last_result = data['PowerState']
+    i += 1
+    sleep(3)
 
 
 ##
