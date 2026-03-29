@@ -75,7 +75,8 @@ if 'Inserted' in data:
 if 'TransferProtocolType' in data:
     vmedia_type      = data['TransferProtocolType']
 
-
+print("BMC IP: %s" % bmc_ip, file=sys.stderr)
+print("BMC UID: %s" % bmc_username, file=sys.stderr)
 print("Current Image: %s" % vmedia_image, file=sys.stderr)
 print("Current Inserted State: %s" % vmedia_state, file=sys.stderr)
 print("Current TransferProtocolType: %s" % vmedia_type, file=sys.stderr)
@@ -94,6 +95,9 @@ if vmedia_state != True:
                 'TransferProtocolType': 'NFS' }
 
     print("Attempting Insertion", file=sys.stderr)
+
+    print("New Image: %s" % image_nfs, file=sys.stderr)
+    print("New TransferProtocolType: NFS", file=sys.stderr)
 
     response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
     

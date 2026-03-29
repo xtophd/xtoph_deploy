@@ -55,6 +55,7 @@ response = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 data = response.json()
 
 override_etag    = response.headers.get('ETag')
+
 if 'Image' in data:
     vmedia_image     = data['Image']
 if 'Inserted' in data:
