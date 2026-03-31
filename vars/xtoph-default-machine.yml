@@ -941,8 +941,9 @@ x570pro:
           description: "Hints to devices based on kickstart_profile.family"
           default:
             blkdev: "nvme0n1"
-            netdev: "enp5s0"
-            #netdev: "enp4s0f0"
+            ## Onboard Intel Nic      ... netdev: "enp5s0"
+            ## Dual-port 10GTek Intel ... netdev: "enp4s0f0 enp4s0f1"
+            netdev: "enp4s0f0"
             kernel_opts: ""
           rhel9:
             blkdev: "nvme0n1"
