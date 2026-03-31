@@ -50,6 +50,7 @@
             -p {{ t_pass }}
             -i {{ t_bmc }}
         when:
+          - xtoph_deploy.machine_profile.bmc.media_status != "manual"
           - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - bmc_result.stdout == "inserted"
@@ -67,6 +68,7 @@
         delay: 5
         when:
           - xtoph_deploy.machine_profile.bmc.media_status != "manual"
+          - xtoph_deploy.machine_profile.bmc.media_eject  != "manual"
           - xtoph_deploy.kickstart_profile.method != "pxe"
           - bmc_result.stdout == "inserted"
 
@@ -74,7 +76,8 @@
         pause:
           prompt: "Press ENTER to confirm VIRTUAL MEDIA IS EJECTED"
         when:
-          - xtoph_deploy.machine_profile.bmc.media_status == "manual"
+          - xtoph_deploy.machine_profile.bmc.media_status == "manual" or
+            xtoph_deploy.machine_profile.bmc.media_eject  == "manual"
 
 
 

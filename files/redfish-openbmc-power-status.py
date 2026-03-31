@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# redfish-dell-power-status.py
+# redfish-openbmc-power-status.py
 #
 #   The curl equivalent:
 #
@@ -57,13 +57,19 @@ while i < 4:
     response  = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
     data      = response.json()
 
-    if last_result != "" and last_result != data['PowerState']:
-        print("Restarting the confirmation count...",file=sys.stderr)
-        last_result=""
-        i = 1
-        next
+    if 'PowerState' in data:
+        if last_result != "" and last_result != data['PowerState']:
+            print("Restarting the confirmation count...",file=sys.stderr)
+            last_result=""
+            i = 1
+            next
+    else:
+        print("ERROR: unexpected result")
+        print(response)
+        exit(1)
 
-    print("Confirmation %s/3" % i,file=sys.stderr)
+
+    print("Returned: %s [Confirmation %s/3]" % ( data['PowerState'], i ),file=sys.stderr)
     last_result = data['PowerState']
     i += 1
     sleep(3)

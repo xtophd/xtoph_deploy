@@ -152,7 +152,8 @@
                   -p "{{ t_pass }}"
                   -i "{{ t_bmc }}"
               when:
-                - xtoph_deploy.machine_profile.bmc.media_eject != "manual"
+                - xtoph_deploy.machine_profile.bmc.media_status != "manual"
+                - xtoph_deploy.machine_profile.bmc.media_eject  != "manual"
                 - bmc_result.stdout == "inserted"
     
             - name: "baremetal-deploy : (BMC) wait for media-status = ejected"
@@ -169,6 +170,7 @@
               when:
               when:
                 - xtoph_deploy.machine_profile.bmc.media_status != "manual"
+                - xtoph_deploy.machine_profile.bmc.media_eject  != "manual"
                 - bmc_result.stdout == "inserted"
 
             - name: "baremetal-deploy : (BMC) Manual Check Point"
@@ -211,6 +213,7 @@
               delay: 5
               until: local_result is not failed
               when:
+                - xtoph_deploy.machine_profile.bmc.media_status != "manual"
                 - xtoph_deploy.machine_profile.bmc.media_insert != "manual"
                 - xtoph_deploy.kickstart_profile.method != "pxe"
 
@@ -227,13 +230,15 @@
               delay: 5
               when:
                 - xtoph_deploy.machine_profile.bmc.media_status != "manual"
+                - xtoph_deploy.machine_profile.bmc.media_insert != "manual"
                 - xtoph_deploy.kickstart_profile.method != "pxe"
     
             - name: "baremetal-deploy : (BMC) Manual Check Point"
               pause:
                 prompt: "Press ENTER to confirm VIRTUAL MEDIA IS INSERTED"
               when:
-                - xtoph_deploy.machine_profile.bmc.media_insert == "manual"
+                - xtoph_deploy.machine_profile.bmc.media_status == "manual" or
+                  xtoph_deploy.machine_profile.bmc.media_insert == "manual"
                 - xtoph_deploy.kickstart_profile.method != "pxe"
    
     
