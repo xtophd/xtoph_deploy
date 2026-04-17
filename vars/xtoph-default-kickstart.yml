@@ -881,7 +881,7 @@ rhel97-bootiso:
     repo_iso:          "rhel-9.7-x86_64-dvd.iso"
     boot_iso_chksum:   ""
     repo_iso_chksum:   ""
-    mnt:               "rhel-9.6"
+    mnt:               "rhel-9.7"
     kvm_os_type:       "rhel_8x64"
     repos:
         baseos:
