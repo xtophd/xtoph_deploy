@@ -361,7 +361,7 @@ kaytus-kr2280:
 
 dell_r630:
       platform: "baremetal"
-      description: "DELL r630 in BIOS mode (uses racadm)"
+      description: "DELL r630 [BIOS mode + AHCI SATA devices]"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
@@ -397,17 +397,53 @@ dell_r630:
         custom_actions:  "racadm-custom-actions.sh"
         reset:           "racadm-reset.sh"
 
-
-
-dell_r630_uefi:
+dell-r630-s130:
       platform: "baremetal"
-      description: "DELL r630 in UEFI mode (uses mostly redfish)"
+      description: "DELL r630 [UEFI mode, RAID SATA w/ S130]"
       kickstart:
         blkdev: "{{ h_blkDEV | default('') }}"
         netdev: "{{ h_netDEV | default('') }}"
         kernel_opts: "{{ h_krnOPT | default('') }}"
         dev_hints:
-          description: "Hints to devices based on kickstart_profile.family"
+          description: "Device hints bassed on kickstart_profile.family, CoreOS will use default"
+          default:
+            blkdev: "md127"
+            netdev: "eno1"
+            kernel_opts: "usb-storage.delay_use=10"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
+      boot_mode: "uefi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-dell-login-status.py"
+        power_status:    "redfish-dell-power-status.py"
+        power_on:        "redfish-dell-power-on.py"
+        power_off:       "redfish-dell-power-off.py"
+        media_status:    "redfish-dell-vmedia-status.py"
+        media_eject:     "redfish-dell-vmedia-eject.py"
+        media_insert:    "redfish-dell-vmedia-insert.py"
+        bootonce_media:  "redfish-dell-bootonce-vmedia.py"
+        bootonce_pxe:    "racadm-bootonce-pxe.sh"
+        bootonce_clear:  "racadm-bootonce-clear.sh"
+        custom_actions:  "redfish-dell-custom-actions.py"
+        reset:           "racadm-reset.sh"
+
+dell_r630_uefi:
+      platform: "baremetal"
+      description: "DELL r630 [UEFI mode, RAID SATA w/ H330]"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Device hints based on kickstart_profile.family, CoreOS will use default"
           default:
             blkdev: "sda"
             netdev: "eno1"
