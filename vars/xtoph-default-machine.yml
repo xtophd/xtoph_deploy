@@ -345,9 +345,53 @@ kaytus-kr2280:
         media_status:    "redfish-openbmc-vmedia-status.py"
         media_eject:     "redfish-openbmc-vmedia-eject.py"
         media_insert:    "redfish-openbmc-vmedia-insert.py"
-        bootonce_media:  "redfish-openbmc-bootonce-media.py"
+        bootonce_media:  "redfish-openbmc-bootonce-vmedia.py"
         bootonce_pxe:    "redfish-openbmc-bootonce-pxe.py"
         bootonce_clear:  "redfish-openbmc-bootonce-clear.py"
+        custom_actions:  "redfish-noop.py"
+        reset:           ""
+
+
+##
+## QUANTUM CLOUD TECH (QCT) ENTRIES
+##
+
+
+qct-d55q-2u:
+      platform: "baremetal"
+      description: "QuantaGrid D55Q-2U"
+      kickstart:
+        blkdev: "{{ h_blkDEV | default('') }}"
+        netdev: "{{ h_netDEV | default('') }}"
+        kernel_opts: "{{ h_krnOPT | default('') }}"
+        dev_hints:
+          description: "Hints to devices based on kickstart_profile.family"
+          default:
+            blkdev: "nvme0n1"
+            netdev: "ens7f0np0"
+            kernel_opts: "module_blacklist=iaa_crypto,intel_qat"
+          rhel7:
+            blkdev: "sda"
+            netdev: "em1"
+      boot_mode: "uefi"
+      storage:
+        default:
+      network:
+        default:
+          ip: "{{ h_netIP | default('') }}"
+          mac: "{{ h_netMAC| default('') }}"
+      bmc:
+        fqdn:            "{{ bmc_fqdn | default('') }}"
+        login_status:    "redfish-qct-login-status.py"
+        power_status:    "redfish-qct-power-status.py"
+        power_on:        "redfish-qct-power-on.py"
+        power_off:       "redfish-qct-power-off.py"
+        media_status:    "redfish-qct-vmedia-status.py"
+        media_eject:     "redfish-qct-vmedia-eject.py"
+        media_insert:    "redfish-qct-vmedia-insert.py"
+        bootonce_media:  "manual"
+        bootonce_pxe:    "manual"
+        bootonce_clear:  "manual"
         custom_actions:  "redfish-noop.py"
         reset:           ""
 
@@ -356,7 +400,6 @@ kaytus-kr2280:
 ##
 ## DELL ENTRIES
 ##
-
 
 
 dell_r630:

@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 #
+# redfish-qct-reset.py
+#
+#   Usage:
+#
+#      python3 redfish-qct-reset.py -u "${bmc_id}" -p "${bmc_pw}" -i $"{bmc_ip}"
+#
 #   The curl equivalent:
 #
-#      curl --insecure                          \
-#           -s                                  \
-#           -u ${bmc_id}:${bmc_pw}              \
-#           -X POST                             \
-#           -H "Content-Type: application/json" \
-#           -d '{"ResetType": "Off"}'           \
-#           https://<bmc-ip>/redfish/v1/Systems/1/Actions/ComputerSystem.Reset
+#          curl --insecure -s -u "${bmc_id}:${bmc_pw}" "https://${bmc_ip}/redfish/v1/Managers/bmc/Actions/Manager.Reset" | jq
 #
 
 import argparse
@@ -16,8 +16,7 @@ import json
 import requests
 import sys
 import warnings
-
-
+import re
 
 ##
 ##    Disable warning messages
@@ -25,13 +24,11 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-
-
 ##
 ##    Load commandline arguments
 ##
 
-parser = argparse.ArgumentParser(description="redfish utility for dell: set power state 'off'")
+parser = argparse.ArgumentParser(description="OpenBMC redfish utility: reset BMC")
 
 parser.add_argument('-i', help='drac ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
@@ -43,24 +40,24 @@ bmc_ip       = args["i"]
 bmc_username = args["u"]
 bmc_password = args["p"]
 
+##
+## Request reset of the BMC
+##
 
+url      = 'https://%s/redfish/v1/Managers/bmc/Actions/Manager.Reset' % bmc_ip
 
-## 
-##    Set power state
-## 
-
-url      = 'https://%s/redfish/v1/Systems/1/Actions/ComputerSystem.Reset' % bmc_ip
-payload  = {'ResetType': 'ForceOff'}
 headers  = {'content-type': 'application/json'}
+payload  = {'ResetType': 'GracefulRestart'}
 
 response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
 
 result_code = response.status_code
-
+    
 if result_code == 200:
-    print("SUCCESS: result code %s returned" % result_code)
+    print("SUCCESS: OpenBMC reset returned code %s" % result_code)
+    sys.exit(0)
 else:
-    print("FAIL: result code %s returned" % result_code)
-    print(response.json())
+    print("FAIL: OpenBMC reset returned code %s" % result_code)
+    print(response)
     sys.exit(1)
 

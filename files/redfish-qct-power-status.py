@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 #
-# redfish-openbmc-power-status.py
+# redfish-QCT_openbmc-power-status.py
 #
 #   The curl equivalent:
 #
 #      curl --insecure -s -u ${bmc_id}:${bmc_pw}  \
-#           https://${bmc_ip}/redfish/v1/Chassis/1 | jq -r ".PowerState" | tr [:upper:] [:lower:]
+#           https://${bmc_ip}/redfish/v1/Chassis/chassis | jq -r ".PowerState" | tr [:upper:] [:lower:]
 #
 
 import argparse
@@ -29,9 +29,9 @@ warnings.filterwarnings("ignore")
 ##    Load commandline arguments
 ##
 
-parser = argparse.ArgumentParser(description="redfish utility for dell: get power state and return 'on' or 'off'")
+parser = argparse.ArgumentParser(description="redfish utility for qct: get power state and return 'on' or 'off'")
 
-parser.add_argument('-i', help='drac ip or hostname', required=True)
+parser.add_argument('-i', help='bmc ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
 parser.add_argument('-p', help='password', required=True)
 parser.add_argument('--chomp', help='chomp linefeed from output', dest="chomp", default=False, action='store_true')
@@ -48,7 +48,7 @@ bmc_password = args["p"]
 ##    Get power status - need 3 consecutive consistenct results
 ## 
 
-url         = 'https://%s/redfish/v1/Chassis/1' % bmc_ip
+url         = 'https://%s/redfish/v1/Chassis/chassis' % bmc_ip
 last_result = ""
 i           = 1
 

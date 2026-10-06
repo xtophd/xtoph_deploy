@@ -4,11 +4,11 @@
 #
 #      curl --insecure                          \
 #           -s                                  \
-#           -u $bmc_uid:$bmc_pw                 \
+#           -u ${bmc_id}:${bmc_pw}              \
 #           -X POST                             \
 #           -H "Content-Type: application/json" \
 #           -d '{"ResetType": "On"}'            \
-#           https://$bmc_ip/redfish/v1/Systems/1/Actions/ComputerSystem.Reset
+#           https://${bmc_ip}/redfish/v1/Systems/system/Actions/ComputerSystem.Reset
 #
 
 import argparse
@@ -31,9 +31,9 @@ warnings.filterwarnings("ignore")
 ##    Load commandline arguments
 ##
 
-parser = argparse.ArgumentParser(description="redfish utility for dell: set power state 'on'")
+parser = argparse.ArgumentParser(description="redfish utility for qct: set power state 'on'")
 
-parser.add_argument('-i', help='drac ip or hostname', required=True)
+parser.add_argument('-i', help='bmc ip or hostname', required=True)
 parser.add_argument('-u', help='username', required=True)
 parser.add_argument('-p', help='password', required=True)
 
@@ -50,7 +50,7 @@ bmc_password = args["p"]
 ## 
 
 
-url     = 'https://%s/redfish/v1/Systems/1/Actions/ComputerSystem.Reset' % bmc_ip
+url     = 'https://%s/redfish/v1/Systems/system/Actions/ComputerSystem.Reset' % bmc_ip
 payload = {'ResetType': 'On'}
 headers = {'content-type': 'application/json'}
 
