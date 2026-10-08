@@ -23,14 +23,14 @@
 
 
 
-- name: "common-assertions : xtoph_deploy.deployhost validation"
+- name: "common-assertions : deployhost.ip is defined"
   any_errors_fatal: true
   assert:
     that:
       - xtoph_deploy.deployhost is defined
       - xtoph_deploy.deployhost.ip is defined
     success_msg: "Assertion Passed"
-    fail_msg: "CONFIG ERROR: assertion listed above means that xtoph_deploy is missing critical data (CHECK YOUR CONFIGS)"
+    fail_msg: "CONFIG ERROR: verify that the ansible host (deployhost) ip is defined"
 
 
 
@@ -43,15 +43,48 @@
 
 
 
-- name: "common-assertions : xtoph_deploy highlevel validation"
+- name: "common-assertions : platform_profile is defined"
   any_errors_fatal: true
   assert:
     that:
       - xtoph_deploy.platform_profile is defined
+    fail_msg: "CONFIG ERROR: verify  that the platform_profile is defined and accurate"
+    success_msg: "Assertion Passed"
+  when:
+    - xtoph_deploy.selected_profile.machine != ""
+    - inventory_hostname not in groups.myDeployhost
+
+
+- name: "common-assertions : machine_profile is defined"
+  any_errors_fatal: true
+  assert:
+    that:
       - xtoph_deploy.machine_profile is defined
+    fail_msg: "CONFIG ERROR: verify  that the machine_profile is defined and accurate"
+    success_msg: "Assertion Passed"
+  when:
+    - xtoph_deploy.selected_profile.machine != ""
+    - inventory_hostname not in groups.myDeployhost
+
+
+- name: "common-assertions : resource_profile is defined"
+  any_errors_fatal: true
+  assert:
+    that:
       - xtoph_deploy.resource_profile is defined
+    fail_msg: "CONFIG ERROR: verify  that the resource_profile is defined and accurate"
+    success_msg: "Assertion Passed"
+  when:
+    - xtoph_deploy.selected_profile.machine != ""
+    - inventory_hostname not in groups.myDeployhost
+
+
+- name: "common-assertions : kickstart_profile"
+  any_errors_fatal: true
+  assert:
+    that:
       - xtoph_deploy.kickstart_profile is defined
-    fail_msg: "CONFIG ERROR: assertion listed above means that xtoph_deploy is missing critical data (CHECK YOUR CONFIGS)"
+    fail_msg: "CONFIG ERROR: verify  that the kickstart_profile is defined and accurate"
     success_msg: "Assertion Passed"
   when:
     - xtoph_deploy.selected_profile.machine != ""
