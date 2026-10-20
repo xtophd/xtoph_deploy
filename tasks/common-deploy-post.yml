@@ -51,7 +51,10 @@
       - name: "common-deploy-post : add new ssh keys for node"
         throttle: 1
         vars:
-          p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
+          # REMOVED: 06/03/2026  THIS DOES NOT WORK FOR OCP.  JUST USE  FULL inventory_hostname 
+          # p_fqdn:   "{{ inventory_hostname_short }}.{{ xtoph_deploy.machine_profile.network.default.subdomain }}"
+
+          p_fqdn:   "{{ inventory_hostname }}"
         shell:
           cmd: |
             ssh-keyscan "{{ p_fqdn }}" >> /root/.ssh/known_hosts
