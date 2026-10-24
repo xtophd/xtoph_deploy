@@ -90,8 +90,8 @@
 
   vars:
     t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
-    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
-    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
+    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username'],true) }}"
+    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password'],true) }}"
   when:
     - xtoph_deploy.kickstart_profile.wait_for_ssh
     - xtoph_deploy.machine_profile.bmc.fqdn is defined

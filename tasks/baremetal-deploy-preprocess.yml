@@ -109,9 +109,14 @@
         when: bmc_result.stdout == "off"
 
   vars:
+
+    ##     NOTE:  Jinja2 only uses the default value if the variable is entirely undefined. 
+    ##            Passing true forces it to evaluate the variable's truthiness, falling back 
+    ##            to the default if the value evaluates to false or has zero length 
+
     t_bmc:    "{{ xtoph_deploy.machine_profile.bmc.fqdn }}"
-    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username']) }}"
-    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password']) }}"
+    t_user:   "{{ bmc_credentials[bmc_fqdn]['username'] | default(bmc_credentials['default']['username'],true) }}"
+    t_pass:   "{{ bmc_credentials[bmc_fqdn]['password'] | default(bmc_credentials['default']['password'],true) }}"
   when:
     - xtoph_deploy.machine_profile.bmc.fqdn is defined
     - xtoph_deploy.machine_profile.bmc.fqdn|length > 0
