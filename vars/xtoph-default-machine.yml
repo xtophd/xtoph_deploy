@@ -369,7 +369,7 @@ qct-d55q-2u:
           default:
             blkdev: "nvme0n1"
             netdev: "ens7f0np0"
-            kernel_opts: "module_blacklist=iaa_crypto,intel_qat"
+            kernel_opts: "module_blacklist=iaa_crypto,intel_qat nomodeset"
           rhel7:
             blkdev: "sda"
             netdev: "em1"

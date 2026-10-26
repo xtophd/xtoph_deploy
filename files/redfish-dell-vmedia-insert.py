@@ -49,25 +49,36 @@ bmc_password = args["p"]
 image_url    = args["m"]
 image_nfs    = args["n"]
 
+##
+##    Get virtualmedia status
+##
 
-
-## 
-##    Insert Virtual Media
-## 
-
-
-url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia' % bmc_ip
-headers  = {'content-type': 'application/json'}
-payload  = {'Image': image_url }
-
-response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
-
+url         = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD' % bmc_ip
+response    = requests.get(url, auth=(bmc_username, bmc_password), verify=False)
 result_code = response.status_code
 
-if result_code == 204:
-    print("SUCCESS: result code %s returned" % result_code)
+data = response.json()
+
+if ( data['Inserted'] ):
+    print("SUCCESS: result code %s returned, media already inserted" % result_code)
 else:
-    print("FAIL: result code %s returned" % result_code)
-    print(response.json())
-    sys.exit(1)
+
+    ## 
+    ##    Insert Virtual Media
+    ## 
+
+    url      = 'https://%s/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia' % bmc_ip
+    headers  = {'content-type': 'application/json'}
+    payload  = {'Image': image_url }
+
+    response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(bmc_username, bmc_password), verify=False)
+
+    result_code = response.status_code
+
+    if result_code == 204:
+        print("SUCCESS: result code %s returned" % result_code)
+    else:
+        print("FAIL: result code %s returned" % result_code)
+        print(response.json())
+        sys.exit(1)
 
